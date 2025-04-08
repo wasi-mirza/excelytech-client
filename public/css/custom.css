@@ -1,0 +1,85 @@
+:root {
+  --primary: #459a70; /* Change to your desired primary color */
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("/public/Poppins-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* @font-face {
+  font-family: "Baumans";
+  src: url("/public/Baumans-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+} */
+
+body {
+  font-family: "Poppin", sans-serif;
+}
+
+/* h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Baumans", Arial, sans-serif;
+} */
+
+/* Credit/Debit Card Styling */
+.credit-card {
+  background: linear-gradient(135deg, #1c1c1e, #38383a);
+  color: white;
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.credit-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.bank-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.card-number {
+  font-family: "Courier New", monospace;
+  font-size: 1.4rem;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+
+.card-footer-details {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.9rem;
+}
+.card-footer-details span {
+  flex: 1;
+  text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card-footer-details {
+    flex-direction: column;
+    align-items: center;
+  }
+  .card-footer-details span {
+    margin-bottom: 10px;
+  }
+}
