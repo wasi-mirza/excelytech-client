@@ -1,32 +1,41 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Login } from "./auth/login";
-import AdminLayout from "./admin/particals/AdminLayout";
-import Proposals from "./admin/proposal/Proposals";
+
+// Login Routes
+import { Login } from "./screens/auth/login";
+import NewRegistration from "./screens/auth/NewRegistration.js";
+import ForgotPassword from "./screens/auth/ForgotPassword.js";
+
+// Admin Routes
+import AdminLayout from "./screens/admin/particals/AdminLayout";
+import Proposals from "./screens/admin/proposal/Proposals";
+
+
+
+
 import ClientDashboard from "./client/ClientDashboard";
-import Register from "./admin/user/NewUser";
-import ViewProduct from "./admin/product/ViewProduct";
-import Products from "./admin/product/Products";
-import Users from "./admin/user/Users";
-import UpdateForm from "./admin/user/UpdateUser";
-import View from "./admin/user/UserDetails";
-import Proposaltemplete from "./admin/proposalTemplate/Proposaltemplete";
-import NewProposalTemplete from "./admin/proposalTemplate/NewProposalTemplate";
-import UpdateProposalTemplate from "./admin/proposalTemplate/UpdateProposalTemplate";
-import ViewProposalTemplete from "./admin/proposalTemplate/ViewProposalTemplete";
-import NewProduct from "./admin/product/NewProduct";
-import NewRegistration from "./auth/NewRegistration.js";
+import Register from "./screens/admin/user/NewUser";
+import ViewProduct from "./screens/admin/product/ViewProduct";
+import Products from "./screens/admin/product/Products";
+import Users from "./screens/admin/user/Users";
+import UpdateForm from "./screens/admin/user/UpdateUser";
+import View from "./screens/admin/user/UserDetails";
+import Proposaltemplete from "./screens/admin/proposalTemplate/Proposaltemplete";
+import NewProposalTemplete from "./screens/admin/proposalTemplate/NewProposalTemplate";
+import UpdateProposalTemplate from "./screens/admin/proposalTemplate/UpdateProposalTemplate";
+import ViewProposalTemplete from "./screens/admin/proposalTemplate/ViewProposalTemplete";
+import NewProduct from "./screens/admin/product/NewProduct";
 // Import route names
 import * as RoutesNames from "./utils/routeNames";
 import UserLayout from "./client/UserLayout";
 import GetProposal from "./client/proposals/GetProposal";
 import ProposalInfo from "./client/proposals/ProposalInfo";
-import UpdateProduct from "./admin/product/updateProduct";
-import AdminHome from "./admin/home/home.js";
-import Category from "./admin/Category/Category";
-import NewProposal from "./admin/proposal/NewProposal";
+import UpdateProduct from "./screens/admin/product/updateProduct";
+import AdminHome from "./screens/admin/home/home.js";
+import Category from "./screens/admin/Category/Category";
+import NewProposal from "./screens/admin/proposal/NewProposal";
 // import AdminChat from "./chats/chat";
-import Chat from "./chats/Chat.js";
+import Chat from "./screens/chats/Chat.js";
 import ServiceDesk from "./client/serviceDesk/ServiceDesk";
 import CreateTicket from "./client/serviceDesk/NewTicket";
 import ClientHome from "./client/clientHome/ClientHome.js";
@@ -45,7 +54,6 @@ import AddPaymentMethod from "./client/PaymentMethod/NewPaymentMethod.js";
 import EditPaymentMethod from "./client/PaymentMethod/EditPaymentMethod.js";
 import EditUserProfile from "./client/EditUserProfile.js";
 import ClientSubscriptionDetails from "./client/Subscription/ClientSubscriptionDetails.js";
-import ForgotPassword from "./auth/ForgotPassword.js";
 import EmailTemplates from "./admin/emailTemplates/EmailTemplates.js";
 import InactivityLogout from "./inactivity_logout.js"; // Import the InactivityLogout Component
 import { useAuth } from "./context/AuthContext"; // Import useAuth
