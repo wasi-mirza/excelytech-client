@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { BASE_URL } from "../../utils/endPointNames";
-import AuthService from "../../utils/authService";
+import { BASE_URL } from "../../../utils/endPointNames.js";
+import AuthService from "../../../utils/authService.js";
 import {
   ALL_EMAILTEMPLATES,
   ALL_PRODUCTS,
@@ -13,7 +13,7 @@ import {
   CATEGORYS,
   LOGIN,
   PROPOSAL_TEMPLATES,
-} from "../../utils/routeNames";
+} from "../../../utils/routeNames.js";
 
 const AdminSidebar = () => {
   const [auth, setAuth] = useAuth();

@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { CardFooter, Modal } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useNavigate } from "react-router-dom";
 import JoditEditor from "jodit-react";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 import {
   Button,
   Card,

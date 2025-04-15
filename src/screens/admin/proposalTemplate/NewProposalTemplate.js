@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import JoditEditor from "jodit-react";
 import toast from "react-hot-toast";
@@ -17,7 +17,7 @@ import {
   Row,
   Col,
 } from "reactstrap";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 
 function NewProposalTemplate() {
   const [title, setTitle] = useState("");
