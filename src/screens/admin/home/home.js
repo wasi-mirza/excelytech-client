@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 // import { Card, Col, Row, ProgressBar, Table, Badge } from "react-bootstrap";
-import { BASE_URL } from "../../utils/endPointNames";
-import { useAuth } from "../../context/AuthContext";
+import { BASE_URL } from "../../../utils/endPointNames.js";
+import { useAuth } from "../../../context/AuthContext.jsx";
 
 function AdminHome() {
   const [auth] = useAuth();

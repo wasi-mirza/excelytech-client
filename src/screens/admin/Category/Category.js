@@ -1,8 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 
 function Category() {
   const [auth] = useAuth();

@@ -40,27 +40,27 @@ import ServiceDesk from "./client/serviceDesk/ServiceDesk";
 import CreateTicket from "./client/serviceDesk/NewTicket";
 import ClientHome from "./client/clientHome/ClientHome.js";
 import ViewTicket from "./client/serviceDesk/ViewTicket.js";
-import Tickets from "./admin/Ticket/Tickets.js";
-import ViewTecket from "./admin/Ticket/ViewTicket.js";
-import Subscriptions from "./admin/subscription/Subscriptions.js";
-import SubscriptionDetails from "./admin/subscription/SubscriptionsDetails.js";
-import ProposalDetails from "./admin/proposal/ProposalDetails.js";
+import Tickets from "./screens/admin/Ticket/Tickets.js";
+import ViewTecket from "./screens/admin/Ticket/ViewTicket.js";
+import Subscriptions from "./screens/admin/subscription/Subscriptions.js";
+import SubscriptionDetails from "./screens/admin/subscription/SubscriptionsDetails.js";
+import ProposalDetails from "./screens/admin/proposal/ProposalDetails.js";
 import SubscriptionsbyUser from "./client/Subscription/SubscriptionsbyUser.js";
-import ChatSidebar from "./chats/ChatSidebar.js";
+import ChatSidebar from "./screens/chats/ChatSidebar.js";
 import UserProfile from "./client/UserProfile.js";
 import PaymentMethods from "./client/PaymentMethod/PaymentMethod.js";
-import NewSubscription from "./admin/subscription/NewSubscription.js";
+import NewSubscription from "./screens/admin/subscription/NewSubscription.js";
 import AddPaymentMethod from "./client/PaymentMethod/NewPaymentMethod.js";
 import EditPaymentMethod from "./client/PaymentMethod/EditPaymentMethod.js";
 import EditUserProfile from "./client/EditUserProfile.js";
 import ClientSubscriptionDetails from "./client/Subscription/ClientSubscriptionDetails.js";
-import EmailTemplates from "./admin/emailTemplates/EmailTemplates.js";
+import EmailTemplates from "./screens/admin/emailTemplates/EmailTemplates.js";
 import InactivityLogout from "./inactivity_logout.js"; // Import the InactivityLogout Component
 import { useAuth } from "./context/AuthContext"; // Import useAuth
 import { Navigate } from "react-router-dom";
-import NewEmailTemplate from "./admin/emailTemplates/NewEmailTemplate.js";
-import ViewEmailTemplate from "./admin/emailTemplates/ViewEmailTemplate.js";
-import UpdateEmailTemplate from "./admin/proposalTemplate/UpdateProposalTemplate";
+import NewEmailTemplate from "./screens/admin/emailTemplates/NewEmailTemplate.js";
+import ViewEmailTemplate from "./screens/admin/emailTemplates/ViewEmailTemplate.js";
+import UpdateEmailTemplate from "./screens/admin/proposalTemplate/UpdateProposalTemplate";
 
 function App() {
   const router = createBrowserRouter([

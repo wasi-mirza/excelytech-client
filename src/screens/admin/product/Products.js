@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import * as Routes from "../../utils/routeNames";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import * as Routes from "../../../utils/routeNames.js";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 
 function Products() {
   const [products, setProducts] = useState([]);

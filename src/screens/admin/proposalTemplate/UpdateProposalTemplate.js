@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate, useParams } from "react-router-dom";
 import JoditEditor from "jodit-react";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 
 function UpdateEmailTemplate() {
   const [proposalTemplete, setProposalTemplete] = useState(null);
