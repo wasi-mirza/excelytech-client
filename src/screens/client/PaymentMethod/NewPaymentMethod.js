@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import toast from "react-hot-toast";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 

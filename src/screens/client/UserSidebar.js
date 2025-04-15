@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
-import { LOGIN } from "../utils/routeNames.js";
-import * as RouteNames from "../utils/routeNames.js";
+import { LOGIN } from "../../utils/routeNames.js";
+import * as RouteNames from "../../utils/routeNames.js";
 import axios from "axios";
-import { BASE_URL } from "../utils/endPointNames.js";
 
 function UserSidebar() {
   const [auth, setAuth] = useAuth();

@@ -1,9 +1,9 @@
 // export default GetProposal;
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 function GetProposal() {
   const [proposals, setProposals] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { BASE_URL } from "../../utils/endPointNames";
-import { useAuth } from "../../context/AuthContext";
+import { BASE_URL } from "../../../utils/endPointNames.js";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import * as Routes from "../../utils/routeNames";
+import * as Routes from "../../../utils/routeNames.js";
 import AddPaymentMethod from "../PaymentMethod/NewPaymentMethod";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";

@@ -13,7 +13,7 @@ import Proposals from "./screens/admin/proposal/Proposals";
 
 
 
-import ClientDashboard from "./client/ClientDashboard";
+import ClientDashboard from "./screens/client/ClientDashboard";
 import Register from "./screens/admin/user/NewUser";
 import ViewProduct from "./screens/admin/product/ViewProduct";
 import Products from "./screens/admin/product/Products";
@@ -27,33 +27,33 @@ import ViewProposalTemplete from "./screens/admin/proposalTemplate/ViewProposalT
 import NewProduct from "./screens/admin/product/NewProduct";
 // Import route names
 import * as RoutesNames from "./utils/routeNames";
-import UserLayout from "./client/UserLayout";
-import GetProposal from "./client/proposals/GetProposal";
-import ProposalInfo from "./client/proposals/ProposalInfo";
+import UserLayout from "./screens/client/UserLayout";
+import GetProposal from "./screens/client/proposals/GetProposal";
+import ProposalInfo from "./screens/client/proposals/ProposalInfo";
 import UpdateProduct from "./screens/admin/product/updateProduct";
 import AdminHome from "./screens/admin/home/home.js";
 import Category from "./screens/admin/Category/Category";
 import NewProposal from "./screens/admin/proposal/NewProposal";
 // import AdminChat from "./chats/chat";
 import Chat from "./screens/chats/Chat.js";
-import ServiceDesk from "./client/serviceDesk/ServiceDesk";
-import CreateTicket from "./client/serviceDesk/NewTicket";
-import ClientHome from "./client/clientHome/ClientHome.js";
-import ViewTicket from "./client/serviceDesk/ViewTicket.js";
+import ServiceDesk from "./screens/client/serviceDesk/ServiceDesk";
+import CreateTicket from "./screens/client/serviceDesk/NewTicket";
+import ClientHome from "./screens/client/clientHome/ClientHome.js";
+import ViewTicket from "./screens/client/serviceDesk/ViewTicket.js";
 import Tickets from "./screens/admin/Ticket/Tickets.js";
 import ViewTecket from "./screens/admin/Ticket/ViewTicket.js";
 import Subscriptions from "./screens/admin/subscription/Subscriptions.js";
 import SubscriptionDetails from "./screens/admin/subscription/SubscriptionsDetails.js";
 import ProposalDetails from "./screens/admin/proposal/ProposalDetails.js";
-import SubscriptionsbyUser from "./client/Subscription/SubscriptionsbyUser.js";
+import SubscriptionsbyUser from "./screens/client/Subscription/SubscriptionsbyUser.js";
 import ChatSidebar from "./screens/chats/ChatSidebar.js";
-import UserProfile from "./client/UserProfile.js";
-import PaymentMethods from "./client/PaymentMethod/PaymentMethod.js";
+import UserProfile from "./screens/client/UserProfile.js";
+import PaymentMethods from "./screens/client/PaymentMethod/PaymentMethod.js";
 import NewSubscription from "./screens/admin/subscription/NewSubscription.js";
-import AddPaymentMethod from "./client/PaymentMethod/NewPaymentMethod.js";
-import EditPaymentMethod from "./client/PaymentMethod/EditPaymentMethod.js";
-import EditUserProfile from "./client/EditUserProfile.js";
-import ClientSubscriptionDetails from "./client/Subscription/ClientSubscriptionDetails.js";
+import AddPaymentMethod from "./screens/client/PaymentMethod/NewPaymentMethod.js";
+import EditPaymentMethod from "./screens/client/PaymentMethod/EditPaymentMethod.js";
+import EditUserProfile from "./screens/client/EditUserProfile.js";
+import ClientSubscriptionDetails from "./screens/client/Subscription/ClientSubscriptionDetails.js";
 import EmailTemplates from "./screens/admin/emailTemplates/EmailTemplates.js";
 import InactivityLogout from "./inactivity_logout.js"; // Import the InactivityLogout Component
 import { useAuth } from "./context/AuthContext"; // Import useAuth
