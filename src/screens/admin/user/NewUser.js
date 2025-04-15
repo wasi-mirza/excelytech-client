@@ -3,9 +3,9 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { toast } from "react-hot-toast"; // Ensure this import is correct
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 import { Typeahead } from "react-bootstrap-typeahead";
 
 const NewUser = () => {

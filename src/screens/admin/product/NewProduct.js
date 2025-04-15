@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import { Typeahead } from "react-bootstrap-typeahead";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 import toast from "react-hot-toast";
 
 // Validation schema with Yup

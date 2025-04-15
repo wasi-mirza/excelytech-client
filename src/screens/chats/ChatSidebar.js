@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/AuthContext";
-import { BASE_URL } from "../utils/endPointNames";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { BASE_URL } from "../../utils/endPointNames.js";
 import { io } from "socket.io-client";
 import axios from "axios";
 

@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { ADMIN_DASHBOARD } from "../../utils/routeNames";
-import { BASE_URL } from "../../utils/endPointNames";
+import { ADMIN_DASHBOARD } from "../../../utils/routeNames.js";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 
 function Tickets() {
   const [auth] = useAuth();

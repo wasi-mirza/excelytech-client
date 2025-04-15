@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import axios from "axios";
 import moment from "moment";
 import { useNavigate, useParams } from "react-router-dom";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 import toast from "react-hot-toast";
 
 function ViewProduct() {

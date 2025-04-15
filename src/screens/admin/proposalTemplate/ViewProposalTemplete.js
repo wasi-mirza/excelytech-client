@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import JoditEditor from "jodit-react";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../utils/endPointNames.js";
 
 function ViewProposalTemplate() {
   const [viewTemplate, setViewTemplate] = useState(null);
