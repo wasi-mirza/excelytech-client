@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../../context/AuthContext.jsx";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 const ViewTicket = () => {
   const [auth] = useAuth();

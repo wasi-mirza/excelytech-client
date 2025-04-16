@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext.jsx";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import moment from "moment";
 import toast from "react-hot-toast";
-import ReusableDialog from "../../../components/DialogComponent";
+import ReusableDialog from "../../../shared/components/DialogComponent";
 import axios from "axios";
 
 import { Modal, ModalHeader, ModalBody } from "reactstrap";

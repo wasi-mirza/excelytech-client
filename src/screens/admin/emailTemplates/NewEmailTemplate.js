@@ -18,7 +18,7 @@ import {
   Col,
   Spinner,
 } from "reactstrap";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 function NewEmailTemplate() {
   const [title, setTitle] = useState("");

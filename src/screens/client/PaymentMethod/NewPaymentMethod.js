@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import toast from "react-hot-toast";

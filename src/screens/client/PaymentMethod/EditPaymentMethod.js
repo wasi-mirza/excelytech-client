@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
-import * as Routes from "../../../utils/routeNames.js";
+import * as Routes from "../../../shared/utils/routeNames.js";
 
 const EditPaymentMethod = () => {
   const { id } = useParams(); // Getting the payment method ID from the URL

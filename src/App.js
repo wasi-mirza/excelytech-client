@@ -26,7 +26,7 @@ import UpdateProposalTemplate from "./screens/admin/proposalTemplate/UpdatePropo
 import ViewProposalTemplete from "./screens/admin/proposalTemplate/ViewProposalTemplete";
 import NewProduct from "./screens/admin/product/NewProduct";
 // Import route names
-import * as RoutesNames from "./utils/routeNames";
+import * as RoutesNames from "./shared/utils/routeNames.js";
 import UserLayout from "./screens/client/UserLayout";
 import GetProposal from "./screens/client/proposals/GetProposal";
 import ProposalInfo from "./screens/client/proposals/ProposalInfo";

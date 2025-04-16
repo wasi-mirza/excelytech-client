@@ -3,8 +3,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
-import { LOGIN } from "../../utils/routeNames.js";
-import * as RouteNames from "../../utils/routeNames.js";
+import { LOGIN } from "../../shared/utils/routeNames.js";
+import * as RouteNames from "../../shared/utils/routeNames.js";
 import axios from "axios";
 
 function UserSidebar() {

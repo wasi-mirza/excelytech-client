@@ -3,8 +3,8 @@ import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../../utils/endPointNames.js";
-import { NEW_EMAILTEMPLATE } from "../../../utils/routeNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
+import { NEW_EMAILTEMPLATE } from "../../../shared/utils/routeNames.js";
 
 const EmailTemplates = () => {
   const [loader, setLoader] = useState(true);
