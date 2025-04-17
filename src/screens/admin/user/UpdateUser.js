@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Typeahead } from "react-bootstrap-typeahead"; // Import Typeahead
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 function UpdateUserForm() {
   const [userInfo, setUserInfo] = useState({

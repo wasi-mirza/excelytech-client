@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import axios from "axios";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 function addLetterSpacing(doc, text, x, y, spacing = 1) {
   let currentX = x; // Track the current X position
   for (let char of text) {

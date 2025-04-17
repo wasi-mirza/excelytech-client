@@ -17,7 +17,7 @@ import {
   Row,
   Col,
 } from "reactstrap";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 function NewProposalTemplate() {
   const [title, setTitle] = useState("");

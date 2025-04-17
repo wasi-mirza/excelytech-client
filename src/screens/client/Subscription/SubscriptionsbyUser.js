@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../../context/AuthContext.jsx";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import { useNavigate } from "react-router-dom";
-import { SUBSCRIPTION_DETAILS } from "../../../utils/routeNames.js";
+import { SUBSCRIPTION_DETAILS } from "../../../shared/utils/routeNames.js";
 function SubscriptionsbyUser() {
   const [subscriptions, setSubscriptions] = useState([]);
   const [auth] = useAuth();

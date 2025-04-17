@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { toast } from "react-hot-toast";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import { BASE_URL } from "../../shared/utils/endPointNames.js";
 import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
 import { BsThreeDotsVertical } from "react-icons/bs";
 

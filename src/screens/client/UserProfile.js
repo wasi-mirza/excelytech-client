@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import { BASE_URL } from "../../shared/utils/endPointNames.js";
 import { Spinner } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { Button } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import * as RouteNames from "../../utils/routeNames.js";
+import * as RouteNames from "../../shared/utils/routeNames.js";
 
 const UserProfile = () => {
   // const { id } = useParams(); // Get user ID from the URL

@@ -7,7 +7,7 @@ import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useNavigate } from "react-router-dom";
 import JoditEditor from "jodit-react";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import {
   Button,
   Card,

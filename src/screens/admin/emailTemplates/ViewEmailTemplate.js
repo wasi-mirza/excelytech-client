@@ -3,7 +3,7 @@ import { useAuth } from "../../../context/AuthContext.jsx";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import JoditEditor from "jodit-react";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import { toast } from "react-hot-toast";
 
 function ViewEmailTemplate() {

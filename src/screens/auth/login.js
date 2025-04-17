@@ -4,8 +4,8 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode"; // Add this package to decode JWT tokens
 import toast from "react-hot-toast";
-import { HOME, USER_HOME, USER_LOGIN_FORMALITY } from "../../utils/routeNames.js";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import { HOME, USER_HOME, USER_LOGIN_FORMALITY } from "../../shared/utils/routeNames.js";
+import { BASE_URL } from "../../shared/utils/endPointNames.js";
 import ForgotPassword from "./ForgotPassword.js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 export const Login = () => {

@@ -26,7 +26,7 @@ import {
   FaSortAmountDown,
   FaDollarSign,
 } from "react-icons/fa";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
