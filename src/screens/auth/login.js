@@ -8,7 +8,7 @@ import { ROUTES } from "../../shared/utils/routes.js";
 import { BASE_URL } from "../../shared/utils/endPointNames.js";
 import ForgotPassword from "./ForgotPassword.js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
-import apiService from '../../shared/services';
+import apiService from '../../shared/services/index.ts';
 
 export const Login = () => {
   const [email, setEmail] = useState("");

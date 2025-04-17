@@ -6,14 +6,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import AuthService from "../../../shared/utils/authService.js";
-import {
-  ALL_EMAILTEMPLATES,
-  ALL_PRODUCTS,
-  ALL_PROPOSALS,
-  CATEGORYS,
-  LOGIN,
-  PROPOSAL_TEMPLATES,
-} from "../../../shared/utils/routes.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
 
 const AdminSidebar = () => {
   const [auth, setAuth] = useAuth();
@@ -51,7 +44,7 @@ const AdminSidebar = () => {
   };
   useEffect(() => {
     if (!auth.user) {
-      navigate(LOGIN); // Redirect when user is logged out
+      navigate(ROUTES.AUTH.LOGIN); // Redirect when user is logged out
     }
   }, [auth.user]); // Runs when auth.user changes
 
@@ -144,7 +137,7 @@ const AdminSidebar = () => {
                 }`}
               >
                 <a
-                  href={CATEGORYS}
+                  href={ROUTES.ADMIN.CATEGORYS}
                   className={`nav-link ${
                     expandedMenu === "productSuite" ? "active" : ""
                   }`}
@@ -170,7 +163,7 @@ const AdminSidebar = () => {
                 >
                   <li className="nav-item">
                     <NavLink
-                      to={CATEGORYS}
+                      to={ROUTES.ADMIN.CATEGORYS}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -181,7 +174,7 @@ const AdminSidebar = () => {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      to={ALL_PRODUCTS}
+                      to={ROUTES.ADMIN.ALL_PRODUCTS}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -215,7 +208,7 @@ const AdminSidebar = () => {
                 }`}
               >
                 <a
-                  href={ALL_PROPOSALS}
+                  href={ROUTES.ADMIN.ALL_PROPOSALS}
                   className={`nav-link ${
                     expandedMenu === "leadsAndMarketing" ? "active" : ""
                   }`}
@@ -241,7 +234,7 @@ const AdminSidebar = () => {
                 >
                   <li className="nav-item">
                     <NavLink
-                      to={ALL_PROPOSALS}
+                      to={ROUTES.ADMIN.ALL_PROPOSALS}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -252,7 +245,7 @@ const AdminSidebar = () => {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      to={PROPOSAL_TEMPLATES}
+                      to={ROUTES.ADMIN.PROPOSAL_TEMPLATES}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -263,7 +256,7 @@ const AdminSidebar = () => {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      to={ALL_EMAILTEMPLATES}
+                      to={ROUTES.ADMIN.ALL_EMAILTEMPLATES}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }

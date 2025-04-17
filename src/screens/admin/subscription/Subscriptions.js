@@ -4,7 +4,7 @@ import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
-import { NEW_SUBCRIPTIONS } from "../../../shared/utils/routes.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
 
 const Subscriptions = () => {
   const [loader, setLoader] = useState(true);
@@ -17,7 +17,7 @@ const Subscriptions = () => {
   const [auth] = useAuth();
 
   const handleAddSubscription = () => {
-    navigate(NEW_SUBCRIPTIONS);
+    navigate(ROUTES.ADMIN.NEW_SUBSCRIPTION);
   };
   // Fetch orders from the API
   const getSubscriptions = async () => {
@@ -63,7 +63,7 @@ const Subscriptions = () => {
   };
 
   const handleViewSubscription = (data) => {
-    navigate(`/admin-dashboard/subscription/${data._id}`);
+    navigate(ROUTES.ADMIN.VIEW_SUBSCRIPTION(data._id));
   };
 
   return (

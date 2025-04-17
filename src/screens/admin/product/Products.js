@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import * as Routes from "../../../shared/utils/routes.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 function Products() {
@@ -59,11 +59,11 @@ function Products() {
   }, [auth, currentPage, searchQuery]);
 
   const handleView = (data) => {
-    navigate(`/admin-dashboard/viewproduct/${data._id}`);
+    navigate(`${ROUTES.ADMIN.VIEW_PRODUCT(data._id)}`);
   };
 
   const handleAddProduct = () => {
-    navigate(Routes.NEW_PRODUCT);
+    navigate(ROUTES.ADMIN.NEW_PRODUCT);
   };
 
   const handleNextPage = () => {

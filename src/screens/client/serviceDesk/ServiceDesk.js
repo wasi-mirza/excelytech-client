@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { USER_DASHBOARD } from "../../../shared/utils/routes.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 function ServiceDesk() {
@@ -57,11 +57,11 @@ function ServiceDesk() {
   };
 
   const handleAddUser = () => {
-    navigate(`${USER_DASHBOARD}/newTicket`);
+    navigate(`${ROUTES.USER.DASHBOARD}/newTicket`);
   };
 
   const handleView = (data) => {
-    navigate(`${USER_DASHBOARD}/${data._id}`);
+    navigate(ROUTES.USER.VIEW_TICKET(data._id));
   };
 
   return (
