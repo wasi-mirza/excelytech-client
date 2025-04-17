@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ROUTES } from "./shared/utils/routes.js";
 
 // Login Routes
-import { Login } from "./screens/auth/login";
+import { Login } from "./screens/auth/Login.js";
 import NewRegistration from "./screens/auth/NewRegistration.js";
 import ForgotPassword from "./screens/auth/ForgotPassword.js";
 

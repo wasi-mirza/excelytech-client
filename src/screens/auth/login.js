@@ -8,6 +8,8 @@ import { ROUTES } from "../../shared/utils/routes.js";
 import { BASE_URL } from "../../shared/utils/endPointNames.js";
 import ForgotPassword from "./ForgotPassword.js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import apiService from '../../shared/services';
+
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -139,7 +141,7 @@ export const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${BASE_URL}/user/login`, {
+      const response = await apiService.post("/user/login", {
         email,
         password,
       });
@@ -164,8 +166,8 @@ export const Login = () => {
           // Redirect to the appropriate dashboard
           userInfo.role === "admin" ? navigate(ROUTES.ADMIN.HOME) : navigate(ROUTES.USER.HOME);
         }
-        const res = axios.post(
-          `${BASE_URL}/useractivity/`,
+        const res = await apiService.post(
+          "/useractivity/",
           {
             userId: userInfo._id,
             activityType: "LOGIN",
@@ -191,13 +193,9 @@ export const Login = () => {
     } catch (err) {
       console.log("err :", err);
 
-      if (err.response && err.response.data) {
-        setError(
-          err.response.data.message || "An error occurred. Please try again."
-        );
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
+      setError(
+        err.message || "An error occurred. Please try again."
+      );
     } finally {
       setLoading(false);
     }
