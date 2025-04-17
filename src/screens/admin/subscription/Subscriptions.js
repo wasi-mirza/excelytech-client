@@ -4,7 +4,7 @@ import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
-import { NEW_SUBCRIPTIONS } from "../../../shared/utils/routeNames.js";
+import { NEW_SUBCRIPTIONS } from "../../../shared/utils/routes.js";
 
 const Subscriptions = () => {
   const [loader, setLoader] = useState(true);

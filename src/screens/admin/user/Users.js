@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import * as Routes from "../../../shared/utils/routeNames.js";
+import * as Routes from "../../../shared/utils/routes.js";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 const Users = () => {

@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode"; // Add this package to decode JWT tokens
 import toast from "react-hot-toast";
-import { HOME, USER_HOME, USER_LOGIN_FORMALITY } from "../../shared/utils/routeNames.js";
+import { ROUTES } from "../../shared/utils/routes.js";
 import { BASE_URL } from "../../shared/utils/endPointNames.js";
 import ForgotPassword from "./ForgotPassword.js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -74,9 +74,9 @@ export const Login = () => {
       if (isValid) {
         const userInfo = JSON.parse(authData);
         if (userInfo.isFirstTimeLogin && userInfo.role !== "admin") {
-          navigate(USER_LOGIN_FORMALITY);
+          navigate(ROUTES.AUTH.FORMALITY);
         } else {
-          userInfo.role === "admin" ? navigate(HOME) : navigate(USER_HOME);
+          userInfo.role === "admin" ? navigate(ROUTES.ADMIN.HOME) : navigate(ROUTES.USER.HOME);
         }
       }
     }
@@ -159,10 +159,10 @@ export const Login = () => {
         // console.log("UserInfo", userInfo);
         // Check if it's the user's first login
         if (userInfo.isFirstTimeLogin && userInfo.role !== "admin") {
-          navigate(USER_LOGIN_FORMALITY); // Replace with the correct route
+          navigate(ROUTES.AUTH.FORMALITY); // Replace with the correct route
         } else {
           // Redirect to the appropriate dashboard
-          userInfo.role === "admin" ? navigate(HOME) : navigate(USER_HOME);
+          userInfo.role === "admin" ? navigate(ROUTES.ADMIN.HOME) : navigate(ROUTES.USER.HOME);
         }
         const res = axios.post(
           `${BASE_URL}/useractivity/`,

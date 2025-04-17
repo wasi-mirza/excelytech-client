@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
-import { NEW_EMAILTEMPLATE } from "../../../shared/utils/routeNames.js";
+import { NEW_EMAILTEMPLATE } from "../../../shared/utils/routes.js";
 
 const EmailTemplates = () => {
   const [loader, setLoader] = useState(true);

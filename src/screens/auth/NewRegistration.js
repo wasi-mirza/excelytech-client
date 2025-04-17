@@ -10,7 +10,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { Spinner, Container } from "reactstrap";
-import { USER_DASHBOARD, USER_HOME } from "../../shared/utils/routeNames";
+import { ROUTES } from "../../shared/utils/routes";
 const NewRegistration = () => {
   const stripePromise = loadStripe(
     "pk_test_51PeI4kRovk9fbY7NlzADRlATaI6qOOBcb1bINnZDiPqcfaEdxjC9OPTMv5I6J95SgAyjGqyu4hfwkXSOuwsATkjC00dWcAlFWU"
@@ -40,7 +40,7 @@ const NewRegistration = () => {
         setActiveStep(1);
       }
       if (!response.data["isFirstTimeLogin"]) {
-        navigate(USER_HOME);
+        navigate(ROUTES.USER.HOME);
       }
       setUserDetails(response.data);
     } catch (error) {
@@ -601,7 +601,7 @@ const CardForm = ({
         if (response.status === 200) {
           toast.success("Payment succeeded! Your subscription is active");
           setLoading(false);
-          navigate(USER_HOME);
+          navigate(ROUTES.USER.HOME);
         }
       }
     } catch (err) {

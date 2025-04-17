@@ -13,7 +13,7 @@ import {
   CATEGORYS,
   LOGIN,
   PROPOSAL_TEMPLATES,
-} from "../../../shared/utils/routeNames.js";
+} from "../../../shared/utils/routes.js";
 
 const AdminSidebar = () => {
   const [auth, setAuth] = useAuth();

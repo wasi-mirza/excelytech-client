@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import * as Routes from "../../../shared/utils/routeNames.js";
+import * as Routes from "../../../shared/utils/routes.js";
 import AddPaymentMethod from "../PaymentMethod/NewPaymentMethod";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
