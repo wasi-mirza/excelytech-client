@@ -3,8 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
-import { LOGIN } from "../../shared/utils/routeNames.js";
-import * as RouteNames from "../../shared/utils/routeNames.js";
+import { ROUTES } from "../../shared/utils/routes.js";
 import axios from "axios";
 
 function UserSidebar() {
@@ -99,7 +98,7 @@ function UserSidebar() {
     setAuth({ user: null, token: "" }, () => {
       // THIS IS THE KEY CHANGE: Use the callback to ensure navigation happens after state update
       toast.success("Logout successfully");
-      navigate(LOGIN);
+      navigate(ROUTES.AUTH.LOGIN);
     });
   };
 
@@ -166,7 +165,7 @@ function UserSidebar() {
           >
             <li className="nav-item">
               <NavLink
-                to={RouteNames.USER_HOME}
+                to={ROUTES.USER.HOME}
                 className={({ isActive }) =>
                   isActive ? "nav-link active text-light" : "nav-link text-dark"
                 }
@@ -177,7 +176,7 @@ function UserSidebar() {
             </li>
             <li className="nav-item">
               <NavLink
-                to={RouteNames.SUBSCRIPTIONS}
+                to={ROUTES.USER.SUBSCRIPTIONS}
                 className={({ isActive }) =>
                   isActive ? "nav-link active text-light" : "nav-link text-dark"
                 }
@@ -188,7 +187,7 @@ function UserSidebar() {
             </li>
             <li className="nav-item">
               <NavLink
-                to={RouteNames.SERVICE_DESK}
+                to={ROUTES.USER.SERVICE_DESK}
                 className={({ isActive }) =>
                   isActive ? "nav-link active text-light" : "nav-link text-dark"
                 }
@@ -200,7 +199,7 @@ function UserSidebar() {
 
             <li className="nav-item">
               <NavLink
-                to={RouteNames.PAY_METHOD}
+                to={ROUTES.USER.PAY_METHOD}
                 className={({ isActive }) =>
                   isActive ? "nav-link active text-light" : "nav-link text-dark"
                 }
@@ -211,7 +210,7 @@ function UserSidebar() {
             </li>
             <li className="nav-item">
               <NavLink
-                to={RouteNames.USER_CHATS}
+                to={ROUTES.USER.USER_CHATS}
                 className={({ isActive }) =>
                   isActive ? "nav-link active text-light" : "nav-link text-dark"
                 }

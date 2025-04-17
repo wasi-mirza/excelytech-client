@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import * as Routes from "../../../shared/utils/routeNames.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 const Users = () => {
@@ -59,8 +59,7 @@ const Users = () => {
   };
   const handleUpdateForm = (id) => {
     console.log("Data", id);
-
-    navigate(`/admin-dashboard/update/${id}`);
+    navigate(ROUTES.ADMIN.UPDATE_USER(id));
   };
   useEffect(() => {
     if (auth?.token) {
@@ -69,16 +68,15 @@ const Users = () => {
   }, [auth, currentPage, searchQuery]);
 
   const handleAddUser = () => {
-    navigate(Routes.NEW_USER);
+    navigate(ROUTES.ADMIN.NEW_USER);
   };
 
   const HandleView = (data) => {
-    navigate(`/admin-dashboard/view/${data._id}`);
+    navigate(ROUTES.ADMIN.VIEW_USER(data._id));
   };
 
   const handleSupportChat = () => {
-    //  navigate(Routes.CHATS);
-    navigate("/chats");
+    navigate(ROUTES.ADMIN.CHATS);
   };
   console.log("asdfsf", userdata);
 
