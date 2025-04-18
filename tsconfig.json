@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+      "allowJs": true,
+      "checkJs": false,
+      "jsx": "react-jsx",
+      "noEmit": true
+    },
+    "include": ["src"]
+  }

@@ -7,6 +7,7 @@ import axios from "axios";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import AuthService from "../../../shared/utils/authService.js";
 import { ROUTES } from "../../../shared/utils/routes.js";
+import { getPublicIp } from "../../../shared/utils/commonUtils.js";
 
 const AdminSidebar = () => {
   const [auth, setAuth] = useAuth();
@@ -17,10 +18,8 @@ const AdminSidebar = () => {
   const [browserInfo, setBrowserInfo] = useState("");
 
   useEffect(() => {
-    // Get IP Address
-    fetch("https://api.ipify.org?format=json")
-      .then((response) => response.json())
-      .then((data) => setIp(data.ip))
+    getPublicIp()
+      .then((ip) => setIp(ip))
       .catch((error) => console.error("Error fetching IP:", error));
 
     // Get Browser Information

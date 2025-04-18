@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../shared/utils/routes.js";
 import { BASE_URL } from "../../../shared/utils/endPointNames.js";
+import { getPublicIp } from "../../../shared/utils/commonUtils.js";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -19,10 +20,8 @@ function Products() {
   const [browserInfo, setBrowserInfo] = useState("");
 
   useEffect(() => {
-    // Get IP Address
-    fetch("https://api.ipify.org?format=json")
-      .then((response) => response.json())
-      .then((data) => setIp(data.ip))
+    getPublicIp()
+      .then((ip) => setIp(ip))
       .catch((error) => console.error("Error fetching IP:", error));
 
     // Get Browser Information
