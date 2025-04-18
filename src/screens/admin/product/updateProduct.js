@@ -17,6 +17,7 @@ import {
   Label,
   Table,
 } from "reactstrap";
+import { getPublicIp } from "../../../shared/utils/commonUtils.js";
 
 function UpdateProduct() {
   const [product, setProduct] = useState(null);
@@ -35,10 +36,8 @@ function UpdateProduct() {
   const [browserInfo, setBrowserInfo] = useState("");
 
   useEffect(() => {
-    // Get IP Address
-    fetch("https://api.ipify.org?format=json")
-      .then((response) => response.json())
-      .then((data) => setIp(data.ip))
+    getPublicIp()
+      .then((ip) => setIp(ip))
       .catch((error) => console.error("Error fetching IP:", error));
 
     // Get Browser Information

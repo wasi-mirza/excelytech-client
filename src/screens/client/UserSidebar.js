@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import { ROUTES } from "../../shared/utils/routes.js";
 import axios from "axios";
+import { getPublicIp } from '../../shared/utils/commonUtils.js';
 
 function UserSidebar() {
   const [auth, setAuth] = useAuth();
@@ -15,10 +16,8 @@ function UserSidebar() {
   const [browserInfo, setBrowserInfo] = useState("");
 
   useEffect(() => {
-    // Get IP Address
-    fetch("https://api.ipify.org?format=json")
-      .then((response) => response.json())
-      .then((data) => setIp(data.ip))
+    getPublicIp()
+      .then((ip) => setIp(ip))
       .catch((error) => console.error("Error fetching IP:", error));
 
     // Get Browser Information
