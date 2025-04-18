@@ -7,7 +7,7 @@ import { ROUTES } from "./shared/utils/routes"; // adjust path as needed
 const InactivityLogout = () => {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
-  const timerRef = useRef(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const inactivityTime = 5 * 60 * 1000; // 5 minutes in milliseconds
 
   const handleLogout = () => {

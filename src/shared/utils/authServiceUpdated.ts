@@ -129,7 +129,7 @@ class AuthService {
    * @param {string} token - New token to set
    * @returns {void}
    */
-  setToken = (token) => {
+  setToken = (token: string) => {
     if (!token) {
       throw new Error("Token cannot be null or undefined");
     }
