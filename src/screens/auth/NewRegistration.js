@@ -11,6 +11,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { Spinner, Container } from "reactstrap";
 import { ROUTES } from "../../shared/utils/routes";
+import { getPublicIp } from '../../shared/utils/commonUtils';
 const NewRegistration = () => {
   const stripePromise = loadStripe(
     "pk_test_51PeI4kRovk9fbY7NlzADRlATaI6qOOBcb1bINnZDiPqcfaEdxjC9OPTMv5I6J95SgAyjGqyu4hfwkXSOuwsATkjC00dWcAlFWU"
@@ -123,10 +124,8 @@ const NewRegistration = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get IP Address
-    fetch("https://api.ipify.org?format=json")
-      .then((response) => response.json())
-      .then((data) => setIp(data.ip))
+    getPublicIp()
+      .then((ip) => setIp(ip))
       .catch((error) => console.error("Error fetching IP:", error));
 
     // Get Browser Information
