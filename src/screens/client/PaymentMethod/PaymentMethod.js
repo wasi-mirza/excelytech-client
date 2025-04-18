@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import * as Routes from "../../../utils/routeNames.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
 import AddPaymentMethod from "../PaymentMethod/NewPaymentMethod";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
@@ -181,9 +181,7 @@ const PaymentMethods = () => {
                       )}
                       <button
                         onClick={() =>
-                          navigate(
-                            `${Routes.EDIT_PAY_METHOD}/${paymentMethod._id}`
-                          )
+                          navigate(ROUTES.USER.EDIT_PAY_METHOD(paymentMethod._id))
                         }
                         className="btn btn-warning btn-sm"
                       >

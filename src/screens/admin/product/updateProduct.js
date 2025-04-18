@@ -3,7 +3,7 @@ import axios from "axios";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate, useParams } from "react-router-dom";
 import { Typeahead } from "react-bootstrap-typeahead";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import toast from "react-hot-toast";
 import {

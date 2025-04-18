@@ -8,6 +8,7 @@ class AuthService {
 
   /** ✅ Check Token Expiration */
   checkTokenExpiration = () => {
+
     console.log("Checking token expiration...");
     const token = localStorage.getItem("token");
     console.log("Token from localStorage:", token);

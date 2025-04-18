@@ -3,9 +3,9 @@ import { useAuth } from "../../../context/AuthContext.jsx";
 // import { useEditUserContext } from "../../context/EditUserContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import * as Routes from "../../../utils/routeNames.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
 
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 function Proposals() {
   const [auth] = useAuth();
@@ -25,12 +25,12 @@ function Proposals() {
   // );
 
   const handleAddProposal = () => {
-    navigate(Routes.NEW_PROPOSAL);
+    navigate(ROUTES.ADMIN.NEW_PROPOSAL);
   };
 
   const HandleView = (data) => {
     // setUserDetails(data);
-    navigate(`/admin-dashboard/proposal/${data._id}`);
+    navigate(ROUTES.ADMIN.VIEW_PROPOSAL(data._id));
   };
   const getProposals = async () => {
     try {
@@ -172,20 +172,6 @@ function Proposals() {
                             {proposal.status}
                           </span>
                         </td>
-                        {/* <td>
-                            <p
-                            // className={`badge ${
-                            //   proposal.subscriptionOn ?? false
-                            //     ? "badge-success"
-                            //     : "badge-danger"
-                            // }`}
-                            // style={{ color: "black" }}
-                            >
-                              {proposal.subscriptionOn ??
-                                "No subscription status available"}
-                            </p>
-                          </td> */}
-
                         {/* <td> */}
                         {/* <button
                               onClick={() => HandleView(proposal)}

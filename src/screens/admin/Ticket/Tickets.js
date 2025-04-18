@@ -2,8 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { ADMIN_DASHBOARD } from "../../../utils/routeNames.js";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 
 function Tickets() {
   const [auth] = useAuth();
@@ -37,7 +37,7 @@ function Tickets() {
   };
 
   const handleView = (data) => {
-    navigate(`${ADMIN_DASHBOARD}/tickets/${data._id}`);
+    navigate(`${ROUTES.ADMIN.TICKETS}/${data._id}`);
   };
 
   const handleSearch = (e) => {

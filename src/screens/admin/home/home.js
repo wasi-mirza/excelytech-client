@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 // import { Card, Col, Row, ProgressBar, Table, Badge } from "react-bootstrap";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 
 function AdminHome() {

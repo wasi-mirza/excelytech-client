@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext"; // adjust path as needed
 import toast from "react-hot-toast";
-import { LOGIN } from "./utils/routeNames"; // adjust path as needed
+import { ROUTES } from "./shared/utils/routes"; // adjust path as needed
 
 const InactivityLogout = () => {
   const [auth, setAuth] = useAuth();
@@ -14,7 +14,7 @@ const InactivityLogout = () => {
     localStorage.clear(); // or localStorage.removeItem('token') and localStorage.removeItem('auth')
     setAuth({ user: null, token: "" });
     toast.success("Logged out due to inactivity");
-    navigate(LOGIN);
+    navigate(ROUTES.AUTH.LOGIN);
   };
 
   const resetTimer = () => {

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { BASE_URL } from "../../utils/endPointNames.js";
+import { BASE_URL } from "../../shared/utils/endPointNames.js";
 import { Spinner } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { Button } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import * as RouteNames from "../../utils/routeNames.js";
+import { ROUTES } from "../../shared/utils/routes.js";
 
 const UserProfile = () => {
   // const { id } = useParams(); // Get user ID from the URL
@@ -55,7 +55,7 @@ const UserProfile = () => {
     <div className="col-md-6 text-right">
       <button
         onClick={() =>
-          navigate(`${RouteNames.EDIT_USER_PROFILE}/${user._id}`)
+          navigate(ROUTES.USER.EDIT_USER_PROFILE(user._id))
         }
         className="btn btn-dark"
       >

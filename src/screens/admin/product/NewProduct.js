@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Typeahead } from "react-bootstrap-typeahead";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { BASE_URL } from "../../../utils/endPointNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
 import toast from "react-hot-toast";
 
 // Validation schema with Yup

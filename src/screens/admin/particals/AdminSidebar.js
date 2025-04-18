@@ -4,16 +4,9 @@ import { useAuth } from "../../../context/AuthContext.jsx";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { BASE_URL } from "../../../utils/endPointNames.js";
-import AuthService from "../../../utils/authService.js";
-import {
-  ALL_EMAILTEMPLATES,
-  ALL_PRODUCTS,
-  ALL_PROPOSALS,
-  CATEGORYS,
-  LOGIN,
-  PROPOSAL_TEMPLATES,
-} from "../../../utils/routeNames.js";
+import { BASE_URL } from "../../../shared/utils/endPointNames.js";
+import AuthService from "../../../shared/utils/authService.js";
+import { ROUTES } from "../../../shared/utils/routes.js";
 
 const AdminSidebar = () => {
   const [auth, setAuth] = useAuth();
@@ -38,68 +31,6 @@ const AdminSidebar = () => {
     getBrowserInfo();
   }, []);
 
-  // const checkTokenExpiration = () => {
-  //   console.log("Checking token expiration...");
-  //   const token = localStorage.getItem("token");
-  //   console.log("Token from localStorage:", token);
-  //   if (token) {
-  //     try {
-  //       const decodedToken = jwtDecode(token);
-  //       console.log("Decoded token:", decodedToken);
-  //       const currentTime = Date.now() / 1000; // Current time in seconds
-  //       const localTime = new Date(currentTime * 1000).toLocaleString();
-
-  //       console.log("Current time (seconds):", currentTime);
-  //       console.log("Local time:", localTime);
-
-  //       // Print the expiry time from the token
-  //       const expiryTime = decodedToken.exp;
-  //       console.log("Token expiry time (seconds since epoch):", expiryTime);
-
-  //       // Convert expiry time to a human-readable date/time string
-  //       const expiryDate = new Date(expiryTime * 1000); // Multiply by 1000 to convert seconds to milliseconds
-
-  //       const formattedExpiryDate = expiryDate
-  //         .toLocaleDateString("en-CA", {
-  //           year: "numeric",
-  //           month: "short",
-  //           day: "numeric",
-  //           hour: "2-digit",
-  //           minute: "2-digit",
-  //           second: "2-digit",
-  //           hour12: true,
-  //           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, //add this line to ensure the time is properly parsed
-  //         })
-  //         .replace(",", ""); // Remove the comma
-
-  //       console.log("Token expiry date/time:", formattedExpiryDate);
-
-  //       if (decodedToken.exp < currentTime) {
-  //         console.log("Token has expired!");
-  //         handleLogout();
-  //       } else {
-  //         console.log("Token is still valid.");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error decoding token:", error);
-  //       handleLogout(); // Or some other error handling
-  //     }
-  //   } else {
-  //     console.log("No token found in localStorage.");
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   console.log("Component mounted, setting up token expiration check."); // Added print statement
-  //   checkTokenExpiration();
-  //   const intervalId = setInterval(checkTokenExpiration, 1000 * 60 * 2);
-  //   console.log("Interval ID:", intervalId); // Added print statement
-  //   return () => {
-  //     console.log("Component unmounted, clearing interval."); // Added print statement
-  //     clearInterval(intervalId);
-  //   };
-  // }, []);
-
   const authService = new AuthService(setAuth, navigate);
   useEffect(() => {
     authService.startTokenCheck(); // Start checking token expiration
@@ -113,7 +44,7 @@ const AdminSidebar = () => {
   };
   useEffect(() => {
     if (!auth.user) {
-      navigate(LOGIN); // Redirect when user is logged out
+      navigate(ROUTES.AUTH.LOGIN); // Redirect when user is logged out
     }
   }, [auth.user]); // Runs when auth.user changes
 
@@ -206,7 +137,7 @@ const AdminSidebar = () => {
                 }`}
               >
                 <a
-                  href={CATEGORYS}
+                  href={ROUTES.ADMIN.CATEGORYS}
                   className={`nav-link ${
                     expandedMenu === "productSuite" ? "active" : ""
                   }`}
@@ -232,7 +163,7 @@ const AdminSidebar = () => {
                 >
                   <li className="nav-item">
                     <NavLink
-                      to={CATEGORYS}
+                      to={ROUTES.ADMIN.CATEGORYS}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -243,7 +174,7 @@ const AdminSidebar = () => {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      to={ALL_PRODUCTS}
+                      to={ROUTES.ADMIN.ALL_PRODUCTS}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -277,7 +208,7 @@ const AdminSidebar = () => {
                 }`}
               >
                 <a
-                  href={ALL_PROPOSALS}
+                  href={ROUTES.ADMIN.ALL_PROPOSALS}
                   className={`nav-link ${
                     expandedMenu === "leadsAndMarketing" ? "active" : ""
                   }`}
@@ -303,7 +234,7 @@ const AdminSidebar = () => {
                 >
                   <li className="nav-item">
                     <NavLink
-                      to={ALL_PROPOSALS}
+                      to={ROUTES.ADMIN.ALL_PROPOSALS}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -314,7 +245,7 @@ const AdminSidebar = () => {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      to={PROPOSAL_TEMPLATES}
+                      to={ROUTES.ADMIN.PROPOSAL_TEMPLATES}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -325,7 +256,7 @@ const AdminSidebar = () => {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      to={ALL_EMAILTEMPLATES}
+                      to={ROUTES.ADMIN.ALL_EMAILTEMPLATES}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
