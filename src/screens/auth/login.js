@@ -9,8 +9,8 @@ import { BASE_URL } from "../../shared/utils/endPointNames.js";
 import ForgotPassword from "./ForgotPassword.js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import apiService from '../../shared/services/index.ts';
-import { getPublicIp, getBrowserInfo } from "../../shared/utils/commonUtils";
-import { loginUser, logUserActivity } from "../../shared/services/authService";
+import { getPublicIp, getBrowserInfo } from "../../shared/utils/commonUtils.js";
+import { loginUser, logUserActivity } from "../../shared/services/authService.js";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
