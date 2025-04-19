@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import JoditEditor from "jodit-react";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../shared/utils/endPointNames";
 
 function UpdateProposalTemplate() {
   const [proposalTemplete, setProposalTemplete] = useState(null);
@@ -49,6 +49,9 @@ function UpdateProposalTemplate() {
       setTemplete({
         title: proposalTemplete.title || "",
         description: proposalTemplete.description || "",
+        status: proposalTemplete.status || "",
+        createdAt: proposalTemplete.createdAt || "",
+        updatedAt: proposalTemplete.updatedAt || "",
       });
     }
   }, [proposalTemplete]);
@@ -74,7 +77,7 @@ function UpdateProposalTemplate() {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setTemplete((prevForm) => ({
       ...prevForm,
@@ -82,7 +85,7 @@ function UpdateProposalTemplate() {
     }));
   };
 
-  const handleDescriptionChange = (newContent) => {
+  const handleDescriptionChange = (newContent: string) => {
     setTemplete((prevForm) => ({
       ...prevForm,
       description: newContent,
