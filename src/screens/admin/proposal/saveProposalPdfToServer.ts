@@ -2,7 +2,16 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import axios from "axios";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
-function addLetterSpacing(doc, text, x, y, spacing = 1) {
+
+// Extend jsPDF type to include autoTable
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+    lastAutoTable: { finalY: number };
+  }
+}
+
+function addLetterSpacing(doc: any, text: any, x: any, y: any, spacing = 1) {
   let currentX = x; // Track the current X position
   for (let char of text) {
     doc.text(char, currentX, y); // Draw each character at the current position
@@ -10,7 +19,7 @@ function addLetterSpacing(doc, text, x, y, spacing = 1) {
   }
 }
 
-export const savePdfToServer = async (proposalData, authToken) => {
+export const savePdfToServer = async (proposalData: any, authToken: any) => {
   const doc = new jsPDF();
   // console.log("proposalData.grandTotalCurrency from pdf", proposalData);
 
@@ -33,7 +42,7 @@ export const savePdfToServer = async (proposalData, authToken) => {
   doc.text(`Title: ${proposalData.title || ""}`, 20, 40);
 
   const headers = [["Product", "Quantity", "Discount", "Total"]];
-  const tableData = proposalData.products.map((product) => [
+  const tableData = proposalData.products.map((product: any) => [
     product.name || "",
     product.quantity || 0,
     product.discount != 0
@@ -135,7 +144,7 @@ export const savePdfToServer = async (proposalData, authToken) => {
       console.error("Unexpected response structure:", response.data.fileUrl);
       throw new Error("Upload failed: Invalid response structure.");
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error uploading PDF:", error.message || error);
     throw new Error("Failed to upload PDF to server.");
   }

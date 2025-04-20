@@ -18,20 +18,21 @@ import {
   Table,
 } from "reactstrap";
 import { getPublicIp } from "../../../shared/utils/commonUtils";
+import { CategoryResponse } from "../../../shared/api/types/category.types";
 
 function UpdateProduct() {
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<any | null>(null);
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [auth] = useAuth();
   const navigate = useNavigate();
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const { id } = useParams();
-  let newUrl = BASE_URL.replace("/api", "");
+  let newUrl = BASE_URL?.replace("/api", "");
   const [ip, setIp] = useState("");
   const [browserInfo, setBrowserInfo] = useState("");
 
@@ -97,7 +98,7 @@ function UpdateProduct() {
     fetchCategories();
   }, [auth]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target; // Destructure the event target properties
     const updatedValue = type === "checkbox" ? checked : value; // If it's a checkbox, use 'checked' otherwise use 'value'
 
@@ -106,11 +107,11 @@ function UpdateProduct() {
       const cost =
         name === "cost"
           ? parseFloat(updatedValue || 0)
-          : parseFloat(product.cost || 0); // If the field is 'cost', update it with 'updatedValue', else use current cost
+          : parseFloat(product?.cost || 0); // If the field is 'cost', update it with 'updatedValue', else use current cost
       const taxPercentage =
         name === "tax"
           ? parseFloat(updatedValue || 0)
-          : parseFloat(product.tax || 0); // If the field is 'tax', update it with 'updatedValue', else use current tax
+          : parseFloat(product?.tax || 0); // If the field is 'tax', update it with 'updatedValue', else use current tax
 
       // Calculate the totalCost using the formula (cost * (1 + taxPercentage / 100))
       const updatedProduct = {
@@ -133,33 +134,33 @@ function UpdateProduct() {
     }
   };
 
-  const handleSelectecUserChange = (selectedUser) => {
+  const handleSelectecUserChange = (selectedUser: any) => {
     setSelectedUser(selectedUser);
     if (selectedUser) {
       const userid = selectedUser._id;
-      setProduct((prevData) => ({
+      setProduct((prevData: any) => ({
         ...prevData,
         productManager: userid,
       }));
     } else {
-      setProduct((prevData) => ({
+      setProduct((prevData: any) => ({
         ...prevData,
         productManager: null,
       }));
     }
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: any) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
       const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result);
+      reader.onload = () => setPreview(reader.result as string);
       reader.readAsDataURL(selectedFile);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -295,7 +296,7 @@ function UpdateProduct() {
                         name="description"
                         value={product.description}
                         onChange={handleChange}
-                        rows="3"
+                        rows={3}
                         required
                       />
                     </div>
@@ -333,10 +334,10 @@ function UpdateProduct() {
                         id="user-selector"
                         options={users}
                         labelKey="username" // Adjust based on your user object, e.g., 'email' or 'name'
-                        onChange={(selected) => {
+                        onChange={(selected: any) => {
                           console.log("selected", selected[0]);
 
-                          handleSelectecUserChange((prev) => ({
+                          handleSelectecUserChange((prev: any) => ({
                             ...prev,
                             productManager: selected[0]?.username || "",
                           }));
@@ -356,8 +357,8 @@ function UpdateProduct() {
                         id="category"
                         options={categories} // Options should be an array of objects with 'name' key
                         labelKey="name" // Adjust this to match the key used for category names in your API response
-                        onChange={(selected) => {
-                          setProduct((prevData) => ({
+                        onChange={(selected: any) => {
+                          setProduct((prevData: any) => ({
                             ...prevData,
                             category: selected[0]?.name || "",
                           }));

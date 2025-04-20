@@ -50,8 +50,8 @@ function UpdateUserForm() {
     "Pacific Time (UTC -08:00)",
     "Yukon Time (UTC -07:00 - No DST)",
   ];
-  const [accountManagers, setAccountManagers] = useState([]); // State for account managers
-  const [previewAM, setPreviewAM] = useState([]);
+  const [accountManagers, setAccountManagers] = useState<any>([]); // State for account managers
+  const [previewAM, setPreviewAM] = useState<any>([]);
   const [loading, setLoading] = useState(true); // Loading state for fetching data
   const [auth] = useAuth();
   const { id } = useParams();
@@ -92,7 +92,7 @@ function UpdateUserForm() {
           },
         });
         setAccountManagers(
-          res.data.map((admin) => ({
+          res.data.map((admin: any) => ({
             id: admin._id,
             name: admin.name,
           }))
@@ -142,7 +142,7 @@ function UpdateUserForm() {
   });
 
   // Handle form submission
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: any) => {
     try {
       const res = await axios.patch(`${BASE_URL}/user/${id}`, values, {
         headers: {
@@ -415,7 +415,7 @@ function UpdateUserForm() {
                             labelKey="name" // Assuming the label is 'name'
                             placeholder="Select an Account Manager"
                             isLoading={loading}
-                            onChange={(selected) => {
+                            onChange={(selected: any) => {
                               setFieldValue(
                                 "accountManagers",
                                 selected[0]?.id || "" // Save the ID of the selected account manager
@@ -423,11 +423,11 @@ function UpdateUserForm() {
                             }}
                             selected={
                               accountManagers.find(
-                                (admin) => admin.id === values.accountManagers
+                                (admin: any) => admin.id === values.accountManagers
                               )
                                 ? [
                                     accountManagers.find(
-                                      (admin) =>
+                                      (admin: any) =>
                                         admin.id === values.accountManagers
                                     ),
                                   ]

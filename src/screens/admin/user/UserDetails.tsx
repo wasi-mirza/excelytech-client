@@ -11,15 +11,15 @@ import axios from "axios";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 function View() {
   const navigate = useNavigate();
-  const [viewInfo, setViewInfo] = useState(null);
+  const [viewInfo, setViewInfo] = useState<any>(null);
   const [auth] = useAuth();
   const { id } = useParams();
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState<any>([]);
   const [noteContent, setNoteContent] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAgreementOpen, setIsAgreementOpen] = useState(false);
-  const [userAgreementUrl, setUserAgreementUrl] = useState("");
+  const [userAgreementUrl, setUserAgreementUrl] = useState<any>(null);
   const [resetEmail] = useState("");
 
   const notesPerPage = 4; // Set number of notes per page
@@ -88,7 +88,7 @@ function View() {
   };
 
   // Function to handle adding new note
-  const handleAddNote = async (e) => {
+  const handleAddNote = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -110,7 +110,7 @@ function View() {
       });
 
       const sortedNotes = res.data.notes.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setViewInfo(res.data);
       setNotes(sortedNotes); // Update local notes array with sorted notes
@@ -145,7 +145,7 @@ function View() {
       setCurrentPage(currentPage + 1);
     }
   };
-  const handleDelete = async (data) => {
+  const handleDelete = async (data: any) => {
     try {
       const res = await axios.delete(`${BASE_URL}/user/${data._id}`, {
         headers: {
@@ -153,7 +153,7 @@ function View() {
           Authorization: `Bearer ${auth?.token}`,
         },
       });
-      if (res === 200) {
+      if (res.status === 200) {
         toast.success("Deleted Successfully");
       } else {
         toast.error("Deleted Failed");
@@ -163,7 +163,7 @@ function View() {
       // console.log(error);
     }
   };
-  const handleUpdateForm = (id) => {
+  const handleUpdateForm = (id: any) => {
     console.log("Data", id);
 
     navigate(`/admin-dashboard/update/${id}`);
@@ -178,7 +178,7 @@ function View() {
   //   handleDelete(data);
   // };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
       setUserAgreementUrl(file);
@@ -195,7 +195,7 @@ function View() {
   const [showModal, setShowModal] = useState(false);
   const [confirmHandler, setConfirmHandler] = useState(null);
 
-  const toggleDialog = (msg, handler) => {
+  const toggleDialog = (msg: any, handler: any) => {
     setMessage(msg);
     setConfirmHandler(() => handler);
     setDialogOpen(!isDialogOpen);
@@ -203,7 +203,7 @@ function View() {
 
   const handleCancel = () => {
     console.log("Cancelled!");
-    toggleDialog();
+    toggleDialog("", () => {});
   };
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -542,7 +542,7 @@ function View() {
                     style={{ maxHeight: "400px" }}
                   >
                     {currentNotes.length > 0 ? (
-                      currentNotes.map((note, index) => (
+                      currentNotes.map((note: any, index: number) => (
                         <div className="card mb-3" key={index}>
                           <div className="card-body">
                             <p className="card-text">{note.content}</p>
@@ -592,7 +592,7 @@ function View() {
                             id="noteContent"
                             className="form-control"
                             placeholder="Enter note content"
-                            rows="5"
+                            rows={5}
                             value={noteContent}
                             onChange={(e) => setNoteContent(e.target.value)}
                             required
@@ -616,9 +616,13 @@ function View() {
 
 export default View;
 
-function AgreementModal({ isOpen, onClose, userAgreementUrl }) {
+function AgreementModal({ isOpen, onClose, userAgreementUrl }: {
+  isOpen: boolean,
+  onClose: () => void,
+  userAgreementUrl: string
+}) {
   if (!isOpen) return null;
-  const newUrl = BASE_URL.replace("/api", "");
+  const newUrl = BASE_URL?.replace("/api", "");
   return (
     <Modal isOpen={isOpen} toggle={onClose} size="lg" centered>
       <ModalHeader toggle={onClose}>Agreement </ModalHeader>
@@ -639,7 +643,12 @@ function AgreementModal({ isOpen, onClose, userAgreementUrl }) {
   );
 }
 
-function PasswordResetModal({ isOpen, onClose, auth, resetEmail }) {
+function PasswordResetModal({ isOpen, onClose, auth, resetEmail }: {
+  isOpen: boolean,
+  onClose: () => void,
+  auth: any,
+  resetEmail: string
+}) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -671,7 +680,7 @@ function PasswordResetModal({ isOpen, onClose, auth, resetEmail }) {
         toast.success(response.data.message || "Password reset successful.");
         onClose();
       }
-    } catch (error) {
+    } catch (error: any) {
       // console.error("Error resetting password:", error);
       toast.error(error.response?.data?.message || "Failed to reset password.");
     }

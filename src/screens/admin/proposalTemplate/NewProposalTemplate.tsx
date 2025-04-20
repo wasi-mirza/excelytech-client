@@ -24,9 +24,9 @@ function NewProposalTemplate() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
 
-  const [titleValid, setTitleValid] = useState(null);
-  const [descriptionValid, setDescriptionValid] = useState(null);
-  const editor = useRef(null);
+  const [titleValid, setTitleValid] = useState<any>(null);
+  const [descriptionValid, setDescriptionValid] = useState<any>(null);
+  const editor = useRef<any>(null);
   const [auth] = useAuth();
   const navigate = useNavigate();
 
@@ -74,7 +74,7 @@ function NewProposalTemplate() {
     return valid;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!validateFields()) return;
 

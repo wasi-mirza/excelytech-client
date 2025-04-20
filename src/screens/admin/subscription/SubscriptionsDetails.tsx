@@ -7,7 +7,7 @@ import { BASE_URL } from "../../../shared/utils/endPointNames";
 function SubscriptionDetails() {
   const [auth] = useAuth();
   const { id } = useParams();
-  const [subscriptionInfo, setSubscriptionInfo] = useState(null);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
 
   useEffect(() => {
     if (auth?.token && id) {
@@ -23,8 +23,8 @@ function SubscriptionDetails() {
     }
   }, [auth, id]);
   const calculateSubscriptionEndDate = (
-    subscriptionStartDate,
-    subscriptionDurationInMonths
+    subscriptionStartDate: any,
+    subscriptionDurationInMonths: any
   ) => {
     const startDate = new Date(subscriptionStartDate);
     startDate.setMonth(startDate.getMonth() + subscriptionDurationInMonths);
@@ -137,7 +137,7 @@ function SubscriptionDetails() {
                   </tr>
                 </thead>
                 <tbody>
-                  {subscriptionInfo.products.map((product, index) => (
+                  {subscriptionInfo.products.map((product: any, index: any) => (
                     <tr key={index}>
                       <td>
                         {product.productId.sku}
@@ -180,7 +180,7 @@ function SubscriptionDetails() {
 
 export default SubscriptionDetails;
 
-const PaymentDetailsTable = ({ paymentDetails }) => {
+const PaymentDetailsTable = ({ paymentDetails }: any) => {
   return (
     <div className="card-body table-responsive p-0">
       <table className="table table-bordered table-hover text-center">
@@ -197,7 +197,7 @@ const PaymentDetailsTable = ({ paymentDetails }) => {
         </thead>
         <tbody>
           {paymentDetails.length > 0 ? (
-            paymentDetails.map((detail, index) => (
+            paymentDetails.map((detail: any, index: any) => (
               <tr key={index}>
                 <td>
                   {detail.currency} {detail.amount}
@@ -232,7 +232,7 @@ const PaymentDetailsTable = ({ paymentDetails }) => {
             ))
           ) : (
             <tr>
-              <td colSpan="8">No payment details available.</td>
+              <td colSpan={8}>No payment details available.</td>
             </tr>
           )}
         </tbody>

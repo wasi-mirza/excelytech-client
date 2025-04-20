@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 
 function UpdateEmailTemplate() {
-  const [proposalTemplete, setProposalTemplete] = useState(null);
+  const [proposalTemplete, setProposalTemplete] = useState<any>(null);
   const [templete, setTemplete] = useState({
     title: "",
     description: "",
@@ -80,16 +80,16 @@ function UpdateEmailTemplate() {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
-    setTemplete((prevForm) => ({
+    setTemplete((prevForm: any) => ({
       ...prevForm,
       [name]: value,
     }));
   };
 
-  const handleDescriptionChange = (newContent) => {
-    setTemplete((prevForm) => ({
+  const handleDescriptionChange = (newContent: any) => {
+    setTemplete((prevForm: any) => ({
       ...prevForm,
       description: newContent,
     }));

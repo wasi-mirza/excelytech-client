@@ -8,7 +8,7 @@ import { BASE_URL } from "../../../shared/utils/endPointNames";
 
 const Users = () => {
   const [auth] = useAuth();
-  const [userdata, setUserdata] = useState([]);
+  const [userdata, setUserdata] = useState<any>([]);
   const [deleteId, setDeleteId] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 32;
@@ -32,13 +32,13 @@ const Users = () => {
       setTotalPages(res.data.totalPages); // Assuming 'totalPages' is in the response
       setLoading(false); // Stop loading after successful response
       // console.log("Userdata : ", res.data.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       setLoading(false);
     }
   };
 
-  const handleDelete = async (data) => {
+  const handleDelete = async (data: any) => {
     try {
       if (
         window.confirm("Are you sure you want to delete this payment method?")
@@ -57,7 +57,7 @@ const Users = () => {
       console.log(error);
     }
   };
-  const handleUpdateForm = (id) => {
+  const handleUpdateForm = (id: any) => {
     console.log("Data", id);
     navigate(ROUTES.ADMIN.UPDATE_USER(id));
   };
@@ -71,7 +71,7 @@ const Users = () => {
     navigate(ROUTES.ADMIN.NEW_USER);
   };
 
-  const HandleView = (data) => {
+  const HandleView = (data: any) => {
     navigate(ROUTES.ADMIN.VIEW_USER(data._id));
   };
 
@@ -138,7 +138,7 @@ const Users = () => {
                   </div>
                 ) : (
                   // .filter((data) => data.businessDetails?.companyType !== "N/A")
-                  userdata?.map((data) => (
+                  userdata?.map((data: any) => (
                     <div
                       className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
                       key={data._id}

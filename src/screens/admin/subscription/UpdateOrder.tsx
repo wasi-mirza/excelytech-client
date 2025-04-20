@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../shared/utils/endPointNames";
 
 function UpdateOrder() {
   const [auth] = useAuth();
   const { id } = useParams();
-  const [orderUpdate, setOrderUpdate] = useState(null);
+  const [orderUpdate, setOrderUpdate] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ function UpdateOrder() {
     }
   }, [auth, id]);
 
-  const handleChange = (index, field, value) => {
+  const handleChange = (index: any, field: any, value: any) => {
     const updatedProducts = [...orderUpdate.products];
     updatedProducts[index][field] = value;
     setOrderUpdate({ ...orderUpdate, products: updatedProducts });
@@ -50,7 +50,7 @@ function UpdateOrder() {
       <h1 className="mb-4">Update Order Details</h1>
       {orderUpdate ? (
         <div>
-          {orderUpdate.products.map((product, index) => (
+          {orderUpdate.products.map((product: any, index: any) => (
             <div className="card card-olive mb-3" key={index}>
               <div className="card-header">
                 <h3 className="card-title">Product {index + 1}</h3>

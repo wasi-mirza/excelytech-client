@@ -8,11 +8,11 @@ import toast from "react-hot-toast";
 import { getPublicIp } from "../../../shared/utils/commonUtils";
 
 function ViewProduct() {
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<any | null>(null);
   const [auth] = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
-  let newUrl = BASE_URL.replace("/api", "");
+  let newUrl = BASE_URL?.replace("/api", "");
 
   const [ip, setIp] = useState("");
   const [browserInfo, setBrowserInfo] = useState("");
@@ -137,7 +137,7 @@ function ViewProduct() {
               <div className="card-body">
                 <div className="text-center mb-3">
                   <img
-                    onError={(e) =>
+                    onError={(e: any) =>
                       (e.target.src = `${newUrl}/uploads/placeholder.png`)
                     }
                     className="img-fluid img-cover rounded"

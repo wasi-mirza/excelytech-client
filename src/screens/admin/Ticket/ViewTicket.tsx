@@ -9,7 +9,7 @@ const ViewTicket = () => {
   const messagesEndRef = useRef(null);
   const [status, setStatus] = useState("");
   const { id } = useParams();
-  const [ticketData, setTicketData] = useState(null); // Initially set to null
+  const [ticketData, setTicketData] = useState<any>(null); // Initially set to null
   const [comment, setComment] = useState(""); // For comment
   const [resolutionNotes, setResolutionNotes] = useState(""); // For resolution notes (string)
 
@@ -35,7 +35,7 @@ const ViewTicket = () => {
     }
   }, [auth, id]);
 
-  const handleStatusChange = (e) => {
+  const handleStatusChange = (e: any) => {
     setStatus(e.target.value);
   };
 
@@ -89,7 +89,7 @@ const ViewTicket = () => {
   //   }
   // };
 
-  const handleUpdateResolutionNotes = async (e) => {
+  const handleUpdateResolutionNotes = async (e: any) => {
     e.preventDefault();
     try {
       const res = await axios.patch(
@@ -111,7 +111,7 @@ const ViewTicket = () => {
     }
   };
 
-  const handleAddComment = async (e) => {
+  const handleAddComment = async (e: any) => {
     e.preventDefault();
     try {
       const res = await axios.post(
@@ -136,7 +136,9 @@ const ViewTicket = () => {
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      (messagesEndRef.current as HTMLElement).scrollIntoView({
+        behavior: "smooth",
+      });
     }
   }, [ticketData?.comments]);
 
@@ -253,8 +255,10 @@ const ViewTicket = () => {
                           placeholder="Add Resolution Notes ..."
                           className="form-control"
                           value={resolutionNotes}
-                          onChange={(e) => setResolutionNotes(e.target.value)}
-                          rows="7 "
+                          onChange={(e: any) =>
+                            setResolutionNotes(e.target.value)
+                          }
+                          rows={7}
                         />
                       </div>
                       <span>
@@ -285,7 +289,7 @@ const ViewTicket = () => {
               </div>
               <div className="card-body">
                 <div className="direct-chat-messages">
-                  {ticketData?.comments?.map((comment, index) => {
+                  {ticketData?.comments?.map((comment: any, index: number) => {
                     const isAdmin = comment?.user?.name !== "admin";
                     return (
                       <div

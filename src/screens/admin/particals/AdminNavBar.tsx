@@ -1,5 +1,3 @@
-import React from "react";
-
 const AdminNavbar = () => {
   return (
     <nav className="main-header navbar navbar-expand navbar-white navbar-light">

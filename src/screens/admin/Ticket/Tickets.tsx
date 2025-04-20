@@ -36,11 +36,11 @@ function Tickets() {
     }
   };
 
-  const handleView = (data) => {
+  const handleView = (data: any) => {
     navigate(`${ROUTES.ADMIN.TICKETS}/${data._id}`);
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: any) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
     fetchTicketData(1, 32, e.target.value);
@@ -115,10 +115,12 @@ function Tickets() {
                       <tbody>
                         {ticketdata.length === 0 ? (
                           <tr>
-                            <td colSpan="7">No tickets found</td>
+                            <td colSpan={7} className="text-center">
+                              No tickets found
+                            </td>
                           </tr>
                         ) : (
-                          ticketdata.map((ticket) => (
+                          ticketdata.map((ticket: any) => (
                             <tr key={ticket._id}>
                               <td>{ticket.title}</td>
                               <td>{ticket.description}</td>

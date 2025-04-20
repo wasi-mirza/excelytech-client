@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import moment from "moment";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { ROUTES } from "../../../shared/utils/routes";
 
@@ -62,7 +61,7 @@ const Subscriptions = () => {
     }
   };
 
-  const handleViewSubscription = (data) => {
+  const handleViewSubscription = (data: any) => {
     navigate(ROUTES.ADMIN.VIEW_SUBSCRIPTION(data._id));
   };
 
@@ -120,12 +119,12 @@ const Subscriptions = () => {
                     <tbody>
                       {subscriptions.length === 0 ? (
                         <tr>
-                          <td colSpan="11" className="text-center">
+                          <td colSpan={11} className="text-center">
                             No matching subscriptions found
                           </td>
                         </tr>
                       ) : (
-                        subscriptions.map((subscription) => (
+                        subscriptions.map((subscription: any) => (
                           <tr
                             key={subscription._id}
                             onClick={() => handleViewSubscription(subscription)}
@@ -141,7 +140,7 @@ const Subscriptions = () => {
                             <td>
                               {subscription.products &&
                               subscription.products.length > 0 ? (
-                                subscription.products.map((product, index) => (
+                                subscription.products.map((product: any, index: any) => (
                                   <span key={index}>
                                     {product.productId?.name ||
                                       "Unnamed Product"}

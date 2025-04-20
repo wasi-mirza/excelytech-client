@@ -8,7 +8,8 @@ import { useFormik } from "formik";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import toast from "react-hot-toast";
 import { getPublicIp } from "../../../shared/utils/commonUtils";
-
+import { getAllCategories } from "../../../shared/api/endpoints/category";
+import { CategoryResponse } from "../../../shared/api/types/category.types";
 // Validation schema with Yup
 const validationSchema = Yup.object({
   sku: Yup.string().required("SKU is required"),
@@ -34,9 +35,9 @@ const NewProduct = () => {
   const navigate = useNavigate();
   const [auth] = useAuth();
   const [users, setUsers] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [showDuration, setShowDuration] = useState(false);
   const [ip, setIp] = useState("");
   const [browserInfo, setBrowserInfo] = useState("");
@@ -62,7 +63,7 @@ const NewProduct = () => {
         headers: { Authorization: `Bearer ${auth.token}` },
       });
       setUsers(
-        response.data.map((admin) => ({
+        response.data.map((admin: any) => ({
           id: admin._id,
           name: admin.name,
         }))
@@ -75,12 +76,8 @@ const NewProduct = () => {
   // Fetch categories (for category selection)
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/category/allCategory`, {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`,
-        },
-      });
-      setCategories(response.data.categories);
+      const res = await getAllCategories(1, 100);
+      setCategories(res?.categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -104,6 +101,7 @@ const NewProduct = () => {
       keywords: [],
       activeSubscriptions: 0,
       revenueGenerated: 0,
+      duration: 0,
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -152,9 +150,9 @@ const NewProduct = () => {
           const productData = {
             ...values,
             imageUrl,
-            cost: parseFloat(values.cost),
-            tax: parseFloat(values.tax),
-            totalCost: parseFloat(values.totalCost),
+            cost: values.cost,
+            tax: values.tax,
+            totalCost: values.totalCost,
           };
 
           // Send product data to backend
@@ -199,20 +197,20 @@ const NewProduct = () => {
 
   useEffect(() => {
     const totalCost = (
-      parseFloat(formik.values.cost || 0) *
-      (1 + parseFloat(formik.values.tax || 0) / 100)
+      formik.values.cost *
+      (1 + formik.values.tax / 100)
     ).toFixed(2);
 
     formik.setFieldValue("totalCost", totalCost); // Keeps totalCost rounded to two decimals
   }, [formik.values.cost, formik.values.tax]);
 
   // Handle file change (image preview)
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: any) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
       const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result);
+      reader.onload = () => setPreview(reader.result as string);
       reader.readAsDataURL(selectedFile);
     }
   };
@@ -287,7 +285,7 @@ const NewProduct = () => {
                         value={formik.values.description}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        rows="3"
+                        rows={3}
                         placeholder="Enter Description"
                       />
                       {formik.touched.description &&
@@ -443,7 +441,7 @@ const NewProduct = () => {
                         onChange={(selected) =>
                           formik.setFieldValue(
                             "productManager",
-                            selected[0]?.id
+                            (selected[0] as any)?.id
                           )
                         }
                         placeholder="Choose a product manager"
@@ -464,7 +462,7 @@ const NewProduct = () => {
                         options={categories}
                         labelKey="name"
                         onChange={(selected) =>
-                          formik.setFieldValue("category", selected[0]?.name)
+                          formik.setFieldValue("category", (selected[0] as any)?.name)
                         }
                         placeholder="Choose a category"
                         className="w-100"

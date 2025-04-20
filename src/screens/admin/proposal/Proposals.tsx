@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-// import { useEditUserContext } from "../../context/EditUserContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../shared/utils/routes";
@@ -28,7 +27,7 @@ function Proposals() {
     navigate(ROUTES.ADMIN.NEW_PROPOSAL);
   };
 
-  const HandleView = (data) => {
+  const HandleView = (data: any) => {
     // setUserDetails(data);
     navigate(ROUTES.ADMIN.VIEW_PROPOSAL(data._id));
   };
@@ -131,7 +130,7 @@ function Proposals() {
                 </thead>
                 <tbody>
                   {proposals.length > 0 ? (
-                    proposals.map((proposal) => (
+                    proposals.map((proposal: any) => (
                       <tr
                         key={proposal._id}
                         onClick={() => HandleView(proposal)}
@@ -191,7 +190,7 @@ function Proposals() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" className="text-center">
+                      <td colSpan={4} className="text-center">
                         No matching Proposal found
                       </td>
                     </tr>
