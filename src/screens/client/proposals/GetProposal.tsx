@@ -1,21 +1,33 @@
-// export default GetProposal;
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
+
+interface Proposal {
+  _id: string;
+  title: string;
+  createdAt: string;
+  finalAmount: number;
+}
+
+interface HoverStyle {
+  color?: string;
+  background?: string;
+}
+
 function GetProposal() {
-  const [proposals, setProposals] = useState([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [proposalsPerPage] = useState(5);
   const navigate = useNavigate();
 
   const [auth] = useAuth();
-  const [proposaldata, setProposalData] = useState(null);
+  const [proposaldata, setProposalData] = useState<Proposal | null>(null);
 
   const fetchProposals = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/proposal/getAllProposals`, {
+      const res = await axios.get<Proposal[]>(`${BASE_URL}/proposal/getAllProposals`, {
         headers: {
           Authorization: `Bearer ${auth?.token}`,
         },
@@ -39,15 +51,15 @@ function GetProposal() {
 
   const totalPages = Math.ceil(proposals.length / proposalsPerPage);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   const nextPage = () =>
     setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
   const prevPage = () =>
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
 
-  const [hoverStyle, setHoverStyle] = useState({});
-  const getproductdta = (id) => {
-    setProposalData(id);
+  const [hoverStyle, setHoverStyle] = useState<HoverStyle>({});
+  const getproductdta = (proposal: Proposal) => {
+    setProposalData(proposal);
     console.log("proposalData:", proposaldata);
     navigate("/user-dashboard/proposal-view");
   };
@@ -89,28 +101,26 @@ function GetProposal() {
                     </thead>
                     <tbody>
                       {currentProposals.map((proposal) => (
-                        <React.Fragment>
-                          <tr key={proposal._id}>
-                            <td>
-                              {new Date(
-                                proposal.createdAt
-                              ).toLocaleDateString() || "N/A"}
-                            </td>
-                            <td>{proposal.title || "N/A"}</td>
+                        <tr key={proposal._id}>
+                          <td>
+                            {new Date(
+                              proposal.createdAt
+                            ).toLocaleDateString() || "N/A"}
+                          </td>
+                          <td>{proposal.title || "N/A"}</td>
 
-                            <td>{proposal.finalAmount || "N/A"}</td>
-                            <td>
-                              <div className="text-center">
-                                <button
-                                  className="btn btn-success px-4 "
-                                  onClick={() => getproductdta(proposal)}
-                                >
-                                  view
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        </React.Fragment>
+                          <td>{proposal.finalAmount || "N/A"}</td>
+                          <td>
+                            <div className="text-center">
+                              <button
+                                className="btn btn-success px-4 "
+                                onClick={() => getproductdta(proposal)}
+                              >
+                                view
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
                       ))}
                     </tbody>
                   </table>

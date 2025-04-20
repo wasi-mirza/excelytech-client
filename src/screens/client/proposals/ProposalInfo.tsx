@@ -6,9 +6,58 @@ import {
   FaList,
 } from "react-icons/fa";
 
+interface Product {
+  _id: string;
+  quantity: number;
+  discount: number;
+  total: number;
+  discountType: string;
+  currency: string;
+}
+
+interface ProposalData {
+  content: string;
+  createdAt: string;
+  discountOnGrandTotal: number;
+  discountType: string;
+  emailTo: string;
+  finalAmount: number;
+  grandTotal: number;
+  grandTotalCurrency: string;
+  productTotal: number;
+  title: string;
+  products: Product[];
+}
+
+interface FormData {
+  content: string;
+  createdAt: string;
+  discountOnGrandTotal: string | number;
+  discountType: string;
+  emailTo: string;
+  finalAmount: string | number;
+  grandTotal: string | number;
+  grandTotalCurrency: string;
+  productTotal: string | number;
+  title: string;
+  products: Product[];
+}
+
 function ProposalInfo() {
-  const [proposaldata] = useState(null);
-  const [formdata, setFormData] = useState({ products: [] });
+  const [proposaldata, setProposalData] = useState<ProposalData | null>(null);
+  const [formdata, setFormData] = useState<FormData>({
+    content: "N/A",
+    createdAt: "N/A",
+    discountOnGrandTotal: "N/A",
+    discountType: "N/A",
+    emailTo: "N/A",
+    finalAmount: "N/A",
+    grandTotal: "N/A",
+    grandTotalCurrency: "",
+    productTotal: "N/A",
+    title: "N/A",
+    products: []
+  });
 
   useEffect(() => {
     if (proposaldata) {

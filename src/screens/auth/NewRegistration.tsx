@@ -12,27 +12,88 @@ import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { Spinner, Container } from "reactstrap";
 import { ROUTES } from "../../shared/utils/routes";
 import { getPublicIp } from '../../shared/utils/commonUtils';
-const NewRegistration = () => {
+
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  username: string;
+  role: string;
+  userAgreementUrl: string;
+  isFirstTimeLogin: boolean;
+}
+
+interface Auth {
+  token: string;
+  user: User;
+}
+
+interface Product {
+  productId: {
+    name: string;
+  }
+}
+
+interface Subscription {
+  _id: string;
+  productName: string;
+  products: Product[];
+  subscriptionDurationInMonths: number;
+  grandTotal: number;
+  grandTotalCurrency: string;
+  checked?: boolean;
+  subscriptionDetailsConfirmed?: boolean;
+}
+
+interface CardFormProps {
+  paymentMethod: string;
+  subscriptions: Subscription[];
+  userDetails: User | null;
+  handlePrevious: () => void;
+  token: string;
+  userDetail: User | null;
+}
+
+interface PaymentData {
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  status: string;
+  stripePaymentIntentId: string;
+  stripeSubscriptionId: string;
+  stripeCustomerId: string;
+  customer: string;
+  stripeInvoiceLink: string;
+  billed: string;
+}
+
+const NewRegistration: React.FC = () => {
   const stripePromise = loadStripe(
     "pk_test_51PeI4kRovk9fbY7NlzADRlATaI6qOOBcb1bINnZDiPqcfaEdxjC9OPTMv5I6J95SgAyjGqyu4hfwkXSOuwsATkjC00dWcAlFWU"
   );
-  const [userDetails, setUserDetails] = useState(null);
-  const [activeStep, setActiveStep] = useState(0);
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [oldPassword, setOldPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [userDetails, setUserDetails] = useState<User | null>(null);
+  const [activeStep, setActiveStep] = useState<number>(0);
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [oldPassword, setOldPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [isPasswordValid, setIsPasswordValid] = useState<boolean>(false);
   const [auth] = useAuth();
-  const [subscriptionDetails, setSubscriptionDetails] = useState([]);
+  const [subscriptionDetails, setSubscriptionDetails] = useState<Subscription[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<string>("Credit Card");
+  const [ip, setIp] = useState<string>("");
+  const [browserInfo, setBrowserInfo] = useState<string>("");
+  const navigate = useNavigate();
 
   // Fetch fetchUserDetails details
   const fetchUserDetails = useCallback(async () => {
+    if (!auth?.user._id || !auth?.token) return;
+
     try {
-      const response = await axios.get(`${BASE_URL}/user/${auth?.user._id}`, {
+      const response = await axios.get<User>(`${BASE_URL}/user/${auth.user._id}`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.token}`,
+          Authorization: `Bearer ${auth.token}`,
         },
       });
 
@@ -48,145 +109,133 @@ const NewRegistration = () => {
       console.error("Error fetching userDetails:", error);
       toast.error("Failed to fetch userDetails. Please try again.");
     }
-  }, [auth]);
-  // update  isfirstPasswordResetDone for user
-  const updateIsfirstPasswordResetDone = async (isfirstPasswordResetDone) => {
+  }, [auth, navigate]);
+
+  // update isfirstPasswordResetDone for user
+  const updateIsfirstPasswordResetDone = async (isfirstPasswordResetDone: boolean): Promise<void> => {
+    if (!auth?.user._id || !auth?.token) return;
+
     try {
-      const response = await axios.patch(
+      await axios.patch(
         `${BASE_URL}/user/update-password/reset-status`,
         {
           userId: auth.user._id,
-          isfirstPasswordResetDone: isfirstPasswordResetDone,
+          isfirstPasswordResetDone,
         },
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${auth?.token}`,
+            Authorization: `Bearer ${auth.token}`,
           },
         }
       );
-
-      console.log("updateIsfirstPasswordResetDone", response.data);
     } catch (error) {
       console.error("Error in updateIsfirstPasswordResetDone:", error);
-      toast.error(
-        "Failed in updateIsfirstPasswordResetDone. Please try again."
-      );
+      toast.error("Failed in updateIsfirstPasswordResetDone. Please try again.");
     }
   };
-  // update  subscriptionDetailsConfirmed for user
+
+  // update subscriptionDetailsConfirmed for user
   const updateSubscriptionDetailsConfirmed = async (
-    subscriptionId,
-    subscriptionDetailsConfirmed
-  ) => {
+    subscriptionId: string,
+    subscriptionDetailsConfirmed: boolean
+  ): Promise<void> => {
+    if (!auth?.token) return;
+
     try {
-      const response = await axios.patch(
+      await axios.patch(
         `${BASE_URL}/subscription/${subscriptionId}`,
         {
-          subscriptionDetailsConfirmed: subscriptionDetailsConfirmed,
+          subscriptionDetailsConfirmed,
         },
         {
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${auth?.token}`,
+            "Content-Type": "application/json", 
+            Authorization: `Bearer ${auth.token}`,
           },
         }
       );
-
-      console.log("subscriptionDetailsConfirmed", response.data);
     } catch (error) {
       console.error("Error in subscriptionDetailsConfirmed:", error);
       toast.error("Failed in subscriptionDetailsConfirmed. Please try again.");
     }
   };
 
-  const handleCheckboxChange = (id) => {
+  const handleCheckboxChange = (id: string): void => {
     setSubscriptionDetails((prevDetails) =>
       prevDetails.map((sub) => {
         if (sub._id === id) {
-          const updatedSub = { ...sub, checked: !sub.checked };
-          console.log(
-            `Sub id: ${updatedSub._id}, sub.checked: ${updatedSub.checked}`
-          );
-          return updatedSub;
+          return { ...sub, checked: !sub.checked };
         }
-        return sub; // Return the subscription as is if it's not the one being toggled
+        return sub;
       })
     );
   };
 
-  // const [selectedSubscriptionId, setSelectedSubscriptionId] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("Credit Card");
-  const [subscriptionId, setSubscriptionId] = useState([]);
-
-  const [ip, setIp] = useState("");
-  const [browserInfo, setBrowserInfo] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    getPublicIp()
-      .then((ip) => setIp(ip))
-      .catch((error) => console.error("Error fetching IP:", error));
-
-    // Get Browser Information
-    const getBrowserInfo = () => {
-      setBrowserInfo(navigator.userAgent);
-    };
-
-    getBrowserInfo();
-  }, []);
   // Fetch subscription details on component mount
   const fetchSubscriptionDetails = useCallback(async () => {
+    if (!auth?.user._id || !auth?.token) return;
+
     try {
-      const response = await axios.get(
-        `${BASE_URL}/subscription/${auth?.user._id}`,
+      const response = await axios.get<{subscriptions: Subscription[]}>(
+        `${BASE_URL}/subscription/${auth.user._id}`,
         {
           headers: {
             Authorization: `Bearer ${auth.token}`,
           },
         }
       );
+
       // Add 'checked' property with default value false
       const subscriptionsWithCheckBox = response.data.subscriptions.map(
         (sub) => ({
           ...sub,
-          checked: sub.subscriptionDetailsConfirmed
-            ? sub.subscriptionDetailsConfirmed
-            : false,
+          checked: sub.subscriptionDetailsConfirmed || false,
         })
       );
-      if (subscriptionDetails.every((sub) => sub.checked)) {
-        setSubscriptionDetails(subscriptionsWithCheckBox);
+
+      setSubscriptionDetails(subscriptionsWithCheckBox);
+      
+      if (subscriptionsWithCheckBox.every((sub) => sub.checked)) {
         setActiveStep(2);
       }
 
-      console.log("Sub", subscriptionDetails);
     } catch (error) {
-      console.error("Error fetching subscription details:", error); // commenet this on production
-      toast.error("Failed to fetch subscription details. Please try again."); // commenet this on production
+      console.error("Error fetching subscription details:", error);
+      toast.error("Failed to fetch subscription details. Please try again.");
     }
   }, [auth]);
+
   useEffect(() => {
     fetchUserDetails();
     fetchSubscriptionDetails();
   }, [auth]);
 
-  const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  useEffect(() => {
+    getPublicIp()
+      .then((ip) => setIp(ip))
+      .catch((error) => console.error("Error fetching IP:", error));
 
-  const validatePassword = () => {
-    const isValid = password === confirmPassword; //&& passwordRegex.test(password);
+    setBrowserInfo(navigator.userAgent);
+  }, []);
+
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  const validatePassword = (): void => {
+    const isValid = password === confirmPassword;
     setIsPasswordValid(isValid);
   };
 
-  const handleNext = async () => {
+  const handleNext = async (): Promise<void> => {
     if (activeStep === 0) {
       try {
+        if (!auth?.user._id || !auth?.token) return;
+
         const createPasswordResponse = await axios.post(
           `${BASE_URL}/password/create`,
           {
-            clientId: auth?.user._id, // Send clientId
-            password: password, // Send password
+            clientId: auth.user._id,
+            password,
           },
           {
             headers: {
@@ -198,10 +247,11 @@ const NewRegistration = () => {
         if (createPasswordResponse.status === 201) {
           setPassword(createPasswordResponse.data.password);
           console.log("Password Created Successfully");
-          const res = axios.post(
+          
+          await axios.post(
             `${BASE_URL}/useractivity/`,
             {
-              userId: auth?.user?._id,
+              userId: auth.user._id,
               activityType: "CREATE",
               description: "Create Password",
               ipAddress: ip,
@@ -209,19 +259,19 @@ const NewRegistration = () => {
             },
             {
               headers: {
-                Authorization: `Bearer ${auth?.token}`,
+                Authorization: `Bearer ${auth.token}`,
               },
             }
           );
-          console.log("create password", res);
 
           setConfirmPassword("");
           setIsPasswordValid(false);
         } else {
-          alert("Failed to generate password. Please try again.");
+          toast.error("Failed to generate password. Please try again.");
           return;
         }
-        const email = auth?.user.email;
+
+        const email = auth.user.email;
         const resetPasswordResponse = await axios.post(
           `${BASE_URL}/user/resetpasswordbyemail`,
           { email, newPassword: password },
@@ -236,46 +286,46 @@ const NewRegistration = () => {
           resetPasswordResponse.status === 200 ||
           resetPasswordResponse.status === 201
         ) {
-          updateIsfirstPasswordResetDone(true);
+          await updateIsfirstPasswordResetDone(true);
           setActiveStep(activeStep + 1);
 
-          const res = axios.post(
+          await axios.post(
             `${BASE_URL}/useractivity/`,
             {
-              userId: auth?.user?._id,
-              activityType: "RESET_PASSWORD",
+              userId: auth.user._id,
+              activityType: "RESET_PASSWORD", 
               description: "Reset Password",
               ipAddress: ip,
               userAgent: browserInfo,
             },
             {
               headers: {
-                Authorization: `Bearer ${auth?.token}`,
+                Authorization: `Bearer ${auth.token}`,
               },
             }
           );
-          console.log("Reset password", res);
         } else {
-          alert("Failed to reset password. Please try again.");
+          toast.error("Failed to reset password. Please try again.");
         }
       } catch (error) {
         console.error("Error during password reset:", error);
-        alert("An error occurred. Please try again.");
+        toast.error("An error occurred. Please try again.");
       }
     }
+
     if (activeStep === 1) {
-      subscriptionDetails.map(async (sub) => {
+      await Promise.all(subscriptionDetails.map(async (sub) => {
         if (sub.checked) {
           await updateSubscriptionDetailsConfirmed(sub._id, sub.checked);
         }
-      });
+      }));
       setActiveStep(activeStep + 1);
     } else if (activeStep < 2) {
       setActiveStep(activeStep + 1);
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = (): void => {
     if (activeStep > 0) {
       setActiveStep(activeStep - 1);
     }
@@ -283,7 +333,6 @@ const NewRegistration = () => {
 
   return (
     <div className="container mt-5">
-      {/* Stepper */}
       <Stepper
         steps={[
           { title: "Reset Password" },
@@ -352,7 +401,7 @@ const NewRegistration = () => {
               </div>
               <div className="d-flex justify-content-end mt-3">
                 <button
-                  className="btn btn-success mt-3 "
+                  className="btn btn-success mt-3"
                   disabled={!isPasswordValid}
                   onClick={handleNext}
                 >
@@ -367,7 +416,6 @@ const NewRegistration = () => {
               <div className="card-header">
                 <h3 className="card-title">Confirm Your Subscriptions</h3>
               </div>
-              {/* /.card-header */}
               <div className="card-body table-responsive p-0">
                 <table className="table table-hover text-nowrap">
                   <thead>
@@ -380,7 +428,7 @@ const NewRegistration = () => {
                   </thead>
                   <tbody>
                     {subscriptionDetails?.length > 0 ? (
-                      subscriptionDetails.map((sub, index) => (
+                      subscriptionDetails.map((sub) => (
                         <tr key={sub._id}>
                           <td>
                             <div className="icheck-primary">
@@ -408,7 +456,7 @@ const NewRegistration = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="4" className="text-center">
+                        <td colSpan={4} className="text-center">
                           Loading subscriptions...
                         </td>
                       </tr>
@@ -416,7 +464,6 @@ const NewRegistration = () => {
                   </tbody>
                 </table>
               </div>
-              {/* /.card-body */}
               <div className="card-footer d-flex justify-content-end">
                 <button
                   className="btn btn-success"
@@ -445,7 +492,6 @@ const NewRegistration = () => {
                 </select>
               </div>
 
-              {/* Conditional Payment Form */}
               {(paymentMethod === "credit_card" ||
                 paymentMethod === "debit_card") && (
                 <Elements stripe={stripePromise}>
@@ -454,7 +500,7 @@ const NewRegistration = () => {
                     subscriptions={subscriptionDetails}
                     handlePrevious={handlePrevious}
                     userDetails={userDetails}
-                    token={auth?.token}
+                    token={auth?.token || ""}
                     userDetail={userDetails}
                   />
                 </Elements>
@@ -470,37 +516,39 @@ const NewRegistration = () => {
 export default NewRegistration;
 
 // CardForm Component to handle card input
-const CardForm = ({
+const CardForm: React.FC<CardFormProps> = ({
   paymentMethod: initialPaymentMethod,
-  subscriptions: subscriptions,
-  userDetails: userDetails,
-  handlePrevious: handlePrevious,
-  token: token,
-  userDetails: userDetail,
+  subscriptions,
+  userDetails,
+  handlePrevious,
+  token,
+  userDetail,
 }) => {
-  // Use a different name for the state variable to avoid conflict
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
   const navigate = useNavigate();
+  const [agreed, setAgreed] = useState<boolean>(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const stripe = useStripe();
+  const elements = useElements();
 
   const openModal = () => {
     fetchAgreementPdf();
     setShowModal(true);
   };
-  const closeModal = () => setShowModal(false);
-  const [agreed, setAgreed] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState(null);
 
-  const fetchAgreementPdf = async () => {
+  const closeModal = () => setShowModal(false);
+
+  const fetchAgreementPdf = async (): Promise<void> => {
+    if (!userDetails?.userAgreementUrl) return;
+
     try {
       const response = await fetch(
-        `${BASE_URL}${userDetails.userAgreementUrl.replace(
-          "/uploads/",
-          "/media/"
-        )}`,
+        `${BASE_URL}${userDetails.userAgreementUrl.replace("/uploads/", "/media/")}`,
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`, // Add token for authentication
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -516,23 +564,14 @@ const CardForm = ({
       console.error("Error fetching the PDF:", error);
     }
   };
+
   useEffect(() => {
-    // Revoke blob URL on unmount to free memory
     return () => {
       if (pdfUrl) URL.revokeObjectURL(pdfUrl);
     };
   }, [pdfUrl]);
-  const [paymentMethod] = useState(initialPaymentMethod);
-  const stripe = useStripe();
-  const elements = useElements();
-  const [cardDetails, setCardDetails] = useState({});
 
-  //Method to activate the subscription
-  const updateSubscriptionStatus = async (subscriptionId) => {
-    // setIsLoading(true);
-    // setError(null);
-    // setSuccessMessage(null);
-
+  const updateSubscriptionStatus = async (subscriptionId: string): Promise<void> => {
     try {
       const response = await fetch(
         `${BASE_URL}/subscription/update-subscription-status/${subscriptionId}`,
@@ -551,32 +590,20 @@ const CardForm = ({
       if (!response.ok) {
         throw new Error("Failed to update subscription status.");
       }
-
-      const data = await response.json();
-      // console.log("update-subscription-status", data);
-
-      // onClose(token, subscriptionId);
-      // setSuccessMessage(data.message);
-    } catch (err) {
-      // toast.error(err);
-      // setError(err.message);
-    } finally {
-      // setIsLoading(false);
+    } catch (error) {
+      console.error("Error updating subscription status:", error);
+      throw error;
     }
   };
-  const handleAddPayment = async (paymentData, subscriptionId) => {
-    try {
-      // Prepare data to send to API
-      const payload = {
-        paymentData,
-        subscriptionId, // Ensure subscriptionId is set
-      };
 
-      // Make API call to create payment and update subscription
+  const handleAddPayment = async (paymentData: PaymentData, subscriptionId: string): Promise<void> => {
+    try {
       const response = await axios.post(
         `${BASE_URL}/payment/newPayment`,
-
-        payload,
+        {
+          paymentData,
+          subscriptionId,
+        },
         {
           headers: {
             "Content-Type": "application/json",
@@ -585,8 +612,8 @@ const CardForm = ({
         }
       );
 
-      if (response.status === 201) {
-        const response = await fetch(`${BASE_URL}/user/${userDetail._id}`, {
+      if (response.status === 201 && userDetail?._id) {
+        const userResponse = await fetch(`${BASE_URL}/user/${userDetail._id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -597,107 +624,91 @@ const CardForm = ({
             isFirstTimeLogin: false,
           }),
         });
-        if (response.status === 200) {
+
+        if (userResponse.status === 200) {
           toast.success("Payment succeeded! Your subscription is active");
           setLoading(false);
           navigate(ROUTES.USER.HOME);
         }
       }
-    } catch (err) {
-      toast.error(
-        err.response?.data?.error || "An error occurred. Please try again."
-      );
-      //   console.log("newPayment err :", err);
-    } finally {
-      // setIsLoading(false);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.error || "An error occurred. Please try again.");
+      }
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
-    if (!stripe || !elements) {
-      // setError("Stripe has not loaded yet.");
+
+    if (!stripe || !elements || !userDetail?.email) {
+      setLoading(false);
       return;
     }
-    const email = userDetail.email;
-    // setIsLoading(true);
-    // setError("");
 
     try {
-      // Step 1: Create payment method with Stripe Elements
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        throw new Error("Card element not found");
+      }
+
       const paymentMethodRequest = await stripe.createPaymentMethod({
         type: "card",
-        card: elements.getElement(CardElement),
-        billing_details: { email },
+        card: cardElement,
+        billing_details: { email: userDetail.email },
       });
-      if (paymentMethodRequest["error"]) {
-        throw new Error(paymentMethodRequest["error"].message);
-      }
-      if (paymentMethodRequest["paymentMethod"].id) {
-        console.log(
-          "paymentMethodRequest.id",
-          paymentMethodRequest["paymentMethod"].id
-        );
 
-        const cardDetails = {
-          stripePaymentMethodRequestTokenId:
-            paymentMethodRequest["paymentMethod"].id,
-          cardNumber: paymentMethodRequest["paymentMethod"].card.last4, // Use card details directly
-          brand: paymentMethodRequest["paymentMethod"].card.brand,
-          expiryDate: `${paymentMethodRequest["paymentMethod"].card.exp_month}/${paymentMethodRequest["paymentMethod"].card.exp_year}`,
-        };
-        console.log("Card details", cardDetails);
-
-        const data = {
-          clientId: userDetail._id,
-          methodType: paymentMethod,
-          cardDetails: cardDetails,
-          isDefault: true,
-        };
-        // Store card details to the db
-        // Add the new payment method
-        const res = await axios.post(`${BASE_URL}/paymentMethod/create`, data, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.status === 201) {
-          toast.success("Payment Method Stored");
-        }
+      if (paymentMethodRequest.error) {
+        throw new Error(paymentMethodRequest.error.message);
       }
 
-      // Step 2: Send paymentMethod.id and other details to your backend
+      if (!paymentMethodRequest.paymentMethod) {
+        throw new Error("Payment method creation failed");
+      }
+
+      const { id: paymentMethodId, card } = paymentMethodRequest.paymentMethod;
+
+      if (!card) {
+        throw new Error("Card details not found");
+      }
+
+      const cardDetails = {
+        stripePaymentMethodRequestTokenId: paymentMethodId,
+        cardNumber: card.last4,
+        brand: card.brand,
+        expiryDate: `${card.exp_month}/${card.exp_year}`,
+      };
+
+      if (!userDetail._id) {
+        throw new Error("User ID not found");
+      }
+
+      const data = {
+        clientId: userDetail._id,
+        methodType: initialPaymentMethod,
+        cardDetails,
+        isDefault: true,
+      };
+
+      const res = await axios.post(`${BASE_URL}/paymentMethod/create`, data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 201) {
+        toast.success("Payment Method Stored");
+      }
+
       const subscription = subscriptions[0];
-      // console.log("Subscription Details", subscription);
-      const subscriptionDurationInMonths =
-        subscription.subscriptionDurationInMonths;
-      let billingInterval;
+      const subscriptionDurationInMonths = subscription.subscriptionDurationInMonths;
+      const billingInterval = subscriptionDurationInMonths === 1 ? "month" : "year";
 
-      // Check subscription duration and set billingInterval accordingly
-      switch (subscriptionDurationInMonths) {
-        case 1:
-          billingInterval = "month"; // 1 means monthly billing
-          break;
-
-        case 12:
-          billingInterval = "year"; // 12 means yearly billing
-          break;
-        default:
-          throw new Error("Invalid subscription duration");
-      }
-      // const email = userDetail.email;
-      // Generate a random number (e.g., between 1000 and 9999)
       const randomNumber = Math.floor(Math.random() * 9000) + 1000;
-
-      // Concatenate the productName, username, and the random number
       const productName = `${subscription.productName}${userDetail.username}${randomNumber}`;
-
       const currency = subscription.grandTotalCurrency.toLowerCase();
-
-      console.log("currency", currency);
-
       const price = subscription.grandTotal;
 
       const response = await fetch(`${BASE_URL}/stripe/create-subscription`, {
@@ -707,182 +718,71 @@ const CardForm = ({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          email,
+          email: userDetail.email,
           productName,
           price,
           currency,
           billingInterval,
-          paymentMethodId: paymentMethodRequest.paymentMethod.id, // Send paymentMethod.id
+          paymentMethodId,
         }),
       });
 
       const data = await response.json();
-      //   console.log("Backend response:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create subscription.");
+        throw new Error(data.error || "Failed to create subscription");
       }
 
       const { clientSecret, stripeCustomerId, stripeSubscriptionId } = data;
 
-      // Step 3: Confirm the payment intent to finalize subscription
-      const paymentResult = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: paymentMethodRequest.paymentMethod.id,
-      });
-      //   console.log("paymentResult", paymentResult);
-
-      if (paymentResult.error) {
-        const { type, message, code } = paymentResult.error;
-
-        // // Log the error for debugging
-        // console.error("Error type:", type);
-        // console.error("Error message:", message);
-        // console.error("Error code:", code);
-
-        // Display user-friendly message
-        let userMessage = "An error occurred during the payment process.";
-        if (code === "card_declined") {
-          userMessage = "Your card was declined. Please try another card.";
-        } else if (code === "insufficient_funds") {
-          userMessage = "Insufficient funds. Please try a different card.";
-        } else if (code === "expired_card") {
-          userMessage = "Your card has expired. Please use a different card.";
-        } else {
-          userMessage = message || userMessage;
-        }
-
-        toast.error(userMessage); // Show message to the user
-      } else {
-        // Check the payment intent status
-        const paymentIntent = paymentResult.paymentIntent;
-        //   console.log("paymentIntent", paymentIntent);
-
-        if (paymentIntent.status === "requires_payment_method") {
-          // Display a message to the user indicating the payment failed and they need to enter a new method
-          toast.error("Payment failed. Please provide a new payment method.");
-
-          // Step 1: Allow the user to enter a new payment method
-          const newPaymentMethodRequest = await stripe.createPaymentMethod({
-            type: "card",
-            card: elements.getElement(CardElement),
-            billing_details: { email }, // Include the user's email or other billing details
-            // billing_details:billing_details,
-          });
-
-          if (newPaymentMethodRequest.error) {
-            // Handle error if the new payment method creation fails
-            toast.error(
-              "Failed to create new payment method. Please try again."
-            );
-            return;
-          }
-
-          // Step 2: Attach the new payment method to the existing payment intent
-          const updatedPaymentIntent = await stripe.paymentIntents.update(
-            paymentIntent.id,
-            {
-              payment_method: newPaymentMethodRequest.paymentMethod.id,
-            }
-          );
-
-          // Step 3: Confirm the payment intent with the new payment method
-          const retryPaymentResult = await stripe.confirmCardPayment(
-            updatedPaymentIntent.client_secret,
-            {
-              payment_method: newPaymentMethodRequest.paymentMethod.id,
-            }
-          );
-
-          // Handle retry result
-          if (retryPaymentResult.error) {
-            console.error(
-              "Error confirming payment with new method:",
-              retryPaymentResult.error
-            );
-            toast.error("Payment failed again. Please try a different method.");
-          } else {
-            if (retryPaymentResult.paymentIntent.status === "succeeded") {
-              await updateSubscriptionStatus(subscription._id);
-
-              const paymentData = {
-                amount: price,
-                currency: currency,
-                paymentMethod: "card",
-                status: paymentIntent.status,
-                stripePaymentIntentId: paymentIntent.id,
-                stripeSubscriptionId: stripeSubscriptionId,
-                stripeCustomerId: stripeCustomerId,
-                customer: userDetail._id,
-                stripeInvoiceLink: "",
-                billed: billingInterval,
-              };
-              await handleAddPayment(paymentData, subscription._id);
-            }
-          }
-        } else if (paymentIntent.status === "canceled") {
-          // The payment was canceled
-          toast.error("The payment was canceled. Please try again.");
-        } else if (paymentIntent.status === "requires_action") {
-          // Handle the 3D Secure authentication process
-          const result = await stripe.handleCardAction(
-            paymentIntent.client_secret
-          );
-          if (result.error) {
-            console.error("3D Secure failed:", result.error.message);
-            toast.error("3D Secure authentication failed. Please try again.");
-          } else {
-            // Payment succeeded after 3D Secure authentication
-            await updateSubscriptionStatus(subscription._id);
-            const paymentData = {
-              amount: price,
-              currency: currency,
-              paymentMethod: "card",
-              status: paymentIntent.status,
-              stripePaymentIntentId: paymentIntent.id,
-              stripeSubscriptionId: stripeSubscriptionId,
-              stripeCustomerId: stripeCustomerId,
-              customer: userDetail._id,
-              stripeInvoiceLink: "",
-              billed: billingInterval,
-            };
-            await handleAddPayment(paymentData, subscription._id);
-          }
-        } else if (paymentIntent.status === "succeeded") {
-          await updateSubscriptionStatus(subscription._id);
-
-          const paymentData = {
-            amount: price,
-            currency: currency,
-            paymentMethod: "card",
-            status: paymentIntent.status,
-            stripePaymentIntentId: paymentIntent.id,
-            stripeSubscriptionId: stripeSubscriptionId,
-            stripeCustomerId: stripeCustomerId,
-            customer: userDetail._id,
-            stripeInvoiceLink: "",
-            billed: billingInterval,
-          };
-          await handleAddPayment(paymentData, subscription._id);
-          //   console.log("Payment succeeded:", paymentIntent);
-        } else {
-          // If the status is unexpected (though it shouldn't be)
-          toast.error("Unexpected payment status. Please try again.");
-        }
+      if (!clientSecret) {
+        throw new Error("Client secret not received");
       }
 
-      // toast.success("Subscription successful!");
-    } catch (err) {
-      //   console.log("Error:", err);
-      // setError(err.message);
+      const paymentResult = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethodId,
+      });
+
+      if (paymentResult.error) {
+        throw new Error(paymentResult.error.message);
+      }
+
+      if (!paymentResult.paymentIntent) {
+        throw new Error("Payment intent not found");
+      }
+
+      const { status, id: paymentIntentId } = paymentResult.paymentIntent;
+
+      if (status === "succeeded") {
+        await updateSubscriptionStatus(subscription._id);
+
+        const paymentData = {
+          amount: price,
+          currency,
+          paymentMethod: "card",
+          status,
+          stripePaymentIntentId: paymentIntentId,
+          stripeSubscriptionId,
+          stripeCustomerId,
+          customer: userDetail._id,
+          stripeInvoiceLink: "",
+          billed: billingInterval,
+        };
+
+        await handleAddPayment(paymentData, subscription._id);
+      }
+
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error(error instanceof Error ? error.message : "Payment failed");
     } finally {
-      // setIsLoading(false);
+      setLoading(false);
     }
   };
-  const [loading, setLoading] = useState(false);
 
   return (
     <div>
-      {(paymentMethod === "credit_card" || paymentMethod === "debit_card") && (
+      {(initialPaymentMethod === "credit_card" || initialPaymentMethod === "debit_card") && (
         <form onSubmit={handleSubmit}>
           <div className="payment-form mt-3">
             <div className="form-group">
@@ -893,16 +793,14 @@ const CardForm = ({
                     fontSize: "16px",
                     color: "#32325d",
                     backgroundColor: "#fff",
-                    border: "1px solid #ced4da", // Bootstrap form-control border
-                    borderRadius: "0.25rem", // Bootstrap border-radius
-                    padding: "0.375rem 0.75rem", // Bootstrap padding
-                    "::placeholder": { color: "#aab7c4" },
+                    border: "1px solid #ced4da",
+                    borderRadius: "0.25rem",
+                    padding: "0.375rem 0.75rem",
                   }}
                 >
                   <CardElement
                     id="card-element"
                     options={{
-                      autocomplete: "new-password",
                       hidePostalCode: true,
                     }}
                   />
@@ -933,8 +831,6 @@ const CardForm = ({
                     Read the Agreement
                   </span>
                 </div>
-                {/* AdminLTE Modal for Agreement */}
-                {/* Modal Component */}
                 <Modal
                   isOpen={showModal}
                   toggle={closeModal}
@@ -962,18 +858,18 @@ const CardForm = ({
               <button
                 className="btn btn-secondary mr-3"
                 onClick={handlePrevious}
+                type="button"
               >
                 Check Subscription Details
               </button>
 
               {loading ? (
-                <Spinner color="primary" size="lg" /> // Show spinner when loading
+                <Spinner color="primary" size="lg" />
               ) : (
                 <button
                   className="btn btn-success"
-                  // disabled={ || !selectedSubscriptionId}
                   disabled={!agreed}
-                  onClick={handleSubmit}
+                  type="submit"
                 >
                   Activate Subscription
                 </button>

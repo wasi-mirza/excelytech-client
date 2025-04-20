@@ -12,7 +12,58 @@ import {
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
-// import { stripePromise } from "./StripeConfig";
+interface Product {
+  productId: {
+    sku: string;
+    name: string;
+  };
+  newTotalCost: number;
+  quantity: number;
+  discount: number;
+  discountType: string;
+  newTax: number;
+  newTotalCostWithTax: number;
+}
+
+interface PaymentDetail {
+  createdAt: string;
+  paymentMethod: string;
+  currency: string;
+  amount: number;
+  status: string;
+  billed: string;
+}
+
+interface SubscriptionInfo {
+  _id: string;
+  subscriptionStatus: string;
+  customer: {
+    email: string;
+  };
+  finalAmount: number;
+  products: Product[];
+  grandTotalCurrency: string;
+  subscriptionDurationInMonths: number;
+  subscriptionStartDate: string;
+  subscriptionEndDate: string;
+  paymentHistory: PaymentDetail[];
+}
+
+interface PaymentDetailsTableProps {
+  paymentDetails: PaymentDetail[];
+}
+
+interface SubscriptionFormProps {
+  isOpen: boolean;
+  onClose: (token: string, subscriptionId: string) => void;
+  email: string;
+  finalAmount: number;
+  productName: string;
+  token: string;
+  clientId: string;
+  subscriptionId: string;
+}
+
 function ClientSubscriptionDetails() {
   const stripePromise = loadStripe(
     "pk_test_51PeI4kRovk9fbY7NlzADRlATaI6qOOBcb1bINnZDiPqcfaEdxjC9OPTMv5I6J95SgAyjGqyu4hfwkXSOuwsATkjC00dWcAlFWU"
@@ -20,17 +71,16 @@ function ClientSubscriptionDetails() {
 
   const [auth] = useAuth();
   const { id } = useParams();
-  const [subscriptionInfo, setSubscriptionInfo] = useState(null);
-  // for stripe dialog
+  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const openModal = () => setModalIsOpen(true);
-  const closeModal = (token, subscriptionId) => {
+  const closeModal = (token: string, subscriptionId: string) => {
     setModalIsOpen(false);
     fetchSubscriptionInfo(token, subscriptionId);
   };
 
-  const fetchSubscriptionInfo = async (token, subscriptionId) => {
+  const fetchSubscriptionInfo = async (token: string, subscriptionId: string) => {
     try {
       const response = await axios.get(
         `${BASE_URL}/subscription/getSubscriptionById/${subscriptionId}`,
@@ -55,7 +105,6 @@ function ClientSubscriptionDetails() {
     <div className="content-wrapper ">
       <section className="content-header">
         <h1>Subscription Details </h1>{" "}
-        {/* Show button only if the status is inactive or processing */}
       </section>
 
       <section className="content">
@@ -83,8 +132,8 @@ function ClientSubscriptionDetails() {
                     subscriptionInfo.products[0].productId.name +
                     subscriptionInfo.customer.email
                   }
-                  token={auth?.token}
-                  clientId={auth?.user._id}
+                  token={auth?.token || ""}
+                  clientId={auth?.user._id || ""}
                   subscriptionId={subscriptionInfo._id}
                 />
               </Elements>
@@ -108,10 +157,6 @@ function ClientSubscriptionDetails() {
                       </span>
                     </p>
 
-                    {/* <p>
-                    <strong>Shipping Address:</strong>{" "}
-                    {`${subscriptionInfo.address.street1}, ${subscriptionInfo.shippingAddress.city}, ${subscriptionInfo.shippingAddress.state}, ${subscriptionInfo.shippingAddress.country}`}
-                  </p> */}
                     <p>
                       <strong>Total Amount:</strong>{" "}
                       {`${subscriptionInfo.grandTotalCurrency} ${subscriptionInfo.finalAmount} `}
@@ -134,8 +179,6 @@ function ClientSubscriptionDetails() {
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric",
-                        // hour: "2-digit",
-                        // minute: "2-digit",
                         hour12: true,
                       })}
                     </p>
@@ -147,8 +190,6 @@ function ClientSubscriptionDetails() {
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric",
-                        // hour: "2-digit",
-                        // minute: "2-digit",
                         hour12: true,
                       })}
                     </p>
@@ -222,7 +263,7 @@ function ClientSubscriptionDetails() {
 
 export default ClientSubscriptionDetails;
 
-const PaymentDetailsTable = ({ paymentDetails }) => {
+const PaymentDetailsTable: React.FC<PaymentDetailsTableProps> = ({ paymentDetails }) => {
   return (
     <table className="table table-bordered">
       <thead className="bg-gray">
@@ -249,7 +290,7 @@ const PaymentDetailsTable = ({ paymentDetails }) => {
   );
 };
 
-const SubscriptionForm = ({
+const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
   isOpen,
   onClose,
   email,
@@ -259,32 +300,25 @@ const SubscriptionForm = ({
   subscriptionId,
   clientId,
 }) => {
-  const [price, setPrice] = useState(finalAmount); // Default monthly price
+  const [price, setPrice] = useState(finalAmount);
   const [billingInterval, setBillingInterval] = useState("month");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const stripe = useStripe();
   const elements = useElements();
 
-  // Function to adjust price based on billing interval
-  const handleIntervalChange = (e) => {
+  const handleIntervalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedInterval = e.target.value;
     setBillingInterval(selectedInterval);
 
-    // Adjust the price for yearly
     if (selectedInterval === "year") {
-      setPrice(finalAmount * 12); // Example: Monthly price is 1000 INR, yearly price is 1000 * 12
+      setPrice(finalAmount * 12);
     } else {
-      setPrice(finalAmount); // Reset to monthly price
+      setPrice(finalAmount);
     }
   };
 
-  //Method to activate the subscription
-  const updateSubscriptionStatus = async (subscriptionId) => {
-    // setIsLoading(true);
-    // setError(null);
-    // setSuccessMessage(null);
-
+  const updateSubscriptionStatus = async (subscriptionId: string) => {
     try {
       const response = await fetch(
         `${BASE_URL}/subscription/update-subscription-status/${subscriptionId}`,
@@ -304,30 +338,24 @@ const SubscriptionForm = ({
         throw new Error("Failed to update subscription status.");
       }
 
-      const data = await response.json();
-      // console.log("update-subscription-status", data);
-
+      await response.json();
       onClose(token, subscriptionId);
-      // setSuccessMessage(data.message);
     } catch (err) {
-      // toast.error(err);
-      setError(err.message);
-    } finally {
-      // setIsLoading(false);
+      if (err instanceof Error) {
+        setError(err.message);
+      }
     }
   };
-  const handleAddPayment = async (paymentData, subscriptionId) => {
+
+  const handleAddPayment = async (paymentData: any, subscriptionId: string) => {
     try {
-      // Prepare data to send to API
       const payload = {
         paymentData,
-        subscriptionId, // Ensure subscriptionId is set
+        subscriptionId,
       };
 
-      // Make API call to create payment and update subscription
       const response = await axios.post(
         `${BASE_URL}/payment/newPayment`,
-
         payload,
         {
           headers: {
@@ -339,15 +367,13 @@ const SubscriptionForm = ({
 
       if (response.status === 201) {
         toast.success("Payment succeeded!");
-        // toast.success(response.data.message); // Success message from backend
       }
     } catch (err) {
-      toast.error(
-        err.response?.data?.error || "An error occurred. Please try again."
-      );
-      //   console.log("newPayment err :", err);
-    } finally {
-      // setIsLoading(false);
+      if (axios.isAxiosError(err)) {
+        toast.error(
+          err.response?.data?.error || "An error occurred. Please try again."
+        );
+      }
     }
   };
 
@@ -363,10 +389,14 @@ const SubscriptionForm = ({
     setError("");
 
     try {
-      // Step 1: Create payment method with Stripe Elements
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        throw new Error("Card element not found");
+      }
+
       const paymentMethodRequest = await stripe.createPaymentMethod({
         type: "card",
-        card: elements.getElement(CardElement),
+        card: cardElement,
         billing_details: { email },
       });
 
@@ -374,12 +404,6 @@ const SubscriptionForm = ({
         throw new Error(paymentMethodRequest.error.message);
       }
 
-      //   console.log(
-      //   "Payment method created:",
-      //   paymentMethodRequest.paymentMethod
-      // );
-
-      // Step 2: Send paymentMethod.id and other details to your backend
       const response = await fetch(`${BASE_URL}/stripe/create-subscription`, {
         method: "POST",
         headers: {
@@ -391,12 +415,11 @@ const SubscriptionForm = ({
           productName,
           price,
           billingInterval,
-          paymentMethodId: paymentMethodRequest.paymentMethod.id, // Send paymentMethod.id
+          paymentMethodId: paymentMethodRequest.paymentMethod.id,
         }),
       });
 
       const data = await response.json();
-      //   console.log("Backend response:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to create subscription.");
@@ -404,21 +427,17 @@ const SubscriptionForm = ({
 
       const { clientSecret, stripeCustomerId, stripeSubscriptionId } = data;
 
-      // Step 3: Confirm the payment intent to finalize subscription
       const paymentResult = await stripe.confirmCardPayment(clientSecret, {
         payment_method: paymentMethodRequest.paymentMethod.id,
       });
-      //   console.log("paymentResult", paymentResult);
 
       if (paymentResult.error) {
         const { type, message, code } = paymentResult.error;
 
-        // Log the error for debugging
         console.error("Error type:", type);
         console.error("Error message:", message);
         console.error("Error code:", code);
 
-        // Display user-friendly message
         let userMessage = "An error occurred during the payment process.";
         if (code === "card_declined") {
           userMessage = "Your card was declined. Please try another card.";
@@ -430,49 +449,38 @@ const SubscriptionForm = ({
           userMessage = message || userMessage;
         }
 
-        toast.error(userMessage); // Show message to the user
+        toast.error(userMessage);
       } else {
-        // Check the payment intent status
         const paymentIntent = paymentResult.paymentIntent;
-        //   console.log("paymentIntent", paymentIntent);
 
         if (paymentIntent.status === "requires_payment_method") {
-          // Display a message to the user indicating the payment failed and they need to enter a new method
           toast.error("Payment failed. Please provide a new payment method.");
 
-          // Step 1: Allow the user to enter a new payment method
+          const cardElement = elements.getElement(CardElement);
+          if (!cardElement) {
+            throw new Error("Card element not found");
+          }
+
           const newPaymentMethodRequest = await stripe.createPaymentMethod({
             type: "card",
-            card: elements.getElement(CardElement),
-            billing_details: { email }, // Include the user's email or other billing details
-            // billing_details:billing_details,
+            card: cardElement,
+            billing_details: { email },
           });
 
           if (newPaymentMethodRequest.error) {
-            // Handle error if the new payment method creation fails
             toast.error(
               "Failed to create new payment method. Please try again."
             );
             return;
           }
 
-          // Step 2: Attach the new payment method to the existing payment intent
-          const updatedPaymentIntent = await stripe.paymentIntents.update(
-            paymentIntent.id,
-            {
-              payment_method: newPaymentMethodRequest.paymentMethod.id,
-            }
-          );
-
-          // Step 3: Confirm the payment intent with the new payment method
           const retryPaymentResult = await stripe.confirmCardPayment(
-            updatedPaymentIntent.client_secret,
+            clientSecret,
             {
               payment_method: newPaymentMethodRequest.paymentMethod.id,
             }
           );
 
-          // Handle retry result
           if (retryPaymentResult.error) {
             console.error(
               "Error confirming payment with new method:",
@@ -499,18 +507,15 @@ const SubscriptionForm = ({
             }
           }
         } else if (paymentIntent.status === "canceled") {
-          // The payment was canceled
           toast.error("The payment was canceled. Please try again.");
         } else if (paymentIntent.status === "requires_action") {
-          // Handle the 3D Secure authentication process
           const result = await stripe.handleCardAction(
-            paymentIntent.client_secret
+            paymentIntent.client_secret || ""
           );
           if (result.error) {
             console.error("3D Secure failed:", result.error.message);
             toast.error("3D Secure authentication failed. Please try again.");
           } else {
-            // Payment succeeded after 3D Secure authentication
             await updateSubscriptionStatus(subscriptionId);
             const paymentData = {
               amount: price,
@@ -542,17 +547,15 @@ const SubscriptionForm = ({
             billed: billingInterval,
           };
           await handleAddPayment(paymentData, subscriptionId);
-          //   console.log("Payment succeeded:", paymentIntent);
         } else {
-          // If the status is unexpected (though it shouldn't be)
           toast.error("Unexpected payment status. Please try again.");
         }
       }
 
-      // toast.success("Subscription successful!");
     } catch (err) {
-      //   console.log("Error:", err);
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -562,7 +565,7 @@ const SubscriptionForm = ({
     <div
       className={`modal fade ${isOpen ? "show" : ""}`}
       id="subscriptionModal"
-      tabIndex="-1"
+      tabIndex={-1}
       aria-labelledby="subscriptionModalLabel"
       aria-hidden={!isOpen}
       style={{ display: isOpen ? "block" : "none" }}
@@ -578,7 +581,7 @@ const SubscriptionForm = ({
               className="close"
               data-dismiss="modal"
               aria-label="Close"
-              onClick={onClose}
+              onClick={() => onClose(token, subscriptionId)}
             >
               <span aria-hidden="true">&times;</span>
             </button>
@@ -651,7 +654,7 @@ const SubscriptionForm = ({
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={onClose}
+                onClick={() => onClose(token, subscriptionId)}
                 data-dismiss="modal"
               >
                 Close

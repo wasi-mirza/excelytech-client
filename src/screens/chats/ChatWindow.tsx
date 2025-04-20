@@ -1,13 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Dispatch, SetStateAction } from 'react';
 import axios from 'axios';
 import MessageInput from './MessageInput';
 
-const ChatWindow = ({ activeChat }) => {
-  const [messages, setMessages] = useState([]);
+interface Message {
+  id: string;
+  sender: string;
+  message: string;
+  timestamp: string;
+}
+
+interface Chat {
+  id: string;
+  name: string;
+  participants: string[];
+}
+
+interface ChatWindowProps {
+  activeChat: Chat;
+}
+
+const ChatWindow = ({ activeChat }: ChatWindowProps) => {
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      const response = await axios.get(`/api/chat/${activeChat.id}`);
+      const response = await axios.get<Message[]>(`/api/chat/${activeChat.id}`);
       setMessages(response.data);
     };
     fetchMessages();

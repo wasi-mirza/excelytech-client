@@ -8,10 +8,44 @@ import { Button } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../shared/utils/routes";
 
+interface Address {
+  street1: string;
+  city: string;
+  zipCode: string;
+  state: string;
+  country: string;
+}
+
+interface BusinessDetails {
+  clientName: string;
+  companyType: string;
+  taxId: string;
+  employeeSize: string;
+  ownerPhone: string;
+  ownerEmail: string;
+}
+
+interface AccountManager {
+  name: string;
+}
+
+interface User {
+  _id: string;
+  email: string;
+  phone: string;
+  address: Address;
+  businessDetails: BusinessDetails;
+  name: string;
+  userType: string;
+  role: string;
+  accountManagers: AccountManager;
+  isBanned: boolean;
+  paymentStatus: string;
+}
+
 const UserProfile = () => {
-  // const { id } = useParams(); // Get user ID from the URL
-  const [user, setUser] = useState(null); // User data state
-  const [loading, setLoading] = useState(true); // Loading state
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [auth] = useAuth();
   const navigate = useNavigate();
 

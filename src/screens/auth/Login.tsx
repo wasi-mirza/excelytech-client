@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { jwtDecode } from "jwt-decode"; // Add this package to decode JWT tokens
 import toast from "react-hot-toast";
 import { ROUTES } from "../../shared/utils/routes";
@@ -45,7 +45,7 @@ export const Login = () => {
         if (decodedToken.exp && decodedToken.exp < currentTime) {
           localStorage.removeItem("token");
           localStorage.removeItem("auth");
-          setAuth(null);
+          setAuth(null as any);
           return false;
         }
         return true;
@@ -53,7 +53,7 @@ export const Login = () => {
         console.error("Invalid token:", err);
         localStorage.removeItem("token");
         localStorage.removeItem("auth");
-        setAuth(null);
+        setAuth(null as any);
         return false;
       }
     }
@@ -97,9 +97,9 @@ export const Login = () => {
   }, []);
 
   // Handle login form submission
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    setError("");
     setLoading(true);
 
     try {
@@ -136,7 +136,7 @@ export const Login = () => {
       console.log("err :", err);
 
       setError(
-        err.message || "An error occurred. Please try again."
+        ((err as AxiosError).response?.data as { message?: string })?.message || "An error occurred. Please try again."
       );
     } finally {
       setLoading(false);

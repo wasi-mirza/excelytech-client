@@ -1,31 +1,69 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { useAuth } from "../../../context/AuthContext";
 import * as Routes from "../../../shared/utils/routes";
 
+interface CardDetails {
+  cardNumber: string;
+  expiryDate: string;
+  cvv: string;
+}
+
+interface BankDetails {
+  accountNumber: string;
+  bankName: string;
+  ifscCode: string;
+}
+
+interface UpiDetails {
+  upiId: string;
+}
+
+interface PaypalDetails {
+  paypalEmail: string;
+  payerId: string;
+}
+
+interface PaymentMethod {
+  _id: string;
+  methodType: string;
+  cardDetails?: CardDetails;
+  bankDetails?: BankDetails;
+  upiDetails?: UpiDetails;
+  paypalDetails?: PaypalDetails;
+  isDefault: boolean;
+}
+
+interface Auth {
+  token: string;
+  user: {
+    _id: string;
+  };
+}
+
 const EditPaymentMethod = () => {
-  const { id } = useParams(); // Getting the payment method ID from the URL
-  const [paymentMethod, setPaymentMethod] = useState(null);
-  const [methodType, setMethodType] = useState("");
-  const [cardDetails, setCardDetails] = useState({
+  const { id } = useParams();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [methodType, setMethodType] = useState<string>("");
+  const [cardDetails, setCardDetails] = useState<CardDetails>({
     cardNumber: "",
     expiryDate: "",
     cvv: "",
   });
-  const [bankDetails, setBankDetails] = useState({
+  const [bankDetails, setBankDetails] = useState<BankDetails>({
     accountNumber: "",
     bankName: "",
     ifscCode: "",
   });
-  const [upiDetails, setUpiDetails] = useState({ upiId: "" });
-  const [paypalDetails, setPaypalDetails] = useState({
+  const [upiDetails, setUpiDetails] = useState<UpiDetails>({ upiId: "" });
+  const [paypalDetails, setPaypalDetails] = useState<PaypalDetails>({
     paypalEmail: "",
     payerId: "",
   });
-  const [isDefault, setIsDefault] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isDefault, setIsDefault] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [auth] = useAuth();
   const navigate = useNavigate();
 
@@ -33,7 +71,7 @@ const EditPaymentMethod = () => {
   useEffect(() => {
     const fetchPaymentMethod = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/paymentMethod/${id}`, {
+        const response = await axios.get<PaymentMethod>(`${BASE_URL}/paymentMethod/${id}`, {
           headers: {
             Authorization: `Bearer ${auth?.token}`,
           },
@@ -48,14 +86,14 @@ const EditPaymentMethod = () => {
           data.methodType === "credit_card" ||
           data.methodType === "debit_card"
         ) {
-          setCardDetails(data.cardDetails);
+          setCardDetails(data.cardDetails || cardDetails);
           console.log("cardDetails", data.cardDetails);
         } else if (data.methodType === "bank_account") {
-          setBankDetails(data.bankDetails);
+          setBankDetails(data.bankDetails || bankDetails);
         } else if (data.methodType === "upi") {
-          setUpiDetails(data.upiDetails);
+          setUpiDetails(data.upiDetails || upiDetails);
         } else if (data.methodType === "paypal") {
-          setPaypalDetails(data.paypalDetails);
+          setPaypalDetails(data.paypalDetails || paypalDetails);
         }
       } catch (error) {
         alert("Error fetching payment method data");
@@ -65,7 +103,7 @@ const EditPaymentMethod = () => {
     fetchPaymentMethod();
   }, [id, auth?.token]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
@@ -91,7 +129,6 @@ const EditPaymentMethod = () => {
           },
         }
       );
-      // console.log("Res",response);
     }
 
     try {
@@ -134,7 +171,7 @@ const EditPaymentMethod = () => {
               <select
                 className="form-control"
                 value={methodType}
-                onChange={(e) => setMethodType(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => setMethodType(e.target.value)}
                 required
               >
                 <option value="credit_card">Credit Card</option>
@@ -153,13 +190,13 @@ const EditPaymentMethod = () => {
                     type="text"
                     className="form-control"
                     value={cardDetails.cardNumber}
-                    onChange={(e) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setCardDetails({
                         ...cardDetails,
                         cardNumber: e.target.value,
                       })
                     }
-                    maxLength="16"
+                    maxLength={16}
                     required
                   />
                 </div>
@@ -169,7 +206,7 @@ const EditPaymentMethod = () => {
                     type="text"
                     className="form-control"
                     value={cardDetails.expiryDate}
-                    onChange={(e) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setCardDetails({
                         ...cardDetails,
                         expiryDate: e.target.value,
@@ -186,10 +223,10 @@ const EditPaymentMethod = () => {
                     className="form-control"
                     placeholder="cvv is not visible for security reasons"
                     value={cardDetails.cvv}
-                    onChange={(e) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setCardDetails({ ...cardDetails, cvv: e.target.value })
                     }
-                    maxLength="4"
+                    maxLength={4}
                     // required
                   />
                 </div>
@@ -202,7 +239,7 @@ const EditPaymentMethod = () => {
                     type="text"
                     className="form-control"
                     value={bankDetails.accountNumber}
-                    onChange={(e) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setBankDetails({
                         ...bankDetails,
                         accountNumber: e.target.value,
@@ -217,7 +254,7 @@ const EditPaymentMethod = () => {
                     type="text"
                     className="form-control"
                     value={bankDetails.bankName}
-                    onChange={(e) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setBankDetails({
                         ...bankDetails,
                         bankName: e.target.value,
@@ -232,7 +269,7 @@ const EditPaymentMethod = () => {
                     type="text"
                     className="form-control"
                     value={bankDetails.ifscCode}
-                    onChange={(e) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setBankDetails({
                         ...bankDetails,
                         ifscCode: e.target.value,
@@ -249,7 +286,7 @@ const EditPaymentMethod = () => {
                   type="text"
                   className="form-control"
                   value={upiDetails.upiId}
-                  onChange={(e) =>
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setUpiDetails({ ...upiDetails, upiId: e.target.value })
                   }
                   required
@@ -263,7 +300,7 @@ const EditPaymentMethod = () => {
                     type="email"
                     className="form-control"
                     value={paypalDetails.paypalEmail}
-                    onChange={(e) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setPaypalDetails({
                         ...paypalDetails,
                         paypalEmail: e.target.value,
@@ -278,7 +315,7 @@ const EditPaymentMethod = () => {
                     type="text"
                     className="form-control"
                     value={paypalDetails.payerId}
-                    onChange={(e) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setPaypalDetails({
                         ...paypalDetails,
                         payerId: e.target.value,

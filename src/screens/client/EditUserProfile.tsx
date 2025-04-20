@@ -6,11 +6,37 @@ import { toast } from "react-hot-toast";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { BASE_URL } from "../../shared/utils/endPointNames";
-import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
+import { Modal, Button } from "react-bootstrap";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
+interface Address {
+  street1: string;
+  street2: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+interface UserInfo {
+  name: string;
+  phone: string;
+  address: Address;
+}
+
+interface FormValues {
+  name: string;
+  phone: string;
+  address: Address;
+}
+
+interface PasswordFormValues {
+  oldPassword: string;
+  newPassword: string;
+}
+
 function EditUserProfile() {
-  const [userInfo, setUserInfo] = useState({
+  const [userInfo, setUserInfo] = useState<UserInfo>({
     name: "",
     phone: "",
     address: {
@@ -19,9 +45,10 @@ function EditUserProfile() {
       city: "",
       state: "",
       zipCode: "",
+      country: ""
     },
   });
-  const [showModal, setShowModal] = useState(false); // Modal state
+  const [showModal, setShowModal] = useState(false);
   const [auth] = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,7 +61,7 @@ function EditUserProfile() {
             Authorization: `Bearer ${auth?.token}`,
           },
         });
-        setUserInfo(res.data); // Load full user details
+        setUserInfo(res.data);
       } catch (error) {
         console.error("Error fetching user data", error);
       }
@@ -45,7 +72,6 @@ function EditUserProfile() {
     }
   }, [auth, id]);
 
-  // Validation schema for editable fields
   const validationSchema = Yup.object({
     name: Yup.string().required("Full name is required"),
     phone: Yup.string().required("Phone number is required"),
@@ -57,7 +83,6 @@ function EditUserProfile() {
     }),
   });
 
-  // Validation schema for password change
   const passwordSchema = Yup.object({
     oldPassword: Yup.string().required("Old password is required"),
     newPassword: Yup.string()
@@ -65,8 +90,7 @@ function EditUserProfile() {
       .required("New password is required"),
   });
 
-  // Handle form submission
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: FormValues) => {
     try {
       const updatedUser = {
         ...userInfo,
@@ -75,7 +99,6 @@ function EditUserProfile() {
       };
       console.log("update add",updatedUser);
       
-
       const res = await axios.patch(`${BASE_URL}/user/${id}`, updatedUser, {
         headers: {
           Authorization: `Bearer ${auth?.token}`,
@@ -90,8 +113,7 @@ function EditUserProfile() {
     }
   };
 
-  // Handle password update
-  const handlePasswordUpdate = async (values, { resetForm }) => {
+  const handlePasswordUpdate = async (values: PasswordFormValues, { resetForm }: { resetForm: () => void }) => {
     console.log("pass",values);
     
     try {
@@ -106,7 +128,7 @@ function EditUserProfile() {
       );
       toast.success("Password updated successfully!");
       setShowModal(false);
-      resetForm(); // Reset form fields in modal
+      resetForm();
     } catch (error) {
       console.error("Error updating password", error);
       toast.error("Failed to update password.");

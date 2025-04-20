@@ -4,6 +4,11 @@ import { Outlet } from "react-router-dom";
 import UserNavbar from "./UserNavbar";
 // import UserNavbar from "./UserNavbar";
 
+interface UserSidebarProps {
+  isOpen: boolean;  
+  toggleSidebar: () => void;
+}
+
 function UserLayout() {
   const [screenSize, setScreenSize] = useState(window.innerWidth);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);

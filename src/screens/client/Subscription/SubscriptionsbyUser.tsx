@@ -4,11 +4,32 @@ import { useAuth } from "../../../context/AuthContext";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../shared/utils/routes";
+
+interface Product {
+  productId: {
+    name: string;
+  }
+}
+
+interface Subscription {
+  _id: string;
+  customer: {
+    name: string;
+  };
+  subscriptionStatus: string;
+  grandTotalCurrency: string;
+  finalAmount: number;
+  products: Product[];
+  subscriptionStartDate: string;
+  subscriptionEndDate: string;
+  subscriptionDurationInMonths: number;
+}
+
 function SubscriptionsbyUser() {
-  const [subscriptions, setSubscriptions] = useState([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [auth] = useAuth();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(""); // Set default value to empty string
   const navigate = useNavigate();
   // Pagination States
@@ -46,7 +67,7 @@ function SubscriptionsbyUser() {
   }, [auth, currentPage]);
 
   // Handle Page Change
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     fetchSubscriptions(page);
   };
 
@@ -65,11 +86,11 @@ function SubscriptionsbyUser() {
   };
 
   // Handle Search Input Change
-  const handleSearch = (event) => {
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value); // Update searchQuery when input changes
   };
 
-  const handleViewSubscription = (data) => {
+  const handleViewSubscription = (data: Subscription) => {
     navigate(ROUTES.USER.SUBSCRIPTION_DETAILS(data._id));
   };
 
@@ -137,13 +158,17 @@ function SubscriptionsbyUser() {
                     {/* If no error, map over filtered subscriptions */}
                     {/* Loading and Error Messages */}
                     {loading && (
-                      <tr className="text-center" role="alert">
-                        Loading...
+                      <tr>
+                        <td colSpan={5} className="text-center">
+                          Loading...
+                        </td>
                       </tr>
                     )}
                     {error && (
-                      <tr className="text-center" role="alert">
-                        {error}
+                      <tr>
+                        <td colSpan={5} className="text-center">
+                          {error}
+                        </td>
                       </tr>
                     )}
                     {!error &&
@@ -174,9 +199,9 @@ function SubscriptionsbyUser() {
                           </td>
                           <td>
                             {subscription.products.map((product, index) => (
-                              <td key={index}>
+                              <div key={index}>
                                 <div>{product.productId.name}</div>
-                              </td>
+                              </div>
                             ))}
                           </td>
                           <td>
@@ -215,7 +240,7 @@ function SubscriptionsbyUser() {
                       !error &&
                       filteredSubscriptions.length === 0 && (
                         <tr>
-                          <td colSpan="6" className="text-center">
+                          <td colSpan={5} className="text-center">
                             No subscriptions found.
                           </td>
                         </tr>

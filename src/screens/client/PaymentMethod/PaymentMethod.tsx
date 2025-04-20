@@ -6,18 +6,50 @@ import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../shared/utils/routes";
 import AddPaymentMethod from "../PaymentMethod/NewPaymentMethod";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
-
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+
+interface PaymentMethod {
+  _id: string;
+  cardBrand?: string;
+  last4?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  isDefault?: boolean;
+  methodType: string;
+  cardDetails?: {
+    cardNumber: string;
+    expiryDate: string;
+  };
+  bankDetails?: {
+    bankName: string;
+    accountNumber: string;
+  };
+  upiDetails?: {
+    upiId: string;
+  };
+  paypalDetails?: {
+    paypalEmail: string;
+  };
+}
+
+interface AuthContextType {
+  token: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+}
 
 const PaymentMethods = () => {
   const stripePromise = loadStripe(
     "pk_test_51PeI4kRovk9fbY7NlzADRlATaI6qOOBcb1bINnZDiPqcfaEdxjC9OPTMv5I6J95SgAyjGqyu4hfwkXSOuwsATkjC00dWcAlFWU"
   );
-  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [auth] = useAuth();
   const navigate = useNavigate();
   const [modal, setModal] = useState(false);
@@ -29,7 +61,7 @@ const PaymentMethods = () => {
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/paymentMethod/all`, {
+        const response = await axios.get<PaymentMethod[]>(`${BASE_URL}/paymentMethod/all`, {
           headers: {
             Authorization: `Bearer ${auth?.token}`,
           },
@@ -47,7 +79,7 @@ const PaymentMethods = () => {
   }, []);
 
   // Handle delete payment method
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (
       window.confirm("Are you sure you want to delete this payment method?")
     ) {
@@ -122,7 +154,7 @@ const PaymentMethods = () => {
                         <div className="credit-card-content">
                           {/* <div className="bank-name">YOUR BANK</div> */}
                           <div className="card-number">
-                            {paymentMethod.cardDetails.cardNumber.replace(
+                            {paymentMethod.cardDetails?.cardNumber.replace(
                               /\d{4}(?=\d)/g,
                               "**** "
                             )}
@@ -130,7 +162,7 @@ const PaymentMethods = () => {
                           <div className="card-footer-details text-white">
                             <span>
                               <strong>Exp:</strong>{" "}
-                              {paymentMethod.cardDetails.expiryDate}
+                              {paymentMethod.cardDetails?.expiryDate}
                             </span>
                             {/* <span>
                             <strong>CVV:</strong>{" "}
@@ -151,9 +183,9 @@ const PaymentMethods = () => {
                             {paymentMethod.methodType === "bank_account" && (
                               <p>
                                 <strong>Bank:</strong>{" "}
-                                {paymentMethod.bankDetails.bankName} <br />
+                                {paymentMethod.bankDetails?.bankName} <br />
                                 <strong>Account:</strong>{" "}
-                                {paymentMethod.bankDetails.accountNumber.slice(
+                                {paymentMethod.bankDetails?.accountNumber.slice(
                                   -4
                                 )}
                               </p>
@@ -161,13 +193,13 @@ const PaymentMethods = () => {
                             {paymentMethod.methodType === "upi" && (
                               <p>
                                 <strong>UPI ID:</strong>{" "}
-                                {paymentMethod.upiDetails.upiId}
+                                {paymentMethod.upiDetails?.upiId}
                               </p>
                             )}
                             {paymentMethod.methodType === "paypal" && (
                               <p>
                                 <strong>PayPal Email:</strong>{" "}
-                                {paymentMethod.paypalDetails.paypalEmail}
+                                {paymentMethod.paypalDetails?.paypalEmail}
                               </p>
                             )}
                           </>

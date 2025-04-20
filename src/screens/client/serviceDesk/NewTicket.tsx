@@ -1,31 +1,60 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import toast from "react-hot-toast";
 
+interface FormData {
+  title: string;
+  description: string;
+  priority: string;
+  client: {
+    user: string;
+    name: string;
+    email: string;
+  };
+  attachments: Array<{
+    filename: string;
+    path: string;
+  }>;
+}
+
+interface FormErrors {
+  title?: string;
+  description?: string;
+  priority?: string;
+  client?: string;
+}
+
+interface UploadedFile {
+  filename: string;
+  url: string;
+}
+
 const CreateTicket = () => {
   const navigate = useNavigate();
   const [auth] = useAuth();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
     priority: "",
     client: {
-      user: auth?.user._id,
-      name: auth.user.name || "", // Assuming name is available in auth.user
-      email: auth.user.email || "", // Assuming email is available in auth.user
+      user: auth?.user._id || "",
+      name: auth?.user.name || "",
+      email: auth?.user.email || "",
     },
     attachments: [],
   });
 
-  const [moreAttachmentsToUpload, setMoreAttachmentsToUpload] = useState([]);
-  const [errors, setErrors] = useState({});
+  const [moreAttachmentsToUpload, setMoreAttachmentsToUpload] = useState<File[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   // Handle form field change
-  const handleChange = (e) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -34,12 +63,14 @@ const CreateTicket = () => {
   };
 
   // Handle multiple file upload
-  const handleFileChange = (event) => {
-    setMoreAttachmentsToUpload(Array.from(event.target.files));
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setMoreAttachmentsToUpload(Array.from(event.target.files));
+    }
   };
 
   // Remove an attachment from the list
-  const handleRemoveAttachment = (indexToRemove) => {
+  const handleRemoveAttachment = (indexToRemove: number) => {
     setMoreAttachmentsToUpload((prevAttachments) =>
       prevAttachments.filter((_, index) => index !== indexToRemove)
     );
@@ -53,18 +84,18 @@ const CreateTicket = () => {
 
   // Validate form data
   const validateForm = () => {
-    const errors = {};
-    if (!formData.title) errors.title = "Title is required.";
-    if (!formData.description) errors.description = "Description is required.";
-    if (!formData.priority) errors.priority = "Priority is required.";
-    if (!formData.client) errors.client = "Client ID is required.";
+    const newErrors: FormErrors = {};
+    if (!formData.title) newErrors.title = "Title is required.";
+    if (!formData.description) newErrors.description = "Description is required.";
+    if (!formData.priority) newErrors.priority = "Priority is required.";
+    if (!formData.client) newErrors.client = "Client ID is required.";
 
-    setErrors(errors);
+    setErrors(newErrors);
 
-    if (Object.keys(errors).length > 0) {
-      toast.error(Object.values(errors).join(", "));
+    if (Object.keys(newErrors).length > 0) {
+      toast.error(Object.values(newErrors).join(", "));
     }
-    return Object.keys(errors).length === 0;
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleUploadFiles = async () => {
@@ -72,7 +103,7 @@ const CreateTicket = () => {
     moreAttachmentsToUpload.forEach((file) => uploadData.append("docs", file));
 
     try {
-      const response = await axios.post(`${BASE_URL}/upload/docs`, uploadData, {
+      const response = await axios.post<{files: UploadedFile[]}>(`${BASE_URL}/upload/docs`, uploadData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${auth.token}`,
@@ -81,7 +112,7 @@ const CreateTicket = () => {
       if (response.status !== 200) {
         throw new Error("File upload failed");
       }
-      return response.data.files.map((file) => ({
+      return response.data.files.map((file: UploadedFile) => ({
         filename: file.filename,
         path: `${BASE_URL}${file.url}`,
       }));
@@ -92,7 +123,7 @@ const CreateTicket = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) return;
 
