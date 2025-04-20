@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import Stepper from "react-stepper-horizontal";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../../shared/utils/endPointNames";
@@ -13,6 +12,56 @@ import { Spinner, Container } from "reactstrap";
 import { ROUTES } from "../../shared/utils/routes";
 import { getPublicIp } from '../../shared/utils/commonUtils';
 
+
+interface Step {
+  title: string;
+}
+
+interface SimpleStepperProps {
+  steps: Step[];
+  activeStep: number;
+}
+
+const SimpleStepper: React.FC<SimpleStepperProps> = ({ steps, activeStep }) => (
+  <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+    {steps.map((step, idx) => (
+      <React.Fragment key={idx}>
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: idx <= activeStep ? "#007bff" : "#e0e0e0",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto",
+              fontWeight: "bold",
+            }}
+          >
+            {idx + 1}
+          </div>
+          <div style={{ marginTop: 8, fontSize: 14, color: idx <= activeStep ? "#007bff" : "#888" }}>
+            {step.title}
+          </div>
+        </div>
+        {idx < steps.length - 1 && (
+          <div
+            style={{
+              flex: 1,
+              height: 2,
+              background: idx < activeStep ? "#007bff" : "#e0e0e0",
+              margin: "0 8px",
+            }}
+          />
+        )}
+      </React.Fragment>
+    ))}
+  </div>
+);
+
 interface User {
   _id: string;
   name: string;
@@ -21,6 +70,7 @@ interface User {
   role: string;
   userAgreementUrl: string;
   isFirstTimeLogin: boolean;
+  isfirstPasswordResetDone?: boolean;
 }
 
 interface Auth {
@@ -67,6 +117,13 @@ interface PaymentData {
   billed: string;
 }
 
+interface CardDetails {
+  stripePaymentMethodRequestTokenId: string;
+  cardNumber: string;
+  brand: string;
+  expiryDate: string;
+}
+
 const NewRegistration: React.FC = () => {
   const stripePromise = loadStripe(
     "pk_test_51PeI4kRovk9fbY7NlzADRlATaI6qOOBcb1bINnZDiPqcfaEdxjC9OPTMv5I6J95SgAyjGqyu4hfwkXSOuwsATkjC00dWcAlFWU"
@@ -98,10 +155,10 @@ const NewRegistration: React.FC = () => {
       });
 
       console.log("userDetails", response.data);
-      if (response.data["isfirstPasswordResetDone"]) {
+      if (response.data.isfirstPasswordResetDone) {
         setActiveStep(1);
       }
-      if (!response.data["isFirstTimeLogin"]) {
+      if (!response.data.isFirstTimeLogin) {
         navigate(ROUTES.USER.HOME);
       }
       setUserDetails(response.data);
@@ -209,7 +266,7 @@ const NewRegistration: React.FC = () => {
   useEffect(() => {
     fetchUserDetails();
     fetchSubscriptionDetails();
-  }, [auth]);
+  }, [auth, fetchUserDetails, fetchSubscriptionDetails]);
 
   useEffect(() => {
     getPublicIp()
@@ -333,14 +390,13 @@ const NewRegistration: React.FC = () => {
 
   return (
     <div className="container mt-5">
-      <Stepper
+      <SimpleStepper
         steps={[
           { title: "Reset Password" },
           { title: "Select Subscription" },
           { title: "Agreement & Payment" },
         ]}
         activeStep={activeStep}
-        activeColor="#007bff"
       />
 
       <div className="card mt-4">
@@ -673,7 +729,7 @@ const CardForm: React.FC<CardFormProps> = ({
         throw new Error("Card details not found");
       }
 
-      const cardDetails = {
+      const cardDetails: CardDetails = {
         stripePaymentMethodRequestTokenId: paymentMethodId,
         cardNumber: card.last4,
         brand: card.brand,
@@ -727,13 +783,13 @@ const CardForm: React.FC<CardFormProps> = ({
         }),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create subscription");
+        throw new Error(responseData.error || "Failed to create subscription");
       }
 
-      const { clientSecret, stripeCustomerId, stripeSubscriptionId } = data;
+      const { clientSecret, stripeCustomerId, stripeSubscriptionId } = responseData;
 
       if (!clientSecret) {
         throw new Error("Client secret not received");
