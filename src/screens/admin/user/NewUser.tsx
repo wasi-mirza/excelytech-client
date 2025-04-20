@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import axios from "axios";
 import { toast } from "react-hot-toast"; // Ensure this import is correct
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { Typeahead } from "react-bootstrap-typeahead";
+import { newUserValidationSchema } from "../../../shared/validations/newUserValidation";
 
 const NewUser = () => {
   const [auth] = useAuth();
@@ -52,40 +52,6 @@ const NewUser = () => {
     fetchAdmins();
   }, [auth?.token]);
 
-  const validationSchema = Yup.object({
-    name: Yup.string().required("Name is required"),
-    phone: Yup.string()
-      .matches(/^[0-9]{10}$/, "Phone number should be 10 digits")
-      .required("Phone number is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    password: Yup.string().required("Password is required"),
-    businessDetails: Yup.object({
-      clientName: Yup.string().required("Client name is required"),
-      companyType: Yup.string().required("Company type is required"),
-      taxId: Yup.string().required("Tax ID is required"),
-      // accountManagers: Yup.string().required("Account Manager is required"),
-      employeeSize: Yup.string().required("Employee size is required"),
-      ownerPhone: Yup.string().required("Owner phone is required"),
-      ownerEmail: Yup.string()
-        .email("Invalid email")
-        .required("Owner email is required"),
-    }),
-    timeZone: Yup.string().required("Time zone is required"),
-    address: Yup.object({
-      street1: Yup.string().required("Street address is required"),
-      street2: Yup.string().required("Street address is required"),
-
-      zipCode: Yup.string().required("ZIP Code is required"),
-      city: Yup.string().required("City is required"),
-      state: Yup.string().required("State is required"),
-      country: Yup.string().required("country is required"),
-    }),
-    allowLogin: Yup.boolean(),
-    activeAccount: Yup.boolean(),
-    bannedAccount: Yup.boolean(),
-    userAgreementUrl: Yup.string().required("User Agreement is required"),
-  });
-
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -120,7 +86,7 @@ const NewUser = () => {
       bannedAccount: false,
       userAgreementUrl: null,
     },
-    validationSchema,
+    validationSchema: newUserValidationSchema,
     onSubmit: async (values) => {
       console.log("clicked on submit", values);
 

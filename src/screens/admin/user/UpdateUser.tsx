@@ -7,6 +7,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Typeahead } from "react-bootstrap-typeahead"; // Import Typeahead
 import { BASE_URL } from "../../../shared/utils/endPointNames";
+import { updateUserValidationSchema } from "../../../shared/validations/newUserValidation";
 
 function UpdateUserForm() {
   const [userInfo, setUserInfo] = useState({
@@ -112,35 +113,6 @@ function UpdateUserForm() {
     }
   }, [auth, id]);
 
-  // Validation schema using Yup
-  const validationSchema = Yup.object({
-    name: Yup.string().required("Full name is required"),
-    email: Yup.string()
-      .email("Invalid email format")
-      .required("Email is required"),
-    phone: Yup.string().required("Phone number is required"),
-    userType: Yup.string().required("User type is required"),
-    businessDetails: Yup.object({
-      clientName: Yup.string().required("Client name is required"),
-      companyName: Yup.string().required("Company name is required"),
-      companyType: Yup.string().required("Company type is required"),
-      taxId: Yup.string().required("Tax ID is required"),
-      employeeSize: Yup.string().required("Employee size is required"),
-      ownerPhone: Yup.string().required("Owner phone is required"),
-      ownerEmail: Yup.string()
-        .email("Invalid email format")
-        .required("Owner email is required"),
-    }),
-    timeZone: Yup.string().required("Time Zone is required"),
-    address: Yup.object({
-      street1: Yup.string().required("Street 1 is required"),
-      street2: Yup.string().required("Street 2 is required"),
-      city: Yup.string().required("City is required"),
-      state: Yup.string().required("State is required"),
-      zipCode: Yup.string().required("Zip code is required"),
-    }),
-  });
-
   // Handle form submission
   const handleSubmit = async (values: any) => {
     try {
@@ -181,7 +153,7 @@ function UpdateUserForm() {
       <section className="content">
         <Formik
           initialValues={userInfo}
-          validationSchema={validationSchema}
+          validationSchema={updateUserValidationSchema}
           onSubmit={handleSubmit}
           enableReinitialize // Important to allow form values to update
         >

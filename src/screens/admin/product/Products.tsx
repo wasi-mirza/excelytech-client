@@ -3,9 +3,9 @@ import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../shared/utils/routes";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
-import { getPublicIp } from "../../../shared/utils/commonUtils";
 import { getProducts } from "../../../shared/api/endpoints/product";
 import { Product } from "../../../shared/api/types/product.types";
+
 function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [auth] = useAuth();
@@ -16,21 +16,6 @@ function Products() {
   const [totalProducts, setTotalProducts] = useState(0);
   const navigate = useNavigate();
   let newUrl = BASE_URL?.replace("/api", "");
-  const [ip, setIp] = useState("");
-  const [browserInfo, setBrowserInfo] = useState("");
-
-  useEffect(() => {
-    getPublicIp()
-      .then((ip) => setIp(ip))
-      .catch((error) => console.error("Error fetching IP:", error));
-
-    // Get Browser Information
-    const getBrowserInfo = () => {
-      setBrowserInfo(navigator.userAgent);
-    };
-
-    getBrowserInfo();
-  }, []);
 
   const getProduct = async () => {
     try {
