@@ -5,14 +5,34 @@ import toast from "react-hot-toast";
 import { getAllCategories, updateCategory, addCategory, deleteCategory } from "../../../shared/api/endpoints/category";
 import { CategoryResponse } from "../../../shared/api/types/category.types";
 
+interface CategoryType {
+  _id: string;
+  name: string;
+}
+
+interface UpdateCategoryType {
+  Updateid?: string;
+  name: string;
+}
+
 function Category() {
   const [auth] = useAuth();
+<<<<<<< Updated upstream
   const [categoryNameList, setCategoryNameList] = useState<CategoryResponse[]>([]);
+=======
+  const [categoryNameList, setCategoryNameList] = useState<CategoryType[]>([]);
+>>>>>>> Stashed changes
   const [isCategoryLoading, setLoading] = useState(true);
   const [newCategory, setNewCategory] = useState(""); // For modal input
+<<<<<<< Updated upstream
   const [selectedCategory, setSelectedCategory] = useState<CategoryResponse | null>(null); // For viewing category
   const [updateCategoryState, setUpdateCategory] = useState({ name: "", categoryId: "" }); // For updating category
   const [deleteCategoryId, setDeleteCategoryId] = useState<string | null> (null); // For deleting category
+=======
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null); // For viewing category
+  const [updateCategory, setUpdateCategory] = useState<UpdateCategoryType>({ name: "" }); // For updating category
+  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null); // For deleting category
+>>>>>>> Stashed changes
   const [errorMessage, setErrorMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -50,7 +70,12 @@ function Category() {
       setNewCategory("");
       setErrorMessage("");
       fetchCategories(); // Refresh categories
+<<<<<<< Updated upstream
       document.getElementById("closeModalButton")?.click(); // Close modal
+=======
+      const closeModalBtn = document.getElementById("closeModalButton");
+      if (closeModalBtn) (closeModalBtn as HTMLButtonElement).click(); // Close modal
+>>>>>>> Stashed changes
     } catch (error) {
       toast.error("Unable to Add");
       console.error("Error adding category:", error);
@@ -62,7 +87,12 @@ function Category() {
       await updateCategory({ name: updateCategoryState.name, categoryId: updateCategoryState.categoryId });
       toast.success("Categories Updated");
       fetchCategories();
+<<<<<<< Updated upstream
       document.getElementById("closeEditModalButton")?.click(); // Close modal
+=======
+      const closeEditModalBtn = document.getElementById("closeEditModalButton");
+      if (closeEditModalBtn) (closeEditModalBtn as HTMLButtonElement).click(); // Close modal
+>>>>>>> Stashed changes
     } catch (error) {
       toast.error("Unable to update");
       console.error("Error updating category:", error);
@@ -71,6 +101,7 @@ function Category() {
 
   const handleDelete = async () => {
     try {
+<<<<<<< Updated upstream
       if (deleteCategoryId) {
         await deleteCategory(deleteCategoryId);
         toast.success("Category Deleted");
@@ -80,6 +111,18 @@ function Category() {
       } else {
         toast.error("No category selected for deletion");
       }
+=======
+      await axios.delete(`${BASE_URL}/category/${deleteCategoryId}`, {
+        headers: {
+          Authorization: `Bearer ${auth?.token}`,
+        },
+      });
+      toast.success("Category Deleted");
+      fetchCategories();
+      setDeleteCategoryId(null);
+      const closeDeleteModalBtn = document.getElementById("closeDeleteModalButton");
+      if (closeDeleteModalBtn) (closeDeleteModalBtn as HTMLButtonElement).click(); // Close modal
+>>>>>>> Stashed changes
     } catch (error) {
       toast.error("Unable to Delete");
       console.error("Error deleting category:", error);

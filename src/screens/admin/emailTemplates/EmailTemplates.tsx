@@ -6,9 +6,15 @@ import toast from "react-hot-toast";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { ROUTES } from "../../../shared/utils/routes";
 
+interface EmailTemplateType {
+  _id: string;
+  title: string;
+  description: string;
+}
+
 const EmailTemplates = () => {
   const [loader, setLoader] = useState(true);
-  const [emailTemplates, setEmailTemplates] = useState([]);
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplateType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -44,7 +50,11 @@ const EmailTemplates = () => {
     }
   }, [auth, searchQuery, currentPage]);
 
+<<<<<<< Updated upstream
   const HandleView = (data: any) => {
+=======
+  const HandleView = (data: EmailTemplateType) => {
+>>>>>>> Stashed changes
     //setProposalTempleteDetails(data);
     console.log(data);
     navigate(`/admin-dashboard/email-template/${data._id}`);
@@ -101,7 +111,7 @@ const EmailTemplates = () => {
                     className="form-control"
                     placeholder="Search by Email Title"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                   />
                   <div className="input-group-append">
                     <button className="btn btn-outline-secondary" type="button">
