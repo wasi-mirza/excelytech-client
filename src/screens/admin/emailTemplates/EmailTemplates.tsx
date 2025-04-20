@@ -50,11 +50,7 @@ const EmailTemplates = () => {
     }
   }, [auth, searchQuery, currentPage]);
 
-<<<<<<< Updated upstream
-  const HandleView = (data: any) => {
-=======
   const HandleView = (data: EmailTemplateType) => {
->>>>>>> Stashed changes
     //setProposalTempleteDetails(data);
     console.log(data);
     navigate(`/admin-dashboard/email-template/${data._id}`);
