@@ -42,7 +42,7 @@ export const Login = () => {
         const decodedToken = jwtDecode(token);
         const currentTime = Date.now() / 1000; // Current time in seconds
 
-        if (decodedToken.exp < currentTime) {
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
           localStorage.removeItem("token");
           localStorage.removeItem("auth");
           setAuth(null);
