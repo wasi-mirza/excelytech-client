@@ -24,8 +24,8 @@ function NewEmailTemplate() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
-  const [titleValid, setTitleValid] = useState(null);
-  const [descriptionValid, setDescriptionValid] = useState(null);
+  const [titleValid, setTitleValid] = useState(false);
+  const [descriptionValid, setDescriptionValid] = useState(false);
   const [loading, setLoading] = useState(false); // Track submission progress
   const editor = useRef(null);
   const [auth] = useAuth();
@@ -75,7 +75,7 @@ function NewEmailTemplate() {
     return valid;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateFields()) return;
 

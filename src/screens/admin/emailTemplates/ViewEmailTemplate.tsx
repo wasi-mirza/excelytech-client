@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import JoditEditor from "jodit-react";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { toast } from "react-hot-toast";
 

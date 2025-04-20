@@ -1,28 +1,26 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-// import { Card, Col, Row, ProgressBar, Table, Badge } from "react-bootstrap";
-import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { useAuth } from "../../../context/AuthContext";
-
+import {
+  getOpenTicketsByPriority,
+  getMonthlyRevenue,
+  getSubscriptionStats,
+} from "../../../shared/api/endpoints/home";
+import {
+  OpenTicketsByPriority,
+  SubscriptionStats,
+} from "../../../shared/api/types/home.types";
 function AdminHome() {
   const [auth] = useAuth();
-  const [subscriptionStats, setSubscriptionStats] = useState(0);
-  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
-  const [ticketsByPriority, setTicketsByPriority] = useState(null);
+  const [subscriptionStats, setSubscriptionStats] =
+    useState<SubscriptionStats | null>(null);
+  const [monthlyRevenue, setMonthlyRevenue] = useState<number | null>(null);
+  const [ticketsByPriority, setTicketsByPriority] =
+    useState<OpenTicketsByPriority | null>(null);
 
   const fetchOpenTicketsByPriority = async () => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/ticket/opentickets/priority`,
-        {
-          headers: {
-            Authorization: `Bearer ${auth?.token}`, // Make sure the token is passed
-          },
-        }
-      );
-
+      const response = await getOpenTicketsByPriority();
       if (response.status === 200) {
-        console.log(response.data); // You can set this data to state and render it
         setTicketsByPriority(response.data);
       }
     } catch (error) {
@@ -36,38 +34,27 @@ function AdminHome() {
       const year = today.getFullYear(); // Get the current year
       const month = today.getMonth() + 1; // Get the current month (0-based, so add 1 to match 1-12 range)
 
-      const response = await axios.get(`${BASE_URL}/payment/revenue/monthly`, {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`, // Ensure token is being passed correctly
-        },
-        params: {
-          year, // Pass the dynamically calculated year
-          month, // Pass the dynamically calculated month
-        },
+      const response = await getMonthlyRevenue({
+        year, // Pass the dynamically calculated year
+        month, // Pass the dynamically calculated month
       });
 
       if (response.status === 200 || response.status === 201) {
-        //console.log("revenue : ", response.data.monthlyRevenue);
-
-        setMonthlyRevenue(response.data.monthlyRevenue);
+        setMonthlyRevenue(response?.data?.monthlyRevenue);
         // Check if the expected structure exists
       } else {
         console.warn("Unexpected status for monthly revenue:", response.status);
-        setMonthlyRevenue(0); // Default to 0 if the status is unexpected
+        setMonthlyRevenue(null); // Default to 0 if the status is unexpected
       }
     } catch (activeError) {
       console.error("Error fetching monthly revenue:", activeError);
-      setMonthlyRevenue(0); // Fallback to 0 if an error occurs
+      setMonthlyRevenue(null); // Fallback to 0 if an error occurs
     }
   };
 
   const fetchsubscriptionStats = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/subscription/all/active`, {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`, // Ensure token is being passed correctly
-        },
-      });
+      const response = await getSubscriptionStats();
 
       if (response.status === 200 || response.status === 201) {
         //console.log("Active Subscriptions Response:", response.data);
@@ -79,11 +66,11 @@ function AdminHome() {
           "Unexpected status for active subscriptions:",
           response.status
         );
-        setSubscriptionStats(0); // Default to 0 if the status is unexpected
+        setSubscriptionStats(null); // Default to 0 if the status is unexpected
       }
     } catch (activeError) {
       console.error("Error fetching active subscriptions:", activeError);
-      setSubscriptionStats(0); // Fallback to 0 if an error occurs
+      setSubscriptionStats(null); // Fallback to 0 if an error occurs
     }
   };
 
@@ -135,7 +122,7 @@ function AdminHome() {
             <div className="col-lg-3 col-6">
               <div className="small-box bg-success">
                 <div className="inner">
-                  <h3>{subscriptionStats["active"]}</h3>
+                  <h3>{subscriptionStats?.active}</h3>
                   <p>Active Subscriptions</p>
                 </div>
                 <div className="icon">
@@ -174,7 +161,7 @@ function AdminHome() {
                   <h3>
                     {ticketsByPriority === null
                       ? 0
-                      : ticketsByPriority["totalOpenTickets"]}
+                      : ticketsByPriority?.totalOpenTickets}
                   </h3>
                   <p>Open Tickets</p>
                 </div>
@@ -195,21 +182,20 @@ function AdminHome() {
                 <div className="col-md-4">
                   <p>
                     <strong>Active vs. Expired Subscriptions:</strong>
-                    <br /> Active : {subscriptionStats["active"]}, Expired :{" "}
-                    {subscriptionStats["expired"]}
+                    <br /> Active : {subscriptionStats?.active}, Expired :{" "}
+                    {subscriptionStats?.expired}
                   </p>
                 </div>
                 <div className="col-md-4">
                   <p>
                     <strong>Processing vs. Inactive Subscriptions:</strong>
-                    <br /> Processing : {subscriptionStats["processing"]},
-                    Inactive : {subscriptionStats["inactive"]}
+                    <br /> Processing : {subscriptionStats?.processing},
+                    Inactive : {subscriptionStats?.inactive}
                   </p>
                 </div>
                 <div className="col-md-4">
                   <p>
-                    <strong>Cancelled :</strong>{" "}
-                    {subscriptionStats["cancelled"]}
+                    <strong>Cancelled :</strong> {subscriptionStats?.cancelled}
                   </p>
                 </div>
 
@@ -235,10 +221,10 @@ function AdminHome() {
                   <div className="col-md-4">
                     <p>
                       <strong>Open Tickets by Priority:</strong>{" "}
-                      {ticketsByPriority["openTicketsByPriority"].map(
+                      {ticketsByPriority?.openTicketsByPriority.map(
                         (tickets) => (
                           <p>
-                            {tickets["_id"]}:{tickets["count"]}
+                            {tickets?._id}:{tickets?.count}
                           </p>
                         )
                       )}

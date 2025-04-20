@@ -44,13 +44,13 @@ const EmailTemplates = () => {
     }
   }, [auth, searchQuery, currentPage]);
 
-  const HandleView = (data) => {
+  const HandleView = (data: any) => {
     //setProposalTempleteDetails(data);
     console.log(data);
     navigate(`/admin-dashboard/email-template/${data._id}`);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     try {
       await axios.delete(`${BASE_URL}/email/${id}`, {
         headers: {
@@ -78,7 +78,7 @@ const EmailTemplates = () => {
   };
 
   const handleCreate = () => {
-    navigate(ROUTES.ADMIN.NEW_EMAILTEMPLATE);
+    navigate(ROUTES.ADMIN.NEW_EMAIL_TEMPLATE);
   };
 
   return (
@@ -150,9 +150,9 @@ const EmailTemplates = () => {
                         </div>
                       </div>
                     ) : (
-                      emailTemplates.map((data) => (
+                      emailTemplates.map((data: any, index: number) => (
                         <div
-                          key={data._id}
+                          key={index}
                           onClick={() => HandleView(data)}
                           className="col-12 col-md-6 mb-4" // 2 items per row for medium screens
                           style={{ maxWidth: "600px" }}
