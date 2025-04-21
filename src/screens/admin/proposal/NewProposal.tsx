@@ -15,65 +15,24 @@ import {
   CardHeader,
   Form,
   FormGroup,
-  FormFeedback,
   Input,
   Label,
   Table,
-  CardTitle,
 } from "reactstrap";
 import { savePdfToServer } from "./saveProposalPdfToServer";
-import { getPublicIp } from "../../../shared/utils/commonUtils";
+import { getProducts } from "../../../shared/api/endpoints/product";
+import { Product } from "../../../shared/api/types/product.types";
+import { ProposalPayload } from "../../../shared/api/types/proposal.types";
+import { ClientUser } from "../../../shared/api/types/client.types";
+import { logUserActivity } from "../../../shared/api/endpoints/user";
+import { addProposal } from "../../../shared/api/endpoints/proposal";
+import { getClients } from "../../../shared/api/endpoints/client";
 
-interface User {
-  _id: string;
-  email: string;
-  name: string;
-}
-
-interface Product {
-  _id: string;
-  name: string;
-  category: string;
-  currency: string;
-  totalCost: number;
-  tax: number;
-  imageUrl: string;
-}
-
-interface ProposalProduct {
-  productId: string;
-  currency: string;
-  name: string;
-  category: string;
-  oldCost: number;
-  newUpdatedCost: number;
-  discountType: "Fixed" | "Percentage";
-  quantity: number;
-  discount: number;
-  newTotalCost: number;
-  newTax: number;
-  newTotalCostWithTax: number;
-}
 
 interface ProposalTemplate {
   _id: string;
   title: string;
   description: string;
-}
-
-interface ProposalData {
-  recipient: string | null;
-  emailTo: string | null;
-  title: string;
-  content: string;
-  products: ProposalProduct[];
-  grandTotalCurrency: string;
-  productTotal: number;
-  grandTotal: number;
-  discountOnGrandTotal: number;
-  finalAmount: number;
-  attachments: Array<{filename: string; path: string}>;
-  status: string;
 }
 
 interface FormErrors {
@@ -89,23 +48,8 @@ const NewProposal = () => {
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [showProductModal, setShowProductModal] = useState(false);
   const [recipientId, setReceipientId] = useState<string | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [ip, setIp] = useState("");
-  const [browserInfo, setBrowserInfo] = useState("");
-
-  useEffect(() => {
-    getPublicIp()
-      .then((ip) => setIp(ip))
-      .catch((error) => console.error("Error fetching IP:", error));
-
-    // Get Browser Information
-    const getBrowserInfo = () => {
-      setBrowserInfo(navigator.userAgent);
-    };
-
-    getBrowserInfo();
-  }, []);
+  const [users, setUsers] = useState<ClientUser[]>([]);
+  const [selectedUser, setSelectedUser] = useState<ClientUser | null>(null);
 
   const createUser = async () => {
     const email = proposalData.emailTo;
@@ -172,7 +116,7 @@ const NewProposal = () => {
     }));
   };
 
-  const handleSelectecUserChange = (selectedUser: User | null) => {
+  const handleSelectecUserChange = (selectedUser: ClientUser | null) => {
     setSelectedUser(selectedUser);
 
     if (selectedUser) {
@@ -204,19 +148,19 @@ const NewProposal = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [moreAttachmentsToUpload, setMoreAttachmentsToUpload] = useState<File[]>([]);
-  const [proposalData, setProposalData] = useState<ProposalData>({
-    recipient: "",
-    emailTo: "",
-    title: "",
-    content: "",
-    products: [],
-    grandTotalCurrency: "CAD",
-    productTotal: 0,
-    grandTotal: 0,
-    discountOnGrandTotal: 0,
-    finalAmount: 0,
-    attachments: [],
-    status: "",
+  const [proposalData, setProposalData] = useState<ProposalPayload>({
+      recipient: "",
+      emailTo: "",
+      title: "",
+      content: "",
+      products: [],
+      grandTotalCurrency: "CAD",
+      productTotal: 0,
+      grandTotal: 0,
+      discountOnGrandTotal: 0,
+      finalAmount: 0,
+      attachments: [],
+      status: "",
   });
 
   const [productTotal, setProductTotal] = useState(0);
@@ -320,14 +264,9 @@ const NewProposal = () => {
   const getProduct = async () => {
     if (!auth?.token) return;
     try {
-      const res = await axios.get(
-        `${BASE_URL}/product/getProducts?page=${currentPage}&limit=${productsPerPage}&search=${searchQuery}`,
-        {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        }
-      );
-      setProducts(Array.isArray(res.data.products) ? res.data.products : []);
-      setTotalProducts(res.data.total || 0);
+      const res = await getProducts(currentPage, productsPerPage, searchQuery);
+      setProducts(res.products || []);
+      setTotalProducts(res.total || 0);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -350,9 +289,7 @@ const NewProposal = () => {
   const fetchUsers = async () => {
     if (!auth?.token) return;
     try {
-      const response = await axios.get(`${BASE_URL}/user/clients`, {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
+      const response = await getClients();
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching Users:", error);
@@ -548,7 +485,6 @@ const NewProposal = () => {
       return;
     }
 
-    console.log("ProposalData", proposalData);
     // First, save the PDF (if needed) and check if it's successful
     const status = await handleSavePdf();
     if (!status) {
@@ -572,34 +508,14 @@ const NewProposal = () => {
             return;
           }
         }
-        const response = await axios.post(
-          `${BASE_URL}/proposal/new`,
-          {
-            proposalData,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${auth?.token}`,
-            },
-          }
-        );
+        const response = await addProposal(proposalData);
         if (response.status === 201) {
-          const res = axios.post(
-            `${BASE_URL}/useractivity/`,
-            {
-              userId: auth?.user?._id,
-              activityType: "CREATE",
-              description: "Create Proposal",
-              ipAddress: ip,
-              userAgent: browserInfo,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${auth?.token}`,
-              },
-            }
-          );
-          console.log("create proposal", res);
+          await logUserActivity({
+            userId: auth?.user?._id,
+            activityType: "CREATE",
+            description: "Create Proposal",
+          });
+          
           toast.success("Proposal sent successfully!");
           navigate("/admin-dashboard/proposals");
         } else {
@@ -648,7 +564,7 @@ const NewProposal = () => {
                   options={users}
                   labelKey="email" // Adjust based on your user object, e.g., 'email' or 'name'
                   onChange={(selected) => {
-                    handleSelectecUserChange(selected[0] as any);
+                    handleSelectecUserChange(selected[0] as ClientUser);
 
                     // Clear the emailTo error if a user is selected
                     if (errors.emailTo && selected.length > 0) {
