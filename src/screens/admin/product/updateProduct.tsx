@@ -91,10 +91,10 @@ function UpdateProduct() {
 
       // Calculate the totalCost using the formula (cost * (1 + taxPercentage / 100))
       const updatedProduct = {
-        ...product, // Spread the current product data
-        [name]: updatedValue, // Update the cost or tax field
-        totalCost: (cost * (1 + taxPercentage / 100)).toFixed(2), // Correct totalCost calculation
-      };
+        ...product,
+        [name]: updatedValue,
+        totalCost: Number((Number(cost) * (1 + Number(taxPercentage) / 100)).toFixed(2)),
+      } as Product;
 
       // console.log(`Cost is ${cost}, tax is ${taxPercentage}`); // Log the cost and tax values
 

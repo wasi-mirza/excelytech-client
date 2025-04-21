@@ -6,7 +6,7 @@ import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { toast } from "react-hot-toast";
 
 function ViewEmailTemplate() {
-  const [viewTemplate, setViewTemplate] = useState(null);
+  const [viewTemplate, setViewTemplate] = useState<any>(null);
   const [loading, setLoading] = useState(true); // ✅ Loading state
   const [auth] = useAuth();
   const { id } = useParams();
