@@ -68,3 +68,6 @@ src/
 
 # Milestone 4
 ### UI/UX Revamp
+
+# Milestone 5
+### New features addition
