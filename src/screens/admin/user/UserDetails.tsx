@@ -193,9 +193,9 @@ function View() {
   const [message, setMessage] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [confirmHandler, setConfirmHandler] = useState(null);
+  const [confirmHandler, setConfirmHandler] = useState<any>(null);
 
-  const toggleDialog = (msg: any, handler: any) => {
+  const toggleDialog = (msg: string, handler: () => void) => {
     setMessage(msg);
     setConfirmHandler(() => handler);
     setDialogOpen(!isDialogOpen);
@@ -214,7 +214,7 @@ function View() {
       <div className="content-wrapper">
         <ReusableDialog
           isOpen={isDialogOpen}
-          toggle={toggleDialog}
+          toggle={() => toggleDialog("", () => {})}
           message={message}
           onConfirm={confirmHandler}
           onCancel={handleCancel}

@@ -1,7 +1,15 @@
 import React from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
 
-const ReusableDialog = ({
+interface DialogComponentProps {
+  isOpen: boolean;
+  toggle: () => void;
+  message?: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
+}
+
+const ReusableDialog: React.FC<DialogComponentProps> = ({
   isOpen,
   toggle,
   message = "Are you sure?",
@@ -24,4 +32,4 @@ const ReusableDialog = ({
   );
 };
 
-export default ReusableDialog;
+export default ReusableDialog; 
