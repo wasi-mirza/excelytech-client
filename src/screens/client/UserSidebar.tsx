@@ -7,10 +7,14 @@ import { ROUTES } from "../../shared/utils/routes";
 import axios from "axios";
 import { getPublicIp } from '../../shared/utils/commonUtils';
 
-function UserSidebar() {
+interface UserSidebarProps {
+  isOpen: boolean;
+  toggleSidebar: () => void;
+}
+
+const UserSidebar: React.FC<UserSidebarProps> = ({ isOpen, toggleSidebar }) => {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [ip, setIp] = useState("");
   const [browserInfo, setBrowserInfo] = useState("");
@@ -47,7 +51,7 @@ function UserSidebar() {
         console.log("Token expiry time (seconds since epoch):", expiryTime);
 
         // Convert expiry time to a human-readable date/time string
-        const expiryDate = new Date(expiryTime * 1000); // Multiply by 1000 to convert seconds to milliseconds
+        const expiryDate = new Date((expiryTime ?? 0) * 1000); // Multiply by 1000 to convert seconds to milliseconds
 
         const formattedExpiryDate = expiryDate
           .toLocaleDateString("en-CA", {
@@ -64,7 +68,7 @@ function UserSidebar() {
 
         console.log("Token expiry date/time:", formattedExpiryDate);
 
-        if (decodedToken.exp < currentTime) {
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
           console.log("Token has expired!");
           handleLogout();
         } else {
@@ -94,11 +98,9 @@ function UserSidebar() {
     console.log("Logging out user...");
     localStorage.removeItem("auth");
     localStorage.removeItem("token");
-    setAuth({ user: null, token: "" }, () => {
-      // THIS IS THE KEY CHANGE: Use the callback to ensure navigation happens after state update
-      toast.success("Logout successfully");
-      navigate(ROUTES.AUTH.LOGIN);
-    });
+    setAuth({ user: null, token: "" });
+    toast.success("Logout successfully");
+    navigate(ROUTES.AUTH.LOGIN);
   };
 
   // Handle window resize to determine mobile screen size
@@ -114,14 +116,10 @@ function UserSidebar() {
     };
   }, []);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
   return (
     <aside
       className={`main-sidebar sidebar-light-olive elevation-4 d-flex flex-column ${
-        isSidebarOpen ? "d-block" : "d-none"
+        isOpen ? "d-block" : "d-none"
       } ${isMobile ? "sidebar-mobile" : "d-md-flex"}`}
       style={{ height: "100vh", position: "fixed", zIndex: 999 }}
     >
@@ -253,6 +251,6 @@ function UserSidebar() {
       </div>
     </aside>
   );
-}
+};
 
 export default UserSidebar;

@@ -1,7 +1,15 @@
 import { jwtDecode } from "jwt-decode";
 
 class AuthService {
-  constructor(setAuth, navigate) {
+  private intervalId?: ReturnType<typeof setInterval>;
+
+  private setAuth: (auth: { user: null; token: string }) => void;
+  private navigate: (path: string) => void;
+
+  constructor(
+    setAuth: (auth: { user: null; token: string }) => void,
+    navigate: (path: string) => void
+  ) {
     this.setAuth = setAuth;
     this.navigate = navigate;
   }
@@ -24,7 +32,7 @@ class AuthService {
         const expiryTime = decodedToken.exp;
         console.log("Token expiry time:", expiryTime);
 
-        if (expiryTime < currentTime) {
+        if (expiryTime && expiryTime < currentTime) {
           console.log("Token has expired!");
           this.handleLogout();
         } else {

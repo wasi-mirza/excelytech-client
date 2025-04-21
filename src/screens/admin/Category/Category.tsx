@@ -5,6 +5,16 @@ import toast from "react-hot-toast";
 import { getAllCategories, updateCategory, addCategory, deleteCategory } from "../../../shared/api/endpoints/category";
 import { CategoryResponse } from "../../../shared/api/types/category.types";
 
+interface CategoryType {
+  _id: string;
+  name: string;
+}
+
+interface UpdateCategoryType {
+  Updateid?: string;
+  name: string;
+}
+
 function Category() {
   const [auth] = useAuth();
   const [categoryNameList, setCategoryNameList] = useState<CategoryResponse[]>([]);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { BASE_URL } from "../../shared/utils/endPointNames";
 import toast from "react-hot-toast";
 
@@ -154,7 +154,7 @@ import toast from "react-hot-toast";
 //   );
 // };
 
-const ForgotPassword = ({ onClose }) => {
+const ForgotPassword = ({ onClose }: { onClose: () => void }) => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -180,9 +180,9 @@ const ForgotPassword = ({ onClose }) => {
   //   getBrowserInfo();
   // }, []);
 
-  const handleResetPassword = async (e) => {
+  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    setError("");
 
     // Validate password match
     if (newPassword !== confirmPassword) {
@@ -205,7 +205,7 @@ const ForgotPassword = ({ onClose }) => {
       }
     } catch (err) {
       setError(
-        err.response?.data?.message || "An error occurred. Please try again."
+        ((err as AxiosError).response?.data as { message?: string })?.message || "An error occurred. Please try again."
       );
     } finally {
       setLoading(false);

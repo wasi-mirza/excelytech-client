@@ -4,17 +4,28 @@ import { Card, Col, Row, ProgressBar, Table, Badge } from "react-bootstrap";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { useAuth } from "../../../context/AuthContext";
 
+interface Payment {
+  createdAt: string;
+  amount: number;
+  currency: string;
+}
+
+interface AuthUser {
+  _id: string;
+  token: string;
+  user: {
+    _id: string;
+  };
+}
+
 const ClientHome = () => {
   const [activeSubscriptions, setActiveSubscriptions] = useState(0);
   const [inactiveSubscriptions, setInActiveSubscriptions] = useState(0);
   const [openTickets, setOpenTickets] = useState(0);
   const [auth] = useAuth();
-  const [recentPayments, setRecentPayments] = useState([
-    { date: "2023-10-01", amount: "$50.00" },
-    { date: "2023-09-15", amount: "$75.00" },
-    { date: "2023-08-20", amount: "$50.00" },
-  ]);
+  const [recentPayments, setRecentPayments] = useState<Payment[]>([]);
   const [userName, setUserName] = useState("John Doe");
+
   const fetchPaymentsByCustomer = async () => {
     try {
       const response = await axios.get(
@@ -37,10 +48,12 @@ const ClientHome = () => {
         return { error: response.statusText };
       }
     } catch (error) {
-      console.error("Error fetching payments by customer:", error.message);
-      return { error: error.message };
+      const err = error as Error;
+      console.error("Error fetching payments by customer:", err.message);
+      return { error: err.message };
     }
   };
+
   // Fetch subscriptions and tickets from API
   const fetchData = async () => {
     try {
@@ -189,9 +202,6 @@ const ClientHome = () => {
               <div className="inner">
                 <h3>{openTickets}</h3>
                 <p>Open/In progress Tickets</p>
-                {/* <span className="badge bg-dark text-warning mt-2 px-3 py-2">
-                  Pending
-                </span> */}
               </div>
               <div className="icon">
                 <i className="fas fa-ticket-alt"></i>
@@ -244,7 +254,7 @@ const ClientHome = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="2" className="text-center text-muted">
+                          <td colSpan={2} className="text-center text-muted">
                             No recent payments available.
                           </td>
                         </tr>

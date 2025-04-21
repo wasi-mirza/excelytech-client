@@ -1,23 +1,47 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { BASE_URL } from "../../shared/utils/endPointNames";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import axios from "axios";
 
+interface User {
+  _id: string;
+  name: string;
+  role?: string;
+  accountManagers?: {
+    _id: string;
+    name: string;
+  };
+}
+
+interface Message {
+  _id: string;
+  sender: string;
+  receiver: string;
+  message: string;
+  file?: string;
+  createdAt: string;
+}
+
+interface Auth {
+  token: string;
+  user: User;
+}
+
 const ChatSidebar = () => {
-  const [messages, setMessages] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [newMessage, setNewMessage] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [socket, setSocket] = useState(null);
-  const messagesEndRef = useRef(null); // Reference for auto-scroll
-  const fileInputRef = useRef(null);
-  const newUrl = BASE_URL.replace("/api", "");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [newMessage, setNewMessage] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const newUrl = BASE_URL?.replace("/api", "") || "";
   const [auth] = useAuth();
 
   // Utility: Format date as "Day, DD MMM YYYY"
-  const formatDate = (date) =>
+  const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
@@ -26,7 +50,7 @@ const ChatSidebar = () => {
     });
 
   // Utility: Check if the current message starts a new day
-  const isNewDay = (currentMessage, index) => {
+  const isNewDay = (currentMessage: Message, index: number) => {
     if (index === 0) return true;
     const currentDate = new Date(currentMessage.createdAt).toDateString();
     const previousDate = new Date(
@@ -56,13 +80,13 @@ const ChatSidebar = () => {
       extraHeaders: { token: auth?.token },
     });
 
-    newSocket.on("connected", console.log("connetd"));
+    newSocket.on("connected", () => console.log("connected"));
     setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();
     };
-  }, [auth]);
+  }, [auth, newUrl]);
 
   useEffect(() => {
     // Join room and handle incoming messages
@@ -75,11 +99,11 @@ const ChatSidebar = () => {
     if (receiverId && socket) {
       socket.emit("joinRoom", { userId, receiverId });
 
-      socket.on("previousMessages", (fetchedMessages) => {
+      socket.on("previousMessages", (fetchedMessages: Message[]) => {
         setMessages(fetchedMessages);
       });
 
-      socket.on("receiveMessage", (message) => {
+      socket.on("receiveMessage", (message: Message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
         console.log("receive", message);
       });
@@ -105,7 +129,7 @@ const ChatSidebar = () => {
         ? auth?.user?.accountManagers?._id
         : selectedUser?._id;
 
-    if ((newMessage.trim() || selectedFile) && receiverId) {
+    if ((newMessage.trim() || selectedFile) && receiverId && socket) {
       let uploadedFileUrl = "";
 
       if (selectedFile) {
@@ -148,12 +172,16 @@ const ChatSidebar = () => {
     }
   };
 
-  const handleFileUpload = (e) => {
-    setSelectedFile(e.target.files[0]);
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFile(e.target.files[0]);
+    }
   };
 
   const triggerFileInput = () => {
-    fileInputRef.current.click(); // Programmatically open the file input dialog
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   return (
@@ -255,11 +283,6 @@ const ChatSidebar = () => {
                           borderRadius: "12px",
                         }}
                       >
-                        {/* <div className="small mb-1">
-                          {msg.sender === auth?.user._id
-                            ? "You"
-                            : selectedUser?.name}
-                        </div> */}
                         {msg.file && (
                           <div className="mb-2">
                             <img

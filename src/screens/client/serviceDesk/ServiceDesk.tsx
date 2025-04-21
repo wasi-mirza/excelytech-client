@@ -5,9 +5,30 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../shared/utils/routes";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 
+interface Ticket {
+  _id: string;
+  title: string;
+  description: string;
+  priority: string;
+  status: string;
+  assignedTo: {
+    name: string;
+  } | null;
+  createdAt: string;
+}
+
+interface PaginationData {
+  totalPages: number;
+}
+
+interface TicketResponse {
+  tickets: Ticket[];
+  pagination: PaginationData;
+}
+
 function ServiceDesk() {
   const [auth] = useAuth();
-  const [ticketData, setTicketData] = useState([]);
+  const [ticketData, setTicketData] = useState<Ticket[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,7 +36,7 @@ function ServiceDesk() {
 
   const fetchTicketData = async (page = 1, search = "") => {
     try {
-      const res = await axios.get(`${BASE_URL}/ticket/user/${auth.user._id}`, {
+      const res = await axios.get<TicketResponse>(`${BASE_URL}/ticket/user/${auth.user._id}`, {
         headers: {
           Authorization: `Bearer ${auth?.token}`,
         },
@@ -37,7 +58,7 @@ function ServiceDesk() {
     }
   }, [auth, currentPage, searchTerm]);
 
-  const handlePageChange = (pageNumber) => {
+  const handlePageChange = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
     }
@@ -51,7 +72,7 @@ function ServiceDesk() {
     handlePageChange(currentPage + 1);
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to first page on new search
   };
@@ -60,7 +81,7 @@ function ServiceDesk() {
     navigate(`${ROUTES.USER.DASHBOARD}/newTicket`);
   };
 
-  const handleView = (data) => {
+  const handleView = (data: Ticket) => {
     navigate(ROUTES.USER.VIEW_TICKET(data._id));
   };
 
@@ -121,7 +142,7 @@ function ServiceDesk() {
                       <tbody>
                         {ticketData.length === 0 || ticketData === null ? (
                           <tr>
-                            <td colSpan="7">No tickets found</td>
+                            <td colSpan={7}>No tickets found</td>
                           </tr>
                         ) : (
                           ticketData?.map((ticket) => (

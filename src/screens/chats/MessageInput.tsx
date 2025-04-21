@@ -1,9 +1,26 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const MessageInput = ({ activeChat, setMessages }) => {
-  const [text, setText] = useState("");
-  const [file, setFile] = useState(null);
+interface Chat {
+  id: string;
+}
+
+interface Message {
+  id: string;
+  sender: string;
+  receiver: string;
+  message: string;
+  file?: File;
+}
+
+interface MessageInputProps {
+  activeChat: Chat;
+  setMessages: any;
+}
+
+const MessageInput: React.FC<MessageInputProps> = ({ activeChat, setMessages }) => {
+  const [text, setText] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
 
   const handleSend = async () => {
     const formData = new FormData();
@@ -12,11 +29,11 @@ const MessageInput = ({ activeChat, setMessages }) => {
     formData.append("message", text);
     if (file) formData.append("file", file);
 
-    const response = await axios.post("/api/chat", formData, {
+    const response = await axios.post<Message>("/api/chat", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
-    setMessages((prev) => [...prev, response.data]);
+    setMessages((prev: Message[]) => [...prev, response.data]);
     setText("");
     setFile(null);
   };
@@ -26,7 +43,12 @@ const MessageInput = ({ activeChat, setMessages }) => {
       <input
         type="file"
         className="form-control me-2"
-        onChange={(e) => setFile(e.target.files[0])}
+        onChange={(e) => {
+          const files = e.target.files;
+          if (files && files.length > 0) {
+            setFile(files[0]);
+          }
+        }}
       />
       <input
         type="text"

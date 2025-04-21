@@ -4,22 +4,58 @@ import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 
+interface Comment {
+  user: {
+    name: string;
+  };
+  message: string;
+  createdAt: string;
+}
+
+interface Attachment {
+  filename: string;
+  path: string;
+}
+
+interface Client {
+  name: string;
+  email: string;
+}
+
+interface TicketData {
+  title: string;
+  description: string;
+  priority: string;
+  status: string;
+  client: Client;
+  comments: Comment[];
+  attachments: Attachment[];
+}
+
 const ViewTicket = () => {
   const [auth] = useAuth();
   const { id } = useParams();
-  const [ticketData, setTicketData] = useState({ attachments: [] });
+  const [ticketData, setTicketData] = useState<TicketData>({
+    title: '',
+    description: '',
+    priority: '',
+    status: '',
+    client: { name: '', email: '' },
+    comments: [],
+    attachments: []
+  });
   const [comment, setComment] = useState("");
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
-  const handleAddComment = async (e) => {
+  const handleAddComment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const res = await axios.post(
         `${BASE_URL}/ticket/comment/${id}`,
         {
-          userId: auth?.user.userId,
-          name: auth?.user.role,
+          userId: auth?.user?._id, // Changed from userId to _id based on auth context
+          name: auth?.user?.role,
           email: auth?.user?.email,
           message: comment,
         },
@@ -31,7 +67,7 @@ const ViewTicket = () => {
       setComment("");
       fetchTicket();
       // Re-fetch ticket data to display the new comment
-    } catch (error) {
+    } catch (error: unknown) {
       console.log("error in Comment", error);
     }
   };
@@ -58,7 +94,7 @@ const ViewTicket = () => {
   }, [auth, id]);
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      (messagesEndRef.current as HTMLElement).scrollIntoView({ behavior: "smooth" });
     }
   }, [ticketData?.comments]);
 

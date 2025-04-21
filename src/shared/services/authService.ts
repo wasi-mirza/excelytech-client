@@ -1,10 +1,10 @@
-import apiService from "./index.ts"; // Your Axios wrapper
+import apiService from "./index"; // Your Axios wrapper
 
-export const loginUser = async (email, password) => {
+export const loginUser = async (email: string, password: string) => {
   return apiService.post("/user/login", { email, password });
 };
 
-export const logUserActivity = async (userId, activityType, description, ip, browserInfo, token) => {
+export const logUserActivity = async (userId: string, activityType: string, description: string, ip: string, browserInfo: string, token: string) => {
   return apiService.post(
     "/useractivity/",
     {
