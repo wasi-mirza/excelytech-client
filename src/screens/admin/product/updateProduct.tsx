@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { Typeahead } from "react-bootstrap-typeahead";
@@ -7,54 +6,38 @@ import { BASE_URL } from "../../../shared/utils/endPointNames";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import toast from "react-hot-toast";
 import {
-  Button,
-  Card,
-  CardBody,
-  Form,
   FormGroup,
-  FormFeedback,
-  Input,
   Label,
-  Table,
 } from "reactstrap";
-import { getPublicIp } from "../../../shared/utils/commonUtils";
+import { CategoryResponse } from "../../../shared/api/types/category.types";
+import { useUserService } from "../../../shared/services/useUserService";
+import { User } from "../../../shared/api/types/user.types";
+import { getProductById, uploadProductImage, updateProduct } from "../../../shared/api/endpoints/product";
+import { Product, UpdateProductInput } from "../../../shared/api/types/product.types";
+import { getAllCategories } from "../../../shared/api/endpoints/category";
+import { logUserActivity } from "../../../shared/api/endpoints/user";
 
 function UpdateProduct() {
-  const [product, setProduct] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const { getUsers, loading: loadingUsers, error: errorUsers } = useUserService();
+
+  const [product, setProduct] = useState<Product>();
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [auth] = useAuth();
   const navigate = useNavigate();
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const { id } = useParams();
-  let newUrl = BASE_URL.replace("/api", "");
-  const [ip, setIp] = useState("");
-  const [browserInfo, setBrowserInfo] = useState("");
-
-  useEffect(() => {
-    getPublicIp()
-      .then((ip) => setIp(ip))
-      .catch((error) => console.error("Error fetching IP:", error));
-
-    // Get Browser Information
-    const getBrowserInfo = () => {
-      setBrowserInfo(navigator.userAgent);
-    };
-
-    getBrowserInfo();
-  }, []);
+  let newUrl = BASE_URL?.replace("/api", "");
 
   const fetchUsers = async () => {
     if (!auth?.token) return;
     try {
-      const response = await axios.get(`${BASE_URL}/user/admin`, {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
-      console.log("Users", response.data);
+      const response = await getUsers();
+      console.log("Users ----", response.data);
 
       setUsers(response.data);
     } catch (error) {
@@ -64,15 +47,11 @@ function UpdateProduct() {
 
   const getProduct = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/product/${id}`, {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`,
-        },
-      });
-      console.log("product", res.data);
+      const res = await getProductById(id);
+      console.log("product single by id---", res);
 
-      setProduct(res.data);
-      setPreview(newUrl + res.data.imageUrl || null); // Set initial preview to existing image URL
+      setProduct(res?.data);
+      setPreview(newUrl + res?.data.imageUrl || null); // Set initial preview to existing image URL
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -85,11 +64,9 @@ function UpdateProduct() {
     fetchUsers();
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/category/allCategory`, {
-          headers: { Authorization: `Bearer ${auth?.token}` },
-        });
-        setCategories(response.data.categories);
-        console.log("res cat", response.data.categories);
+        const response = await getAllCategories(1, 1000);
+        setCategories(response.categories);
+        console.log("res cat", response.categories);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -97,27 +74,27 @@ function UpdateProduct() {
     fetchCategories();
   }, [auth]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target; // Destructure the event target properties
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value, type, checked } = e.target as HTMLInputElement; // Destructure the event target properties
     const updatedValue = type === "checkbox" ? checked : value; // If it's a checkbox, use 'checked' otherwise use 'value'
 
     if (name === "cost" || name === "tax") {
       // Check if the field changed is "cost" or "tax"
       const cost =
         name === "cost"
-          ? parseFloat(updatedValue || 0)
-          : parseFloat(product.cost || 0); // If the field is 'cost', update it with 'updatedValue', else use current cost
+          ? updatedValue || 0
+          : product?.cost || 0; // If the field is 'cost', update it with 'updatedValue', else use current cost
       const taxPercentage =
         name === "tax"
-          ? parseFloat(updatedValue || 0)
-          : parseFloat(product.tax || 0); // If the field is 'tax', update it with 'updatedValue', else use current tax
+          ? updatedValue || 0
+          : product?.tax || 0; // If the field is 'tax', update it with 'updatedValue', else use current tax
 
       // Calculate the totalCost using the formula (cost * (1 + taxPercentage / 100))
       const updatedProduct = {
-        ...product, // Spread the current product data
-        [name]: updatedValue, // Update the cost or tax field
-        totalCost: (cost * (1 + taxPercentage / 100)).toFixed(2), // Correct totalCost calculation
-      };
+        ...product,
+        [name]: updatedValue,
+        totalCost: Number((Number(cost) * (1 + Number(taxPercentage) / 100)).toFixed(2)),
+      } as Product;
 
       // console.log(`Cost is ${cost}, tax is ${taxPercentage}`); // Log the cost and tax values
 
@@ -129,109 +106,64 @@ function UpdateProduct() {
       setProduct({
         ...product,
         [name]: updatedValue,
-      });
+      } as Product);
     }
   };
 
-  const handleSelectecUserChange = (selectedUser) => {
+  const handleSelectecUserChange = (selectedUser: any) => {
     setSelectedUser(selectedUser);
     if (selectedUser) {
       const userid = selectedUser._id;
-      setProduct((prevData) => ({
+      setProduct((prevData: any) => ({
         ...prevData,
         productManager: userid,
       }));
     } else {
-      setProduct((prevData) => ({
+      setProduct((prevData: any) => ({
         ...prevData,
         productManager: null,
       }));
     }
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: any) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
       const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result);
+      reader.onload = () => setPreview(reader.result as string);
       reader.readAsDataURL(selectedFile);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     try {
       // Set imageUrl to the existing product image URL initially
-      let imageUrl = product.imageUrl;
-      console.log("Images", imageUrl);
+      let imageUrl = product?.imageUrl;
       if (file !== null) {
         const uploadData = new FormData();
         uploadData.append("image", file);
-        console.log("file", file, uploadData);
 
-        const uploadResponse = await axios.post(
-          `${BASE_URL}/upload/productImage`,
-          uploadData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${auth?.token}`,
-            },
-          }
-        );
+        const uploadResponse = await uploadProductImage(uploadData);
 
         imageUrl = uploadResponse.data.fileUrl;
         toast.success("Image uploaded successfully");
-        console.log("image", uploadResponse);
-        // if(uploadResponse.status ==200 || uploadResponse.status == 201){
-        //   const res = axios.post(`${BASE_URL}/useractivity/`,
-        //     {
-        //       userId: auth?.user?._id,
-        //   activityType: "UPLOAD",
-        //   description: "Upload updated product Image",
-        //   ipAddress: ip,
-        //   userAgent: browserInfo,
-        //   },{
-        //       headers: {
-        //         Authorization: `Bearer ${auth?.token}`,
-        //       },
-        //     })
-        //     console.log("Upload updated product Image",res);
-        // }
       }
 
       // Update imageUrl with new uploaded URL
 
       // Prepare the updated product data, including the correct imageUrl
       const updatedProductData = { ...product, imageUrl };
-      console.log("imgUrl", imageUrl, updatedProductData);
 
-      const updateResponse = await axios.patch(
-        `${BASE_URL}/product/${product._id}`,
-        updatedProductData,
-        {
-          headers: { Authorization: `Bearer ${auth?.token}` },
-        }
-      );
+      const updateResponse = await updateProduct(updatedProductData as UpdateProductInput);
       if (updateResponse.status == 200 || updateResponse.status == 201) {
-        const res = axios.post(
-          `${BASE_URL}/useractivity/`,
-          {
-            userId: auth?.user?._id,
-            activityType: "UPDATE",
-            description: "Updated product",
-            ipAddress: ip,
-            userAgent: browserInfo,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${auth?.token}`,
-            },
-          }
-        );
-        console.log("Updated product", res);
+        await logUserActivity({
+          userId: auth?.user?._id,
+          activityType: "UPDATE",
+          description: "Updated product",
+        });
       }
       toast.success("Product updated successfully");
       navigate(-1);
@@ -272,7 +204,7 @@ function UpdateProduct() {
                         id="sku"
                         name="sku"
                         readOnly
-                        value={product.sku}
+                        value={product?.sku}
                       />
                     </div>
                     <div className="form-group">
@@ -282,7 +214,7 @@ function UpdateProduct() {
                         className="form-control"
                         id="name"
                         name="name"
-                        value={product.name}
+                        value={product?.name}
                         onChange={handleChange}
                         required
                       />
@@ -293,9 +225,9 @@ function UpdateProduct() {
                         className="form-control"
                         id="description"
                         name="description"
-                        value={product.description}
+                        value={product?.description}
                         onChange={handleChange}
-                        rows="3"
+                        rows={3}
                         required
                       />
                     </div>
@@ -305,7 +237,7 @@ function UpdateProduct() {
                         className="form-control"
                         id="currency"
                         name="currency"
-                        value={product.currency}
+                        value={product?.currency}
                         onChange={handleChange}
                         required
                       >
@@ -333,18 +265,18 @@ function UpdateProduct() {
                         id="user-selector"
                         options={users}
                         labelKey="username" // Adjust based on your user object, e.g., 'email' or 'name'
-                        onChange={(selected) => {
+                        onChange={(selected: any) => {
                           console.log("selected", selected[0]);
 
-                          handleSelectecUserChange((prev) => ({
+                          handleSelectecUserChange((prev: any) => ({
                             ...prev,
                             productManager: selected[0]?.username || "",
                           }));
                         }}
                         //  onInputChange={(input) => handleEmailTo(input)}
                         selected={
-                          product.productManager
-                            ? [product.productManager]
+                          product?.productManager
+                            ? [product?.productManager]
                             : selectedUser[0]
                         }
                         placeholder="Choose a product manager"
@@ -356,14 +288,14 @@ function UpdateProduct() {
                         id="category"
                         options={categories} // Options should be an array of objects with 'name' key
                         labelKey="name" // Adjust this to match the key used for category names in your API response
-                        onChange={(selected) => {
-                          setProduct((prevData) => ({
+                        onChange={(selected: any) => {
+                          setProduct((prevData: any) => ({
                             ...prevData,
                             category: selected[0]?.name || "",
                           }));
                         }}
                         selected={
-                          product.category ? [{ name: product.category }] : []
+                          product?.category ? [{ name: product?.category }] : []
                         } // Ensure the selected value is always in the correct format
                         placeholder="Choose a category"
                         maxResults={10} // Limits results shown before scrolling
@@ -387,7 +319,7 @@ function UpdateProduct() {
                         className="form-control"
                         id="cost"
                         name="cost"
-                        value={product.cost}
+                        value={product?.cost}
                         onChange={handleChange}
                         required
                       />
@@ -399,7 +331,7 @@ function UpdateProduct() {
                         className="form-control"
                         id="tax"
                         name="tax"
-                        value={product.tax}
+                        value={product?.tax}
                         onChange={handleChange}
                         required
                       />
@@ -412,9 +344,8 @@ function UpdateProduct() {
                         id="totalCost"
                         name="totalCost"
                         value={
-                          product.totalCost ||
-                          parseFloat(product.cost || 0) *
-                            (1 + parseFloat(product.tax || 0) / 100)
+                          product?.totalCost ||
+                          (product?.cost || 0) * (1 + (product?.tax || 0) / 100)
                         }
                         readOnly
                       />

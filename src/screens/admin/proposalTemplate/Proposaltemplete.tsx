@@ -7,7 +7,7 @@ import { BASE_URL } from "../../../shared/utils/endPointNames";
 
 const Proposaltemplete = () => {
   const [loader, setLoader] = useState(true);
-  const [proposalTemplete, setProposalTemplete] = useState([]);
+  const [proposalTemplete, setProposalTemplete] = useState<any>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -43,18 +43,18 @@ const Proposaltemplete = () => {
     }
   }, [auth, searchQuery, currentPage]);
 
-  const handleUpdateForm = (data) => {
+  const handleUpdateForm = (data: any) => {
     //setProposalTempleteDetails(data);
     navigate(`/admin-dashboard/updateproposaltemplete/${data._id}`);
   };
 
-  const HandleView = (data) => {
+  const HandleView = (data: any) => {
     //setProposalTempleteDetails(data);
     console.log(data);
     navigate(`/admin-dashboard/viewproposaltemplete/${data._id}`);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: any) => {
     try {
       await axios.delete(`${BASE_URL}/proposalTemplate/templates/${id}`, {
         headers: {
@@ -151,7 +151,7 @@ const Proposaltemplete = () => {
                     </div>
                   </div>
                 ) : (
-                  proposalTemplete.map((data) => (
+                  proposalTemplete.map((data: any) => (
                     <div
                       key={data._id}
                       className="col-12 col-md-3 mb-4"

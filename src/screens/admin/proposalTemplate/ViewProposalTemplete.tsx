@@ -6,10 +6,10 @@ import JoditEditor from "jodit-react";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 
 function ViewProposalTemplate() {
-  const [viewTemplate, setViewTemplate] = useState(null);
+  const [viewTemplate, setViewTemplate] = useState<any>(null);
   const [auth] = useAuth();
   const { id } = useParams();
-  const editor = useRef(null);
+  const editor = useRef<any>(null);
   // Fetch templates from the API
   const getProposalTemplete = async () => {
     // setLoader(true); // Show loader while fetching

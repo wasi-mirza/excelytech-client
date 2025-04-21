@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../shared/utils/routes";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
-import { getPublicIp } from "../../../shared/utils/commonUtils";
+import { getProducts } from "../../../shared/api/endpoints/product";
+import { Product } from "../../../shared/api/types/product.types";
 
 function Products() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [auth] = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -15,37 +15,14 @@ function Products() {
   const [searchQuery, setSearchQuery] = useState("");
   const [totalProducts, setTotalProducts] = useState(0);
   const navigate = useNavigate();
-  let newUrl = BASE_URL.replace("/api", "");
-  const [ip, setIp] = useState("");
-  const [browserInfo, setBrowserInfo] = useState("");
-
-  useEffect(() => {
-    getPublicIp()
-      .then((ip) => setIp(ip))
-      .catch((error) => console.error("Error fetching IP:", error));
-
-    // Get Browser Information
-    const getBrowserInfo = () => {
-      setBrowserInfo(navigator.userAgent);
-    };
-
-    getBrowserInfo();
-  }, []);
+  let newUrl = BASE_URL?.replace("/api", "");
 
   const getProduct = async () => {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/product/getProducts?page=${currentPage}&limit=${productsPerPage}&search=${searchQuery}`,
-        {
-          headers: {
-            Authorization: `Bearer ${auth?.token}`,
-          },
-        }
-      );
-
-      setProducts(res.data.products);
-      setTotalPages(res.data.totalPages);
-      setTotalProducts(res.data.total);
+      const res = await getProducts(currentPage, productsPerPage, searchQuery);
+      setProducts(res?.products);
+      setTotalPages(res?.totalPages);
+      setTotalProducts(res?.total);
     } catch (error) {
       console.error(error);
     }
@@ -57,7 +34,7 @@ function Products() {
     }
   }, [auth, currentPage, searchQuery]);
 
-  const handleView = (data) => {
+  const handleView = (data: Product) => {
     navigate(`${ROUTES.ADMIN.VIEW_PRODUCT(data._id)}`);
   };
 
@@ -77,7 +54,7 @@ function Products() {
     }
   };
 
-  const getStatusDotClass = (status) => {
+  const getStatusDotClass = (status: string) => {
     if (status === "Active") return "bg-success";
     if (status === "Inactive") return "bg-danger";
     if (status === "Retired") return "bg-warning";
@@ -128,14 +105,14 @@ function Products() {
         <div className="card p-2">
           <div className="row">
             {products.length > 0 ? (
-              products.map((prod) => (
+              products.map((prod :any) => (
                 <div className="col-md-3 mb-4" key={prod._id}>
                   <div
                     className="card shadow-sm h-100"
                     onClick={() => handleView(prod)}
                   >
                     <img
-                      onError={(e) =>
+                      onError={(e: any) =>
                         (e.target.src = `${newUrl}/uploads/placeholder.png`)
                       }
                       src={`${newUrl}${prod.imageUrl}`}

@@ -1,72 +1,36 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Typeahead } from "react-bootstrap-typeahead";
-import * as Yup from "yup";
 import { useFormik } from "formik";
-import { BASE_URL } from "../../../shared/utils/endPointNames";
 import toast from "react-hot-toast";
-import { getPublicIp } from "../../../shared/utils/commonUtils";
-
-// Validation schema with Yup
-const validationSchema = Yup.object({
-  sku: Yup.string().required("SKU is required"),
-  name: Yup.string().required("Product Name is required"),
-  description: Yup.string().required("Description is required"),
-  cost: Yup.number()
-    .required("Cost is required")
-    .min(0, "Cost must be greater than or equal to 0"),
-  tax: Yup.number()
-    .required("Tax is required")
-    .min(0, "Tax must be greater than or equal to 0"),
-  totalCost: Yup.number().required("Total Cost is required"),
-  productManager: Yup.string().required("Product Manager is required"),
-  category: Yup.string().required("Category is required"),
-  purchaseType: Yup.string().required("Purchase Type is required"),
-  currency: Yup.string().required("Currency is required"),
-  status: Yup.string().required("Status is required"),
-  tags: Yup.array().of(Yup.string().required("Each tag is required")),
-  keywords: Yup.array().of(Yup.string().required("Each keyword is required")),
-});
+import { getAllCategories } from "../../../shared/api/endpoints/category";
+import { CategoryResponse } from "../../../shared/api/types/category.types";
+import { User } from "../../../shared/api/types/user.types";
+import { AddProductInput } from "../../../shared/api/types/product.types";
+import { useUserService } from "../../../shared/services/useUserService";
+import { uploadProductImage } from "../../../shared/api/endpoints/product";
+import { addProduct } from "../../../shared/api/endpoints/product";
+import { logUserActivity } from "../../../shared/api/endpoints/user";
+import { productValidationSchema } from "../../../shared/validations/productValidation";
 
 const NewProduct = () => {
+  const { getUsers, loading, error } = useUserService();
+
   const navigate = useNavigate();
   const [auth] = useAuth();
-  const [users, setUsers] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [showDuration, setShowDuration] = useState(false);
-  const [ip, setIp] = useState("");
-  const [browserInfo, setBrowserInfo] = useState("");
-
-  useEffect(() => {
-    getPublicIp()
-      .then((ip) => setIp(ip))
-      .catch((error) => console.error("Error fetching IP:", error));
-
-    // Get Browser Information
-    const getBrowserInfo = () => {
-      setBrowserInfo(navigator.userAgent);
-    };
-
-    getBrowserInfo();
-  }, []);
 
   // Fetch users (for product manager selection)
   const fetchUsers = async () => {
     if (!auth?.token) return;
     try {
-      const response = await axios.get(`${BASE_URL}/user/admin`, {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
-      setUsers(
-        response.data.map((admin) => ({
-          id: admin._id,
-          name: admin.name,
-        }))
-      );
+      const users = await getUsers();
+      setUsers(users?.data)
     } catch (error) {
       console.error("Error fetching Users:", error);
     }
@@ -75,19 +39,15 @@ const NewProduct = () => {
   // Fetch categories (for category selection)
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/category/allCategory`, {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`,
-        },
-      });
-      setCategories(response.data.categories);
+      const res = await getAllCategories(1, 1000);
+      setCategories(res?.categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
   };
 
   // Formik setup
-  const formik = useFormik({
+  const formik = useFormik<AddProductInput>({
     initialValues: {
       sku: "",
       name: "",
@@ -100,12 +60,13 @@ const NewProduct = () => {
       purchaseType: "one-time",
       currency: "CAD",
       status: "Active",
-      tags: [],
+      tags: [], 
       keywords: [],
       activeSubscriptions: 0,
       revenueGenerated: 0,
+      imageUrl: "",
     },
-    validationSchema,
+    validationSchema: productValidationSchema,
     onSubmit: async (values) => {
       let imageUrl = null;
       if (!file) {
@@ -118,71 +79,40 @@ const NewProduct = () => {
       uploadData.append("image", file);
 
       try {
-        const uploadResponse = await axios.post(
-          `${BASE_URL}/upload/productImage`,
-          uploadData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${auth?.token}`,
-            },
-          }
-        );
-
+        const uploadResponse = await uploadProductImage(uploadData);
         if (uploadResponse.status === 200) {
-          const response = axios.post(
-            `${BASE_URL}/useractivity/`,
-            {
-              userId: auth?.user?._id,
-              activityType: "UPLOAD",
-              description: "upload product image",
-              ipAddress: ip,
-              userAgent: browserInfo,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${auth?.token}`,
-              },
-            }
-          );
-          console.log("forgot password", response);
+          // Log user activity
+          await logUserActivity({
+            userId: auth?.user?._id,
+            activityType: "UPLOAD",
+            description: "upload product image",
+          });
+
           imageUrl = uploadResponse.data.fileUrl;
 
           // Prepare product data with image URL
           const productData = {
             ...values,
             imageUrl,
-            cost: parseFloat(values.cost),
-            tax: parseFloat(values.tax),
-            totalCost: parseFloat(values.totalCost),
+            cost: parseFloat(values.cost.toString()),
+            tax: parseFloat(values.tax.toString()),
+            totalCost: parseFloat(values.totalCost.toString()),
           };
 
           // Send product data to backend
-          const res = await axios.post(
-            `${BASE_URL}/product/newProduct`,
-            productData,
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${auth?.token}`,
-              },
-            }
-          );
-
+          const res = await addProduct(productData);
           if (res.data) {
             toast.success(res.data.message);
             navigate(-1);
           } else {
-            toast.error("Failed to upload Product");
-            console.log("Failed to upload Product");
+            toast.error("Failed to save product");
           }
         } else {
-          toast.error("Failed to upload image.");
-          console.log("Failed to upload image.");
+          toast.error("Failed to upload image");
         }
-      } catch (error) {
-        console.error("Error uploading product:", error);
-        toast.error("Error uploading product.");
+      } catch (error: any) {
+        console.error("Error in product creation:", error);
+        toast.error(error.response?.data?.message || "Error creating product");
       }
     },
   });
@@ -199,20 +129,20 @@ const NewProduct = () => {
 
   useEffect(() => {
     const totalCost = (
-      parseFloat(formik.values.cost || 0) *
-      (1 + parseFloat(formik.values.tax || 0) / 100)
+      formik.values.cost *
+      (1 + formik.values.tax / 100)
     ).toFixed(2);
 
     formik.setFieldValue("totalCost", totalCost); // Keeps totalCost rounded to two decimals
   }, [formik.values.cost, formik.values.tax]);
 
   // Handle file change (image preview)
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result);
+      reader.onload = () => setPreview(reader.result as string);
       reader.readAsDataURL(selectedFile);
     }
   };
@@ -287,7 +217,7 @@ const NewProduct = () => {
                         value={formik.values.description}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        rows="3"
+                        rows={3}
                         placeholder="Enter Description"
                       />
                       {formik.touched.description &&
@@ -443,7 +373,7 @@ const NewProduct = () => {
                         onChange={(selected) =>
                           formik.setFieldValue(
                             "productManager",
-                            selected[0]?.id
+                            (selected[0] as User)?._id
                           )
                         }
                         placeholder="Choose a product manager"
@@ -464,7 +394,9 @@ const NewProduct = () => {
                         options={categories}
                         labelKey="name"
                         onChange={(selected) =>
-                          formik.setFieldValue("category", selected[0]?.name)
+                          formik.setFieldValue("category", 
+                            (selected[0] as CategoryResponse)?._id
+                          )
                         }
                         placeholder="Choose a category"
                         className="w-100"

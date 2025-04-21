@@ -1,8 +1,9 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../../shared/utils/endPointNames";
+
+import { getAllCategories, updateCategory, addCategory, deleteCategory } from "../../../shared/api/endpoints/category";
+import { CategoryResponse } from "../../../shared/api/types/category.types";
 
 interface CategoryType {
   _id: string;
@@ -16,13 +17,12 @@ interface UpdateCategoryType {
 
 function Category() {
   const [auth] = useAuth();
-  const [categoryNameList, setCategoryNameList] = useState<CategoryType[]>([]);
+  const [categoryNameList, setCategoryNameList] = useState<CategoryResponse[]>([]);
   const [isCategoryLoading, setLoading] = useState(true);
-  const [value, setValue] = useState(""); // For modal input
   const [newCategory, setNewCategory] = useState(""); // For modal input
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null); // For viewing category
-  const [updateCategory, setUpdateCategory] = useState<UpdateCategoryType>({ name: "" }); // For updating category
-  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null); // For deleting category
+  const [selectedCategory, setSelectedCategory] = useState<CategoryResponse | null>(null); // For viewing category
+  const [updateCategoryState, setUpdateCategory] = useState({ name: "", categoryId: "" }); // For updating category
+  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null> (null); // For deleting category
   const [errorMessage, setErrorMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -34,19 +34,11 @@ function Category() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        `${BASE_URL}/category/allCategory?page=${currentPage}&limit=${itemsPerPage}&search=${searchQuery}`,
-        {
-          headers: {
-            Authorization: `Bearer ${auth?.token}`,
-          },
-        }
-      );
-      console.log("gategaryData:", res.data);
+      const categories = await getAllCategories(currentPage, itemsPerPage, searchQuery);
 
       setLoading(false);
-      setCategoryNameList(res.data.categories); // Adjust according to your response structure
-      setTotalPages(res.data.totalPages); // Adjust according to your response structure
+      setCategoryNameList(categories?.categories || []); // Adjust according to your response structure
+      setTotalPages(categories?.total || 0); // Adjust according to your response structure
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -63,21 +55,12 @@ function Category() {
     }
 
     try {
-      await axios.post(
-        `${BASE_URL}/category/new`,
-        { name: newCategory },
-        {
-          headers: {
-            Authorization: `Bearer ${auth?.token}`,
-          },
-        }
-      );
+      await addCategory({ name: newCategory });
       toast.success("Category Added");
       setNewCategory("");
       setErrorMessage("");
       fetchCategories(); // Refresh categories
-      const closeModalBtn = document.getElementById("closeModalButton");
-      if (closeModalBtn) (closeModalBtn as HTMLButtonElement).click(); // Close modal
+      document.getElementById("closeModalButton")?.click(); // Close modal
     } catch (error) {
       toast.error("Unable to Add");
       console.error("Error adding category:", error);
@@ -86,19 +69,10 @@ function Category() {
 
   const handleUpdate = async () => {
     try {
-      await axios.patch(
-        `${BASE_URL}/category/${updateCategory.Updateid}`,
-        { name: updateCategory.name },
-        {
-          headers: {
-            Authorization: `Bearer ${auth?.token}`,
-          },
-        }
-      );
+      await updateCategory({ name: updateCategoryState.name, categoryId: updateCategoryState.categoryId });
       toast.success("Categories Updated");
       fetchCategories();
-      const closeEditModalBtn = document.getElementById("closeEditModalButton");
-      if (closeEditModalBtn) (closeEditModalBtn as HTMLButtonElement).click(); // Close modal
+      document.getElementById("closeEditModalButton")?.click(); // Close modal
     } catch (error) {
       toast.error("Unable to update");
       console.error("Error updating category:", error);
@@ -107,16 +81,15 @@ function Category() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${BASE_URL}/category/${deleteCategoryId}`, {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`,
-        },
-      });
-      toast.success("Category Deleted");
-      fetchCategories();
-      setDeleteCategoryId(null);
-      const closeDeleteModalBtn = document.getElementById("closeDeleteModalButton");
-      if (closeDeleteModalBtn) (closeDeleteModalBtn as HTMLButtonElement).click(); // Close modal
+      if (deleteCategoryId) {
+        await deleteCategory(deleteCategoryId);
+        toast.success("Category Deleted");
+        fetchCategories();
+        setDeleteCategoryId(null);
+        document.getElementById("closeDeleteModalButton")?.click(); // Close modal
+      } else {
+        toast.error("No category selected for deletion");
+      }
     } catch (error) {
       toast.error("Unable to Delete");
       console.error("Error deleting category:", error);
@@ -226,7 +199,7 @@ function Category() {
                                 data-target="#editCategoryModal"
                                 onClick={() =>
                                   setUpdateCategory({
-                                    Updateid: category._id,
+                                    categoryId: category._id,
                                     name: category.name,
                                   })
                                 }
@@ -372,9 +345,9 @@ function Category() {
               <input
                 type="text"
                 className="form-control"
-                value={updateCategory.name}
+                value={updateCategoryState.name}
                 onChange={(e) =>
-                  setUpdateCategory({ ...updateCategory, name: e.target.value })
+                  setUpdateCategory({ ...updateCategoryState, name: e.target.value })
                 }
                 placeholder="Enter new category name"
               />

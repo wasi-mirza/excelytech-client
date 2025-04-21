@@ -13,7 +13,7 @@ const AdminSidebar = () => {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [expandedMenu, setExpandedMenu] = useState(null); // Track which menu is expanded
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null); // Track which menu is expanded
   const [ip, setIp] = useState("");
   const [browserInfo, setBrowserInfo] = useState("");
 
@@ -51,7 +51,7 @@ const AdminSidebar = () => {
     // setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const toggleMenu = (menu) => {
+  const toggleMenu = (menu: string | null) => {
     setExpandedMenu(menu);
   };
 
@@ -136,7 +136,7 @@ const AdminSidebar = () => {
                 }`}
               >
                 <a
-                  href={ROUTES.ADMIN.CATEGORYS}
+                  href={ROUTES.ADMIN.CATEGORIES}
                   className={`nav-link ${
                     expandedMenu === "productSuite" ? "active" : ""
                   }`}
@@ -162,7 +162,7 @@ const AdminSidebar = () => {
                 >
                   <li className="nav-item">
                     <NavLink
-                      to={ROUTES.ADMIN.CATEGORYS}
+                      to={ROUTES.ADMIN.CATEGORIES}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }
@@ -255,7 +255,7 @@ const AdminSidebar = () => {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      to={ROUTES.ADMIN.ALL_EMAILTEMPLATES}
+                      to={ROUTES.ADMIN.ALL_EMAIL_TEMPLATES}
                       className={({ isActive }) =>
                         isActive ? "nav-link active" : "nav-link"
                       }

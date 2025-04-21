@@ -24,14 +24,73 @@ import {
 import { savePdfToServer } from "./saveProposalPdfToServer";
 import { getPublicIp } from "../../../shared/utils/commonUtils";
 
+interface User {
+  _id: string;
+  email: string;
+  name: string;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  category: string;
+  currency: string;
+  totalCost: number;
+  tax: number;
+  imageUrl: string;
+}
+
+interface ProposalProduct {
+  productId: string;
+  currency: string;
+  name: string;
+  category: string;
+  oldCost: number;
+  newUpdatedCost: number;
+  discountType: "Fixed" | "Percentage";
+  quantity: number;
+  discount: number;
+  newTotalCost: number;
+  newTax: number;
+  newTotalCostWithTax: number;
+}
+
+interface ProposalTemplate {
+  _id: string;
+  title: string;
+  description: string;
+}
+
+interface ProposalData {
+  recipient: string | null;
+  emailTo: string | null;
+  title: string;
+  content: string;
+  products: ProposalProduct[];
+  grandTotalCurrency: string;
+  productTotal: number;
+  grandTotal: number;
+  discountOnGrandTotal: number;
+  finalAmount: number;
+  attachments: Array<{filename: string; path: string}>;
+  status: string;
+}
+
+interface FormErrors {
+  emailTo?: string;
+  title?: string;
+  content?: string;
+  products?: string;
+}
+
 const NewProposal = () => {
   const navigate = useNavigate();
   const [auth] = useAuth();
-  const [selectedProducts, setSelectedProducts] = useState(new Set());
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [showProductModal, setShowProductModal] = useState(false);
-  const [recipientId, setReceipientId] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [recipientId, setReceipientId] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [ip, setIp] = useState("");
   const [browserInfo, setBrowserInfo] = useState("");
 
@@ -50,7 +109,7 @@ const NewProposal = () => {
 
   const createUser = async () => {
     const email = proposalData.emailTo;
-    const userName = proposalData.emailTo.split("@")[0];
+    const userName = email?.split("@")[0] || "";
 
     const userData = {
       // Basic user information
@@ -92,27 +151,28 @@ const NewProposal = () => {
 
     try {
       const res = await axios.post(`${BASE_URL}/user/register`, userData);
-      // console.log(res);
       if (res.data) {
         setReceipientId(res.data._id);
         return true;
       }
       toast.success(" created Successfully");
       navigate("/admin-dashboard/allusers");
-    } catch (error) {
-      toast.error(error.response.data.message);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Error creating user");
       console.error(error);
       return false;
     }
   };
-  const handleEmailTo = (input) => {
+
+  const handleEmailTo = (input: string) => {
     setProposalData((prevData) => ({
       ...prevData,
       recipient: null,
       emailTo: input,
     }));
   };
-  const handleSelectecUserChange = (selectedUser) => {
+
+  const handleSelectecUserChange = (selectedUser: User | null) => {
     setSelectedUser(selectedUser);
 
     if (selectedUser) {
@@ -134,17 +194,17 @@ const NewProposal = () => {
     }
   };
 
-  const [proposalTemplates, setProposalTemplates] = useState([]);
+  const [proposalTemplates, setProposalTemplates] = useState<ProposalTemplate[]>([]);
   const [showModal, setShowModal] = useState(false);
   // Product data and pagination
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [moreAttachmentsToUpload, setMoreAttachmentsToUpload] = useState([]);
-  const [proposalData, setProposalData] = useState({
+  const [moreAttachmentsToUpload, setMoreAttachmentsToUpload] = useState<File[]>([]);
+  const [proposalData, setProposalData] = useState<ProposalData>({
     recipient: "",
     emailTo: "",
     title: "",
@@ -163,7 +223,7 @@ const NewProposal = () => {
   const [grandTotal, setGrandTotal] = useState(0);
   const [discountOnGrandTotal, setDiscountOnGrandTotal] = useState(0);
   const [finalAmount, setFinalAmount] = useState(0);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const editor = useRef(null);
   const editorConfig = {
@@ -189,10 +249,14 @@ const NewProposal = () => {
     showXPathInStatusbar: false,
     spellcheck: false,
   };
+
   // multiple attachments
-  const handleFileChange = (event) => {
-    setMoreAttachmentsToUpload(Array.from(event.target.files));
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setMoreAttachmentsToUpload(Array.from(event.target.files));
+    }
   };
+
   const handleUploadFiles = async () => {
     const formData = new FormData();
     moreAttachmentsToUpload.forEach((file) => {
@@ -203,10 +267,10 @@ const NewProposal = () => {
       const response = await axios.post(`${BASE_URL}/upload/docs`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${auth.token}`,
+          Authorization: `Bearer ${auth?.token}`,
         },
       });
-      response.data.files.map((file) => {
+      response.data.files.forEach((file: {filename: string; url: string}) => {
         const newAttachment = {
           filename: file.filename,
           path: `${BASE_URL}${file.url}`,
@@ -221,13 +285,14 @@ const NewProposal = () => {
     }
   };
 
-  const handleCurrencyChange = (e) => {
+  const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCurrency = e.target.value;
     setProposalData((prevData) => ({
       ...prevData,
       grandTotalCurrency: newCurrency,
     }));
   };
+
   // Open and close modal
   const handleShowProductModal = () => {
     setShowProductModal(true);
@@ -239,9 +304,10 @@ const NewProposal = () => {
       }));
     }
   };
+
   const handleCloseProductModal = () => setShowProductModal(false);
 
-  const handleCheckboxChange = (productId) => {
+  const handleCheckboxChange = (productId: string) => {
     setSelectedProducts((prevSelected) => {
       const newSelected = new Set(prevSelected);
       newSelected.has(productId)
@@ -267,7 +333,7 @@ const NewProposal = () => {
     }
   };
 
-  const handleSearchChange = (e) => setSearchQuery(e.target.value);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value);
 
   const handleNextPage = () => {
     if (currentPage < Math.ceil(totalProducts / productsPerPage)) {
@@ -288,7 +354,6 @@ const NewProposal = () => {
         headers: { Authorization: `Bearer ${auth.token}` },
       });
       setUsers(response.data);
-      // console.log("users", response.data.data);
     } catch (error) {
       console.error("Error fetching Users:", error);
     }
@@ -306,7 +371,7 @@ const NewProposal = () => {
     }
   };
 
-  const handleTemplateSelect = (templateContent) => {
+  const handleTemplateSelect = (templateContent: string) => {
     setProposalData((prevData) => ({
       ...prevData,
       content: templateContent,
@@ -321,11 +386,11 @@ const NewProposal = () => {
     setShowModal(false);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProposalData((prev) => ({ ...prev, [name]: value }));
     // Clear the error for the field as the user types
-    if (errors[name]) {
+    if (errors[name as keyof FormErrors]) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         [name]: "",
@@ -333,15 +398,16 @@ const NewProposal = () => {
     }
   };
 
-  const handleEditorChange = (newContent) => {
+  const handleEditorChange = (newContent: string) => {
     setProposalData((prevData) => ({
       ...prevData,
       content: newContent,
     }));
   };
+
   // Validation function
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: FormErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // Validate email
@@ -371,10 +437,11 @@ const NewProposal = () => {
 
     return Object.keys(newErrors).length === 0; // Return true if no errors
   };
-  const calculateTotal = (quantity, totalCost, discount, discountType) => {
-    quantity = parseFloat(quantity) || 0;
-    totalCost = parseFloat(totalCost) || 0;
-    discount = parseFloat(discount) || 0;
+
+  const calculateTotal = (quantity: number, totalCost: number, discount: number, discountType: string) => {
+    quantity = parseFloat(quantity.toString()) || 0;
+    totalCost = parseFloat(totalCost.toString()) || 0;
+    discount = parseFloat(discount.toString()) || 0;
 
     let total = quantity * totalCost;
 
@@ -388,6 +455,7 @@ const NewProposal = () => {
 
     return Math.max(0, total);
   };
+
   const calculateGrandTotals = () => {
     let newTotalCostWithTax = 0;
     let discount = 0;
@@ -412,16 +480,16 @@ const NewProposal = () => {
       finalAmount: finalAmount,
     }));
   };
-  const handleProductChange = (index, event) => {
+
+  const handleProductChange = (index: number, event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
     const updatedProducts = proposalData.products.map((product, i) =>
       i === index ? { ...product, [name]: value } : product
     );
 
-    const quantity = parseFloat(updatedProducts[index].quantity) || 1;
-    const discount = parseFloat(updatedProducts[index].discount) || 0;
-    const newUpdatedCost =
-      parseFloat(updatedProducts[index].newUpdatedCost) || 0;
+    const quantity = parseFloat(updatedProducts[index].quantity.toString()) || 1;
+    const discount = parseFloat(updatedProducts[index].discount.toString()) || 0;
+    const newUpdatedCost = parseFloat(updatedProducts[index].newUpdatedCost.toString()) || 0;
     const discountType = updatedProducts[index].discountType;
 
     updatedProducts[index].newTotalCost = calculateTotal(
@@ -432,20 +500,21 @@ const NewProposal = () => {
     );
 
     //totalWithTax Starts
-    const taxRate = parseFloat(updatedProducts[index].newTax) || 0;
+    const taxRate = parseFloat(updatedProducts[index].newTax.toString()) || 0;
     const totalTax = (updatedProducts[index].newTotalCost * taxRate) / 100;
     updatedProducts[index].newTotalCostWithTax =
-      updatedProducts[index].newTotalCost + parseFloat(totalTax) || 0;
+      updatedProducts[index].newTotalCost + totalTax;
     console.log("updatedProducts", updatedProducts);
     setProposalData((prevData) => ({ ...prevData, products: updatedProducts }));
   };
 
-  const removeProduct = (index) => {
+  const removeProduct = (index: number) => {
     setProposalData((prev) => ({
       ...prev,
       products: prev.products.filter((_, i) => i !== index),
     }));
   };
+
   const handleSavePdf = async () => {
     try {
       const response = await savePdfToServer(proposalData, auth?.token);
@@ -470,15 +539,15 @@ const NewProposal = () => {
     }
   };
 
-  const sendProposal = async (e) => {
+  const sendProposal = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Run validation
     if (!validateForm()) {
       console.log("Validation failed.");
-
       return;
     }
+
     console.log("ProposalData", proposalData);
     // First, save the PDF (if needed) and check if it's successful
     const status = await handleSavePdf();
@@ -552,6 +621,7 @@ const NewProposal = () => {
   useEffect(() => {
     calculateGrandTotals();
   }, [proposalData.products]);
+
   return (
     <div className="content-wrapper">
       <section className="content-header">
@@ -578,7 +648,7 @@ const NewProposal = () => {
                   options={users}
                   labelKey="email" // Adjust based on your user object, e.g., 'email' or 'name'
                   onChange={(selected) => {
-                    handleSelectecUserChange(selected[0] || null);
+                    handleSelectecUserChange(selected[0] as any);
 
                     // Clear the emailTo error if a user is selected
                     if (errors.emailTo && selected.length > 0) {
@@ -668,7 +738,7 @@ const NewProposal = () => {
                       type="select"
                       name="currency"
                       value={proposalData.grandTotalCurrency}
-                      onChange={handleCurrencyChange}
+                      onChange={handleCurrencyChange as any}
                       className="form-control w-50"
                     >
                       <option value="CAD">CAD - Canadian Dollar</option>
@@ -828,14 +898,15 @@ const NewProposal = () => {
                                     style={{ marginRight: "10px" }}
                                   />
                                   <img
-                                    onError={(e) =>
-                                      (e.target.src =
-                                        BASE_URL.replace("/api", "") +
-                                        "/uploads/placeholder.png")
-                                    }
+                                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.src = BASE_URL ? 
+                                        BASE_URL.replace("/api", "") + "/uploads/placeholder.png" :
+                                        "/uploads/placeholder.png";
+                                    }}
                                     className="img-fluid img-cover rounded"
                                     src={
-                                      BASE_URL.replace("/api", "") +
+                                      BASE_URL?.replace("/api", "") +
                                       product.imageUrl
                                     }
                                     alt="product image"
@@ -853,7 +924,7 @@ const NewProposal = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="4" className="text-center">
+                            <td colSpan={4} className="text-center">
                               No products found.
                             </td>
                           </tr>
@@ -900,22 +971,22 @@ const NewProposal = () => {
                           (p) => p._id === productId
                         );
                         return {
-                          productId: product._id,
-                          currency: product.currency,
-                          name: product.name,
-                          category: product.category,
-                          oldCost: product.totalCost,
-                          newUpdatedCost: product.totalCost,
+                          productId: product?._id,
+                          currency: product?.currency,
+                          name: product?.name,
+                          category: product?.category,
+                          oldCost: product?.totalCost,
+                          newUpdatedCost: product?.totalCost,
                           discountType: "Fixed",
                           quantity: 1,
                           discount: 0,
-                          newTotalCost: product.totalCost,
-                          newTax: product.tax,
-                          newTotalCostWithTax: product.totalCost,
+                          newTotalCost: product?.totalCost,
+                          newTax: product?.tax,
+                          newTotalCostWithTax: product?.totalCost,
                         };
                       });
 
-                      setProposalData((prevData) => ({
+                      setProposalData((prevData: any) => ({
                         ...prevData,
                         products: [
                           ...prevData.products,
@@ -1055,7 +1126,7 @@ const NewProposal = () => {
 
                   {/* Responsive Card Layout for Small Devices */}
                   <div className="d-md-none">
-                    {proposalData.products.map((product, index) => (
+                    {proposalData.products.map((product: any, index: any) => (
                       <div key={index} className="card mb-3">
                         <div className="card-body">
                           <div className="d-flex justify-content-between align-items-center">

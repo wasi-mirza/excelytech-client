@@ -28,14 +28,14 @@ const NewSubscription = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const calculateSubscriptionEndDate = (
-    subscriptionStartDate,
-    subscriptionDurationInMonths
+    subscriptionStartDate: any,
+    subscriptionDurationInMonths: any
   ) => {
     const startDate = new Date(subscriptionStartDate);
     startDate.setMonth(startDate.getMonth() + subscriptionDurationInMonths);
     return startDate;
   };
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const endDate = new Date(
       calculateSubscriptionEndDate(
@@ -48,7 +48,7 @@ const NewSubscription = () => {
     setSubscriptionData({ ...subscriptionData, [name]: value });
   };
 
-  const handleSelectecUserChange = (selectedUser) => {
+  const handleSelectecUserChange = (selectedUser: any | null) => {
     setSelectedUser(selectedUser);
 
     if (selectedUser) {
@@ -56,7 +56,7 @@ const NewSubscription = () => {
       const emailTo = selectedUser.email;
       const ownerEmail = selectedUser.businessDetails.ownerEmail;
 
-      setSubscriptionData((prevData) => ({
+      setSubscriptionData((prevData: any) => ({
         ...prevData,
         customer: customer,
         emailTo: emailTo,
@@ -64,7 +64,7 @@ const NewSubscription = () => {
       }));
     } else {
       // Reset the values if no user is selected
-      setSubscriptionData((prevData) => ({
+      setSubscriptionData((prevData: any) => ({
         ...prevData,
         customer: null,
         emailTo: null,
@@ -106,17 +106,17 @@ const NewSubscription = () => {
   const [grandTotal, setGrandTotal] = useState(0);
   const [discountOnGrandTotal, setDiscountOnGrandTotal] = useState(0);
   const [finalAmount, setFinalAmount] = useState(0);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<any>({});
 
-  const handleCurrencyChange = (e) => {
+  const handleCurrencyChange = (e: any) => {
     const newCurrency = e.target.value;
-    setSubscriptionData((prevData) => ({
+    setSubscriptionData((prevData: any) => ({
       ...prevData,
       grandTotalCurrency: newCurrency,
     }));
   };
-  const handleWelcomeSendMsg = (sendMsg) => {
-    setSubscriptionData((prevData) => ({
+  const handleWelcomeSendMsg = (sendMsg: boolean) => {
+    setSubscriptionData((prevData: any) => ({
       ...prevData,
       sendWelcomeMsg: sendMsg,
     }));
@@ -126,7 +126,7 @@ const NewSubscription = () => {
     setShowProductModal(true);
     // Clear the emailTo error if user starts typing
     if (errors.products) {
-      setErrors((prevErrors) => ({
+      setErrors((prevErrors: any) => ({
         ...prevErrors,
         products: "",
       }));
@@ -134,8 +134,8 @@ const NewSubscription = () => {
   };
   const handleCloseProductModal = () => setShowProductModal(false);
 
-  const handleCheckboxChange = (productId) => {
-    setSelectedProducts((prevSelected) => {
+  const handleCheckboxChange = (productId: string) => {
+    setSelectedProducts((prevSelected: any) => {
       const newSelected = new Set(prevSelected);
       newSelected.has(productId)
         ? newSelected.delete(productId)
@@ -160,7 +160,7 @@ const NewSubscription = () => {
     }
   };
 
-  const handleSearchChange = (e) => setSearchQuery(e.target.value);
+  const handleSearchChange = (e: any) => setSearchQuery(e.target.value);
 
   const handleNextPage = () => {
     if (currentPage < Math.ceil(totalProducts / productsPerPage)) {
@@ -177,7 +177,7 @@ const NewSubscription = () => {
   const [proposalsSentToSelectedCustomer, setProposalsSentToSelectedCustomer] =
     useState([]);
 
-  const fetchProposalsSentToSelectedClient = async (id) => {
+  const fetchProposalsSentToSelectedClient = async (id: string) => {
     if (!auth?.token) return;
     try {
       const response = await axios.get(
@@ -211,7 +211,7 @@ const NewSubscription = () => {
 
   // Validation function
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: any = {};
 
     // Validate email
     if (!subscriptionData.customer) {
@@ -229,10 +229,10 @@ const NewSubscription = () => {
     return Object.keys(newErrors).length === 0; // Return true if no errors
   };
 
-  const calculateTotal = (quantity, totalCost, discount, discountType) => {
-    quantity = parseFloat(quantity) || 0;
-    totalCost = parseFloat(totalCost) || 0;
-    discount = parseFloat(discount) || 0;
+  const calculateTotal = (quantity: number, totalCost: number, discount: number, discountType: string) => {
+    quantity = parseFloat(quantity.toString()) || 0;
+    totalCost = parseFloat(totalCost.toString()) || 0;
+    discount = parseFloat(discount.toString()) || 0;
 
     let total = quantity * totalCost;
 
@@ -250,7 +250,7 @@ const NewSubscription = () => {
     let newTotalCostWithTax = 0;
     let discount = 0;
 
-    subscriptionData.products.forEach((product) => {
+    subscriptionData.products.forEach((product: any) => {
       newTotalCostWithTax += product.newTotalCostWithTax || 0;
       discount += product.discount || 0;
     });
@@ -270,9 +270,9 @@ const NewSubscription = () => {
       finalAmount: finalAmount,
     }));
   };
-  const handleProductChange = (index, event) => {
+  const handleProductChange = (index: number, event: any) => {
     const { name, value } = event.target;
-    const updatedProducts = subscriptionData.products.map((product, i) =>
+    const updatedProducts = subscriptionData.products.map((product: any, i: number) =>
       i === index ? { ...product, [name]: value } : product
     );
 
@@ -293,24 +293,24 @@ const NewSubscription = () => {
     const taxRate = parseFloat(updatedProducts[index].newTax) || 0;
     const totalTax = (updatedProducts[index].newTotalCost * taxRate) / 100;
     updatedProducts[index].newTotalCostWithTax =
-      updatedProducts[index].newTotalCost + parseFloat(totalTax) || 0;
+      updatedProducts[index].newTotalCost + parseFloat(totalTax.toString()) || 0;
     console.log("updatedProducts", updatedProducts);
-    setSubscriptionData((prevData) => ({
+    setSubscriptionData((prevData: any) => ({
       ...prevData,
       products: updatedProducts,
     }));
   };
 
-  const removeProduct = (index) => {
-    setSubscriptionData((prev) => ({
+  const removeProduct = (index: number) => {
+    setSubscriptionData((prev: any) => ({
       ...prev,
-      products: prev.products.filter((_, i) => i !== index),
+      products: prev.products.filter((_: any, i: number) => i !== index),
     }));
   };
 
   // const [sendWelcomeMsg, setSendWelcomeMsg] = useState(false);
 
-  const sendProposal = async (e) => {
+  const sendProposal = async (e: any) => {
     e.preventDefault();
 
     // Run validation
@@ -382,11 +382,11 @@ const NewSubscription = () => {
                         id="user-selector"
                         options={users}
                         labelKey="email" // Adjust based on your user object, e.g., 'email' or 'name'
-                        onChange={(selected) => {
+                        onChange={(selected: any) => {
                           handleSelectecUserChange(selected[0] || null);
 
                           if (errors.customer && selected.length > 0) {
-                            setErrors((prevErrors) => ({
+                            setErrors((prevErrors: any) => ({
                               ...prevErrors,
                               customer: "",
                             }));
@@ -468,7 +468,7 @@ const NewSubscription = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {subscriptionData.products.map((product, index) => (
+                            {subscriptionData.products.map((product: any, index: number) => (
                               <tr key={index}>
                                 <td>
                                   <strong>{product.name}</strong>
@@ -572,7 +572,7 @@ const NewSubscription = () => {
 
                       {/* Responsive Card Layout for Small Devices */}
                       <div className="d-md-none">
-                        {subscriptionData.products.map((product, index) => (
+                        {subscriptionData.products.map((product: any, index: number) => (
                           <div key={index} className="card mb-3">
                             <div className="card-body">
                               <div className="d-flex justify-content-between align-items-center">
@@ -802,7 +802,7 @@ const NewSubscription = () => {
               </thead>
               <tbody>
                 {products.length > 0 ? (
-                  products.map((product) => (
+                  products.map((product: any) => (
                     <tr
                       key={product._id}
                       onClick={() => handleCheckboxChange(product._id)}
@@ -820,14 +820,14 @@ const NewSubscription = () => {
                             style={{ marginRight: "10px" }}
                           />
                           <img
-                            onError={(e) =>
+                            onError={(e: any) =>
                               (e.target.src =
-                                BASE_URL.replace("/api", "") +
+                                BASE_URL?.replace("/api", "") +
                                 "/uploads/placeholder.png")
                             }
                             className="img-fluid img-cover rounded"
                             src={
-                              BASE_URL.replace("/api", "") + product.imageUrl
+                              BASE_URL?.replace("/api", "") + product.imageUrl
                             }
                             alt="product image"
                             height={50}
@@ -842,7 +842,7 @@ const NewSubscription = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="text-center">
+                    <td colSpan={4} className="text-center">
                       No products found.
                     </td>
                   </tr>
@@ -880,8 +880,10 @@ const NewSubscription = () => {
             variant="primary"
             onClick={() => {
               const selectedProductArray = Array.from(selectedProducts).map(
-                (productId) => {
-                  const product = products.find((p) => p._id === productId);
+                (productId: any) => {
+                  const product: any = products.find(
+                    (p: any) => p._id === productId
+                  );
                   return {
                     productId: product._id,
                     currency: product.currency,
@@ -899,7 +901,7 @@ const NewSubscription = () => {
                 }
               );
 
-              setSubscriptionData((prevData) => ({
+              setSubscriptionData((prevData: any) => ({
                 ...prevData,
                 products: [...prevData.products, ...selectedProductArray],
               }));

@@ -35,23 +35,23 @@ const ProposalDetails = () => {
   const { id } = useParams();
   const [auth] = useAuth();
   const navigate = useNavigate();
-  const [proposal, setProposal] = useState(null);
+  const [proposal, setProposal] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [updateStatus, setUpdateStatus] = useState(null);
+  const [updateStatus, setUpdateStatus] = useState<string | null>(null);
 
   const [isFirstModalOpen, setFirstModalOpen] = useState(false);
 
   const toggleFirstModal = () => setFirstModalOpen(!isFirstModalOpen);
 
   const handleUpdateStatusVar = () => {
-    toggleFirstModal(true);
+    toggleFirstModal();
   };
 
   const handleConfirmUpdate = async () => {
-    await handleUpdateStatus(updateStatus);
+    await handleUpdateStatus(updateStatus || "");
   };
 
-  const handleUpdateStatus = async (status) => {
+  const handleUpdateStatus = async (status: string) => {
     // const subscriptionOn = status === "Accepted" ? true : false;
     // console.log("subscriptionOn", subscriptionOn, status);
 
@@ -95,7 +95,7 @@ const ProposalDetails = () => {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching proposal:", error);
-      toast.error(error);
+      toast.error(error as string || "Error fetching proposal");
       setLoading(false);
     }
   };
@@ -191,7 +191,7 @@ const ProposalDetails = () => {
                         className="form-control"
                         id="status"
                         name="status"
-                        value={updateStatus}
+                        value={updateStatus || ""}
                         style={{ width: "auto" }}
                         onChange={(e) => setUpdateStatus(e.target.value)}
                       >
@@ -239,7 +239,7 @@ const ProposalDetails = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {proposal.products.map((product, index) => (
+                  {proposal.products.map((product: any, index: number) => (
                     <tr key={index} className="align-middle">
                       <td className="font-weight-bold text-dark">
                         {product.productId.name}
@@ -307,7 +307,7 @@ const ProposalDetails = () => {
                 <CardBody>
                   {proposal.attachments.length > 0 ? (
                     <ListGroup>
-                      {proposal.attachments.map((attachment, index) => (
+                      {proposal.attachments.map((attachment: any, index: number) => (
                         <ListGroupItem
                           key={index}
                           className="d-flex justify-content-between align-items-center"
@@ -335,7 +335,7 @@ const ProposalDetails = () => {
       <StatusConfirmationModal
         isOpen={isFirstModalOpen}
         toggle={toggleFirstModal}
-        proposalStatus={updateStatus}
+        proposalStatus={updateStatus || ""}
         onConfirm={handleConfirmUpdate}
       />
     </div>
@@ -352,6 +352,11 @@ const StatusConfirmationModal = ({
   // proposalId,
   // customer,
   // handleSubscriptionData,
+}: {
+  isOpen: boolean;
+  toggle: () => void;
+  proposalStatus: string;
+  onConfirm: () => Promise<void>;
 }) => {
   // const [formData, setFormData] = useState({
   //   customer: customer,

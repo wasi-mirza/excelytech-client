@@ -5,30 +5,16 @@ import moment from "moment";
 import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import toast from "react-hot-toast";
-import { getPublicIp } from "../../../shared/utils/commonUtils";
+import { logUserActivity } from "../../../shared/api/endpoints/user";
+import { getProductById } from "../../../shared/api/endpoints/product";
+import { Product } from "../../../shared/api/types/product.types";
 
 function ViewProduct() {
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<Product>();
   const [auth] = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
-  let newUrl = BASE_URL.replace("/api", "");
-
-  const [ip, setIp] = useState("");
-  const [browserInfo, setBrowserInfo] = useState("");
-
-  useEffect(() => {
-    getPublicIp()
-      .then((ip) => setIp(ip))
-      .catch((error) => console.error("Error fetching IP:", error));
-
-    // Get Browser Information
-    const getBrowserInfo = () => {
-      setBrowserInfo(navigator.userAgent);
-    };
-
-    getBrowserInfo();
-  }, []);
+  let newUrl = BASE_URL?.replace("/api", "");
 
   const handleEdit = () => {
     navigate(`/admin-dashboard/updateproduct/${id}`, { replace: true });
@@ -57,29 +43,14 @@ function ViewProduct() {
 
   const getProduct = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/product/${id}`, {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`,
-        },
-      });
+      const res = await getProductById(id);
       setProduct(res.data);
       if (res.status == 200 || res.status == 201) {
-        const response = axios.post(
-          `${BASE_URL}/useractivity/`,
-          {
-            userId: auth?.user?._id,
-            activityType: "VIEW_PAGE",
-            description: "View product page",
-            ipAddress: ip,
-            userAgent: browserInfo,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${auth?.token}`,
-            },
-          }
-        );
-        console.log("View product page", response);
+        await logUserActivity({
+          userId: auth?.user?._id,
+          activityType: "VIEW_PAGE",
+          description: "View product page"
+        });
       }
     } catch (error) {
       console.error(error);
@@ -137,7 +108,7 @@ function ViewProduct() {
               <div className="card-body">
                 <div className="text-center mb-3">
                   <img
-                    onError={(e) =>
+                    onError={(e: any) =>
                       (e.target.src = `${newUrl}/uploads/placeholder.png`)
                     }
                     className="img-fluid img-cover rounded"

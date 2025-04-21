@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 import { CardFooter, Modal } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import JoditEditor from "jodit-react";
 import toast from "react-hot-toast";
-import { BASE_URL } from "../../utils/endPointNames";
+import { BASE_URL } from "../../../shared/utils/endPointNames";
 import {
   Button,
   Card,
@@ -25,10 +25,10 @@ const UpdateProposal = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [auth] = useAuth();
-  const [proposal, setProposal] = useState(null);
-  const [proposalData, setProposalData] = useState(null);
+  const [proposal, setProposal] = useState<any>(null);
+  const [proposalData, setProposalData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedProducts, setSelectedProducts] = useState(new Set());
+  const [selectedProducts, setSelectedProducts] = useState<any>(new Set());
   const [showProductModal, setShowProductModal] = useState(false);
   // Fetch proposal data
   const fetchProposal = async () => {
@@ -40,11 +40,11 @@ const UpdateProposal = () => {
       });
       setProposal(response.data);
       setProposalData(response.data);
-      console.log("status", updateStatus);
+      console.log("status", response.data);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching proposal:", error);
-      toast.error(error);
+      toast.error(error as string || "Error fetching proposal");
       setLoading(false);
     }
   };
@@ -196,7 +196,7 @@ const UpdateProposal = () => {
     spellcheck: false,
   };
   // multiple attachments
-  const handleFileChange = (event) => {
+  const handleFileChange = (event: any) => {
     setMoreAttachmentsToUpload(Array.from(event.target.files));
   };
   const handleUploadFiles = async () => {
@@ -212,7 +212,7 @@ const UpdateProposal = () => {
           Authorization: `Bearer ${auth.token}`,
         },
       });
-      response.data.files.map((file) => {
+      response.data.files.map((file: any) => {
         const newAttachment = {
           filename: file.filename,
           path: `${BASE_URL}${file.url}`,
@@ -234,9 +234,9 @@ const UpdateProposal = () => {
 
   // };
   // Function to handle currency change
-  const handleCurrencyChange = (e) => {
+  const handleCurrencyChange = (e: any) => {
     const newCurrency = e.target.value;
-    setProposalData((prevData) => ({
+    setProposalData((prevData: any) => ({
       ...prevData,
       grandTotalCurrency: newCurrency,
     }));
@@ -248,7 +248,7 @@ const UpdateProposal = () => {
     let total = 0;
     let discount = 0;
 
-    proposalData.products.forEach((product) => {
+    proposalData.products.forEach((product: any) => {
       total += product.total || 0;
       discount += product.discount || 0;
     });
@@ -260,7 +260,7 @@ const UpdateProposal = () => {
     setDiscountOnGrandTotal(discount);
     setFinalAmount(finalAmount);
 
-    setProposalData((prevData) => ({
+    setProposalData((prevData: any) => ({
       ...prevData,
       productTotal: total,
       grandTotal: total,
@@ -269,8 +269,8 @@ const UpdateProposal = () => {
     }));
   };
 
-  const handleCheckboxChange = (productId) => {
-    setSelectedProducts((prevSelected) => {
+  const handleCheckboxChange = (productId: any) => {
+    setSelectedProducts((prevSelected: any) => {
       const newSelected = new Set(prevSelected);
       newSelected.has(productId)
         ? newSelected.delete(productId)
@@ -295,7 +295,7 @@ const UpdateProposal = () => {
     }
   };
 
-  const handleSearchChange = (e) => setSearchQuery(e.target.value);
+  const handleSearchChange = (e: any) => setSearchQuery(e.target.value);
 
   const handleNextPage = () => {
     if (currentPage < Math.ceil(totalProducts / productsPerPage)) {
@@ -315,7 +315,7 @@ const UpdateProposal = () => {
       const response = await axios.get(`${BASE_URL}/user/clients`, {
         headers: { Authorization: `Bearer ${auth.token}` },
       });
-      setUsers(response.data);
+      // setUsers(response.data);
       // console.log("users", response.data.data);
     } catch (error) {
       console.error("Error fetching Users:", error);
@@ -334,27 +334,27 @@ const UpdateProposal = () => {
     }
   };
 
-  const handleTemplateSelect = (templateContent) => {
-    setProposalData((prevData) => ({
+  const handleTemplateSelect = (templateContent: any) => {
+    setProposalData((prevData: any) => ({
       ...prevData,
       content: templateContent,
     }));
     setShowModal(false);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
-    setProposalData((prev) => ({ ...prev, [name]: value }));
+    setProposalData((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  const handleEditorChange = (newContent) => {
-    setProposalData((prevData) => ({
+  const handleEditorChange = (newContent: any) => {
+    setProposalData((prevData: any) => ({
       ...prevData,
       content: newContent,
     }));
   };
 
-  const calculateTotal = (quantity, totalCost, discount, discountType) => {
+  const calculateTotal = (quantity: any, totalCost: any, discount: any, discountType: any) => {
     quantity = parseFloat(quantity) || 0;
     totalCost = parseFloat(totalCost) || 0;
     discount = parseFloat(discount) || 0;
@@ -372,9 +372,9 @@ const UpdateProposal = () => {
     return Math.max(0, total);
   };
 
-  const handleProductChange = (index, event) => {
+  const handleProductChange = (index: any, event: any) => {
     const { name, value } = event.target;
-    const updatedProducts = proposalData.products.map((product, i) =>
+    const updatedProducts = proposalData.products.map((product: any, i: any) =>
       i === index ? { ...product, [name]: value } : product
     );
 
@@ -390,18 +390,18 @@ const UpdateProposal = () => {
       discountType
     );
     console.log("updatedProducts", updatedProducts);
-    setProposalData((prevData) => ({ ...prevData, products: updatedProducts }));
+    setProposalData((prevData: any) => ({ ...prevData, products: updatedProducts }));
   };
 
-  const removeProduct = (index) => {
-    setProposalData((prev) => ({
+  const removeProduct = (index: any) => {
+    setProposalData((prev: any) => ({
       ...prev,
-      products: prev.products.filter((_, i) => i !== index),
+      products: prev.products.filter((_: any, i: any) => i !== index),
     }));
   };
   const handleSavePdf = async () => {
     try {
-      const response = await savePdfToServer(proposalData, auth?.token);
+      const response = await savePdfToServer(proposalData as any, auth?.token);
       if (response) {
         const newAttachment = {
           filename: response.filename,
@@ -423,7 +423,7 @@ const UpdateProposal = () => {
     }
   };
 
-  const sendProposal = async (e) => {
+  const sendProposal = async (e: any) => {
     e.preventDefault();
 
     // First, save the PDF (if needed) and check if it's successful
@@ -442,17 +442,17 @@ const UpdateProposal = () => {
 
     if (status && uploadFilesDone) {
       try {
-        if (proposalData.recipient === null) {
+        if (proposalData?.recipient === null) {
           // create user
-          const res = await createUser();
-          if (!res) {
-            return;
-          }
+          // const res = await createUser();
+          // if (!res) {
+          //   return;
+          // }
         }
         const res = await axios.post(
           `${BASE_URL}/proposal/new`,
           {
-            proposalData,
+            proposalData: proposalData as any,
           },
           {
             headers: {
@@ -476,7 +476,7 @@ const UpdateProposal = () => {
 
   useEffect(() => {
     calculateGrandTotals();
-  }, [proposalData.products]);
+  }, [proposalData?.products]);
   return (
     <div className="content-wrapper">
       <div className="container-fluid">
@@ -486,17 +486,18 @@ const UpdateProposal = () => {
             <Form>
               <FormGroup>
                 <Label>Email To</Label>
-                <Typeahead
+                {/* TODO: Add Typeahead I have commented it out because it is not working handleSelectecUserChange function is commented & even set users & create user function is commented */}
+                {/* <Typeahead
                   id="user-selector"
-                  options={users}
+                  options={users as any}
                   labelKey="email" // Adjust based on your user object, e.g., 'email' or 'name'
-                  onChange={(selected) =>
+                  onChange={(selected: any) =>
                     handleSelectecUserChange(selected[0] || null)
                   }
-                  onInputChange={(input) => handleEmailTo(input)}
+                  onInputChange={(input: any) => handleEmailTo(input)}
                   selected={selectedUser ? [selectedUser] : []}
                   placeholder="Choose a user"
-                />
+                /> */}
               </FormGroup>
               <FormGroup>
                 <Label>Title</Label>
@@ -523,7 +524,7 @@ const UpdateProposal = () => {
                 </Modal.Header>
                 <Modal.Body>
                   <ul className="list-unstyled">
-                    {proposalTemplates.map((template) => (
+                    {proposalTemplates.map((template: any) => (
                       <li key={template._id} className="mb-2">
                         <button
                           className="btn btn-secondary btn-block text-left"
@@ -603,7 +604,7 @@ const UpdateProposal = () => {
                   <div className="card-body table-responsive">
                     <table className="table table-bordered table-striped">
                       <tbody>
-                        {moreAttachmentsToUpload.map((attachment, index) => (
+                        {moreAttachmentsToUpload.map((attachment: any, index: any) => (
                           <tr key={index}>
                             <td>{attachment.name}</td>
                           </tr>
@@ -666,7 +667,7 @@ const UpdateProposal = () => {
                       </thead>
                       <tbody>
                         {products.length > 0 ? (
-                          products.map((product) => (
+                          products.map((product: any) => (
                             <tr
                               key={product._id}
                               onClick={() => handleCheckboxChange(product._id)}
@@ -684,7 +685,7 @@ const UpdateProposal = () => {
                                     style={{ marginRight: "10px" }}
                                   />
                                   <img
-                                    onError={(e) =>
+                                    onError={(e: any) =>
                                       (e.target.src =
                                         BASE_URL + "/uploads/placeholder.png")
                                     }
@@ -705,7 +706,7 @@ const UpdateProposal = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="4" className="text-center">
+                            <td colSpan={4} className="text-center">
                               No products found.
                             </td>
                           </tr>
@@ -748,11 +749,11 @@ const UpdateProposal = () => {
                       const selectedProductArray = Array.from(
                         selectedProducts
                       ).map((productId) => {
-                        const product = products.find(
-                          (p) => p._id === productId
+                        const product: any = products.find(
+                          (p: any) => p._id === productId
                         );
                         return {
-                          productId: product._id,
+                          productId: product?._id,
                           currency: product.currency,
                           name: product.name,
                           category: product.category,
@@ -764,7 +765,7 @@ const UpdateProposal = () => {
                         };
                       });
 
-                      setProposalData((prevData) => ({
+                      setProposalData((prevData: any) => ({
                         ...prevData,
                         products: [
                           ...prevData.products,
@@ -800,7 +801,7 @@ const UpdateProposal = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {proposalData.products.map((product, index) => (
+                      {proposalData.products.map((product: any, index: any) => (
                         <tr key={index}>
                           <td>
                             <div>
@@ -880,7 +881,7 @@ const UpdateProposal = () => {
 
                   {/* Responsive Card Layout for Small Devices */}
                   <div className="d-md-none">
-                    {proposalData.products.map((product, index) => (
+                    {proposalData.products.map((product: any, index: any) => (
                       <div key={index} className="card mb-3">
                         <div className="card-body">
                           <div className="d-flex justify-content-between align-items-center">

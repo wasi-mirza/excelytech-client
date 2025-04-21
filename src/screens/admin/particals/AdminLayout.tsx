@@ -67,7 +67,7 @@ const AdminLayout = () => {
         />
       </div> */}
       {/* <AdminNavbar /> */}
-      <AdminSidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <AdminSidebar />
       <div className="content">
         <Outlet />
       </div>

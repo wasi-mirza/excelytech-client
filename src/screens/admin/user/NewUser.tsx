@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import axios from "axios";
 import { toast } from "react-hot-toast"; // Ensure this import is correct
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { Typeahead } from "react-bootstrap-typeahead";
+import { newUserValidationSchema } from "../../../shared/validations/newUserValidation";
 
 const NewUser = () => {
   const [auth] = useAuth();
@@ -36,7 +36,7 @@ const NewUser = () => {
           },
         });
         setAdmins(
-          response.data.map((admin) => ({
+          response.data.map((admin: any) => ({
             id: admin._id,
             name: admin.name,
           }))
@@ -51,40 +51,6 @@ const NewUser = () => {
 
     fetchAdmins();
   }, [auth?.token]);
-
-  const validationSchema = Yup.object({
-    name: Yup.string().required("Name is required"),
-    phone: Yup.string()
-      .matches(/^[0-9]{10}$/, "Phone number should be 10 digits")
-      .required("Phone number is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    password: Yup.string().required("Password is required"),
-    businessDetails: Yup.object({
-      clientName: Yup.string().required("Client name is required"),
-      companyType: Yup.string().required("Company type is required"),
-      taxId: Yup.string().required("Tax ID is required"),
-      // accountManagers: Yup.string().required("Account Manager is required"),
-      employeeSize: Yup.string().required("Employee size is required"),
-      ownerPhone: Yup.string().required("Owner phone is required"),
-      ownerEmail: Yup.string()
-        .email("Invalid email")
-        .required("Owner email is required"),
-    }),
-    timeZone: Yup.string().required("Time zone is required"),
-    address: Yup.object({
-      street1: Yup.string().required("Street address is required"),
-      street2: Yup.string().required("Street address is required"),
-
-      zipCode: Yup.string().required("ZIP Code is required"),
-      city: Yup.string().required("City is required"),
-      state: Yup.string().required("State is required"),
-      country: Yup.string().required("country is required"),
-    }),
-    allowLogin: Yup.boolean(),
-    activeAccount: Yup.boolean(),
-    bannedAccount: Yup.boolean(),
-    userAgreementUrl: Yup.string().required("User Agreement is required"),
-  });
 
   const formik = useFormik({
     initialValues: {
@@ -120,7 +86,7 @@ const NewUser = () => {
       bannedAccount: false,
       userAgreementUrl: null,
     },
-    validationSchema,
+    validationSchema: newUserValidationSchema,
     onSubmit: async (values) => {
       console.log("clicked on submit", values);
 
@@ -183,7 +149,7 @@ const NewUser = () => {
           toast.success("User created successfully");
           navigate("/admin-dashboard/allusers");
         }
-      } catch (error) {
+      } catch (error: any) {
         toast.error(error.response?.data?.message || "Error creating user");
       }
     },
@@ -259,15 +225,15 @@ const NewUser = () => {
                           <input
                             type="text"
                             name={`businessDetails.${field}`}
-                            value={formik.values.businessDetails[field]}
+                            value={formik.values.businessDetails[field as keyof typeof formik.values.businessDetails]}
                             onChange={formik.handleChange}
                             className="form-control"
                           />
                         )}
-                        {formik.touched.businessDetails?.[field] &&
-                          formik.errors.businessDetails?.[field] && (
+                        {formik.touched.businessDetails?.[field as keyof typeof formik.values.businessDetails] &&
+                          formik.errors.businessDetails?.[field as keyof typeof formik.values.businessDetails] && (
                             <div className="text-danger">
-                              {formik.errors.businessDetails[field]}
+                              {formik.errors.businessDetails[field as keyof typeof formik.values.businessDetails]}
                             </div>
                           )}
                       </div>
@@ -412,7 +378,7 @@ const NewUser = () => {
                           onChange={(event) => {
                             formik.setFieldValue(
                               "userAgreementUrl",
-                              event.currentTarget.files[0]
+                              event.currentTarget.files?.[0]
                             );
                           }}
                           accept=".pdf,.doc,.docx"
@@ -462,9 +428,8 @@ const NewUser = () => {
                     <h5 className="card-title">Address</h5>
                   </div>
                   <div className="card-body">
-                    .
-                    <div class="mb-3">
-                      <label for="" class="form-label">
+                    <div className="mb-3">
+                      <label htmlFor="" className="form-label">
                         Timezone
                       </label>
                       <select
@@ -497,14 +462,14 @@ const NewUser = () => {
                         <input
                           type="text"
                           name={`address.${field}`}
-                          value={formik.values.address[field]}
+                          value={formik.values.address[field as keyof typeof formik.values.address]}
                           onChange={formik.handleChange}
                           className="form-control"
                         />
-                        {formik.touched.address?.[field] &&
-                          formik.errors.address?.[field] && (
+                        {formik.touched.address?.[field as keyof typeof formik.values.address] &&
+                          formik.errors.address?.[field as keyof typeof formik.values.address] && (
                             <div className="text-danger">
-                              {formik.errors.address[field]}
+                              {formik.errors.address[field as keyof typeof formik.values.address]}
                             </div>
                           )}
                       </div>
@@ -528,7 +493,7 @@ const NewUser = () => {
                         labelKey="name"
                         placeholder="Select an Account Manager"
                         isLoading={loadingAdmins}
-                        onChange={(selected) => {
+                        onChange={(selected: any) => {
                           formik.setFieldValue(
                             "accountManagers",
                             selected[0]?.id || ""

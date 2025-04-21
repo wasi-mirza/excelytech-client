@@ -6,7 +6,6 @@ import JoditEditor from "jodit-react";
 import toast from "react-hot-toast";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 
-
 function UpdateProposalTemplate() {
   const [proposalTemplete, setProposalTemplete] = useState<any>(null);
   const [templete, setTemplete] = useState({
