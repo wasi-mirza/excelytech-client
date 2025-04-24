@@ -1,12 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
+import PageHeader from "../../../shared/components/PageHeader";
+import InfoCard from "../../../shared/components/InfoCard";
+import DataTable, { Column } from "../../../shared/components/DataTable";
+import {
+  Box,
+  Grid,
+  Typography,
+  Chip,
+  useTheme,
+} from "@mui/material";
+import {
+  AccountCircle as AccountCircleIcon,
+  Business as BusinessIcon,
+  CalendarToday as CalendarIcon,
+  AttachMoney as AttachMoneyIcon,
+  ShoppingCart as ShoppingCartIcon,
+} from "@mui/icons-material";
 
 function SubscriptionDetails() {
   const [auth] = useAuth();
   const { id } = useParams();
+  const theme = useTheme();
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
 
   useEffect(() => {
@@ -17,226 +35,249 @@ function SubscriptionDetails() {
         })
         .then((res) => {
           setSubscriptionInfo(res.data);
-          console.log("SubscriptionInfo", res.data);
         })
-        .catch((error) => console.error("Error fetching order:", error));
+        .catch((error) => console.error("Error fetching subscription:", error));
     }
   }, [auth, id]);
-  const calculateSubscriptionEndDate = (
-    subscriptionStartDate: any,
-    subscriptionDurationInMonths: any
-  ) => {
-    const startDate = new Date(subscriptionStartDate);
-    startDate.setMonth(startDate.getMonth() + subscriptionDurationInMonths);
-    return startDate;
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "sent":
+        return "warning";
+      case "active":
+        return "success";
+      case "inactive":
+        return "default";
+      default:
+        return "error";
+    }
   };
+
+  const productColumns: Column<any>[] = [
+    {
+      id: 'product',
+      label: 'Product',
+      format: (value) => (
+        <Box>
+          <Typography variant="subtitle2">{value?.productId?.sku || 'N/A'}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {value?.productId?.name || 'N/A'}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'originalCost',
+      label: 'Original Cost',
+      align: 'right',
+      format: (value) => `${subscriptionInfo?.grandTotalCurrency || ''} ${value?.productId?.cost || 0}`,
+    },
+    {
+      id: 'modifiedCost',
+      label: 'Modified Cost',
+      align: 'right',
+      format: (value) => `${subscriptionInfo?.grandTotalCurrency || ''} ${value?.newTotalCost || 0}`,
+    },
+    {
+      id: 'quantity',
+      label: 'Quantity',
+      align: 'right',
+      format: (value) => value?.quantity || 0,
+    },
+    {
+      id: 'discount',
+      label: 'Discount',
+      align: 'right',
+      format: (value) => `${value?.discount || 0} ${value?.discountType || 'N/A'}`,
+    },
+    {
+      id: 'tax',
+      label: 'Tax',
+      align: 'right',
+      format: (value) => `${value?.newTax || 0}%`,
+    },
+    {
+      id: 'totalCost',
+      label: 'Total Cost With Tax',
+      align: 'right',
+      format: (value) => `${subscriptionInfo?.grandTotalCurrency || ''} ${value?.newTotalCostWithTax || 0}`,
+    },
+  ];
+
+  const paymentColumns: Column<any>[] = [
+    {
+      id: 'amount',
+      label: 'Amount',
+      format: (value) => `${value?.currency || ''} ${value?.amount || 0}`,
+    },
+    {
+      id: 'createdAt',
+      label: 'Payment Date',
+      format: (value) => value ? new Date(value).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour12: true,
+      }) : 'N/A',
+    },
+    {
+      id: 'paymentMethod',
+      label: 'Payment Method',
+      format: (value) => value || 'N/A',
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      format: (value) => (
+        <Chip
+          label={value || 'N/A'}
+          color={
+            value === "completed"
+              ? "success"
+              : value === "pending"
+              ? "warning"
+              : "error"
+          }
+          size="small"
+        />
+      ),
+    },
+    {
+      id: 'stripeSubscriptionId',
+      label: 'Stripe Subscription ID',
+      format: (value) => value || "N/A",
+    },
+    {
+      id: 'stripePaymentIntentId',
+      label: 'Stripe Payment Intent ID',
+      format: (value) => value || "N/A",
+    },
+    {
+      id: 'stripeCustomerId',
+      label: 'Stripe Customer ID',
+      format: (value) => value || "N/A",
+    },
+  ];
+
+  if (!subscriptionInfo) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <InfoCard
+          title="Loading..."
+          items={[]}
+          headerColor={theme.palette.primary.light}
+        />
+      </Box>
+    );
+  }
+
   return (
-    <div className="content-wrapper">
-      <section className="content-header">
-        <h1>Subscription Details</h1>
-      </section>
+    <Box sx={{ p: 3 }}>
+      <PageHeader
+        title="Subscription Details"
+        showBackButton
+        backUrl="/admin-dashboard/subscriptions"
+      />
 
-      {subscriptionInfo ? (
-        <div className="invoice p-3 mb-3">
-          {/* Subscription Information */}
-          <div className="card card-olive card-outline">
-            <div className="card-header">
-              <h3 className="card-title">
-                Subscription Id: {subscriptionInfo.subscriptionId || "N/A"}
-              </h3>
-            </div>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-md-6">
-                  <strong>Account Owner:</strong>
-                  <br />
-                  {`${subscriptionInfo.customer?.name} (${subscriptionInfo.customer?.email})`}
-                </div>
-                <div className="col-md-6">
-                  <strong>Business Owner:</strong>
-                  <br />
-                  {`${subscriptionInfo.customer?.businessDetails.clientName} (${subscriptionInfo.customer?.businessDetails.ownerEmail})`}
-                </div>
-              </div>
-              <br />
-              <div className="row">
-                <div className="col-md-6">
-                  <p>
-                    <strong>Subscription Status:</strong>
-                    <span
-                      className={`badge ${
-                        subscriptionInfo.subscriptionStatus === "Sent"
-                          ? "badge-warning"
-                          : subscriptionInfo.subscriptionStatus === "active"
-                          ? "badge-success"
-                          : subscriptionInfo.subscriptionStatus === "inactive"
-                          ? "badge-dark"
-                          : "badge-danger"
-                      }`}
-                    >
-                      {subscriptionInfo.subscriptionStatus}
-                    </span>
-                  </p>
-                  <p>
-                    <strong>Total Amount:</strong>
-                    {`${subscriptionInfo.grandTotalCurrency} ${subscriptionInfo.finalAmount}`}
-                  </p>
-                  <p>
-                    <strong>Total no of products:</strong>
-                    {`${subscriptionInfo.products.length}`}
-                  </p>
-                </div>
-                <div className="col-md-6">
-                  <p>
-                    <strong>Duration:</strong>
-                    {subscriptionInfo.subscriptionDurationInMonths} Months
-                  </p>
-                  <p>
-                    <strong>Start Date:</strong>
-                    {new Date(
-                      subscriptionInfo.subscriptionStartDate
-                    ).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour12: true,
-                    })}
-                  </p>
-                  <p>
-                    <strong>End Date:</strong>
-                    {new Date(
-                      subscriptionInfo.subscriptionEndDate
-                    ).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour12: true,
-                    })}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Product Details */}
-          <div className="card card-olive card-outline mt-4">
-            <div className="card-header">
-              <h3 className="card-title">Product Details</h3>
-            </div>
-            <div className="card-body">
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Original Cost</th>
-                    <th>Modified Cost</th>
-                    <th>Quantity</th>
-                    <th>Discount</th>
-                    <th>Tax</th>
-                    <th>Total Cost With Tax</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {subscriptionInfo.products.map((product: any, index: any) => (
-                    <tr key={index}>
-                      <td>
-                        {product.productId.sku}
-                        <br />
-                        {product.productId.name}
-                      </td>
-                      <td>{`${subscriptionInfo.grandTotalCurrency} ${product.productId.cost}`}</td>
-                      <td>{`${subscriptionInfo.grandTotalCurrency} ${product.newTotalCost}`}</td>
-                      <td>{product.quantity}</td>
-                      <td>{`${product.discount} ${product.discountType}`}</td>
-                      <td>{product.newTax} %</td>
-                      <td>{`${subscriptionInfo.grandTotalCurrency} ${product.newTotalCostWithTax}`}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Payment Details */}
-          <div className="card card-olive card-outline mt-4">
-            <div className="card-header">
-              <h3 className="card-title">Payment Details</h3>
-            </div>
-            <div className="card-body">
-              <PaymentDetailsTable
-                paymentDetails={subscriptionInfo.paymentHistory}
+      <Grid container spacing={3}>
+        {/* Subscription Information */}
+        <Grid item xs={12}>
+          <InfoCard
+            title={`Subscription ID: ${subscriptionInfo.subscriptionId || "N/A"}`}
+            items={[]}
+            headerColor={theme.palette.primary.light}
+            rightContent={
+              <Chip
+                label={subscriptionInfo.subscriptionStatus}
+                color={getStatusColor(subscriptionInfo.subscriptionStatus)}
+                sx={{ ml: 2 }}
               />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="text-center">
-          <p>Loading Subscription details...</p>
-        </div>
-      )}
-    </div>
+            }
+          >
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                    Account Owner
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <AccountCircleIcon color="primary" />
+                    <Typography>
+                      {`${subscriptionInfo.customer?.name} (${subscriptionInfo.customer?.email})`}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                    Business Owner
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BusinessIcon color="primary" />
+                    <Typography>
+                      {`${subscriptionInfo.customer?.businessDetails.clientName} (${subscriptionInfo.customer?.businessDetails.ownerEmail})`}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'grid', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <AttachMoneyIcon color="primary" />
+                    <Typography>
+                      <strong>Total Amount:</strong>{" "}
+                      {`${subscriptionInfo.grandTotalCurrency} ${subscriptionInfo.finalAmount}`}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ShoppingCartIcon color="primary" />
+                    <Typography>
+                      <strong>Total Products:</strong> {subscriptionInfo.products.length}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CalendarIcon color="primary" />
+                    <Typography>
+                      <strong>Duration:</strong> {subscriptionInfo.subscriptionDurationInMonths} Months
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          </InfoCard>
+        </Grid>
+
+        {/* Product Details */}
+        <Grid item xs={12}>
+          <InfoCard
+            title="Product Details"
+            items={[]}
+            headerColor={theme.palette.primary.light}
+          >
+            <DataTable
+              columns={productColumns}
+              data={subscriptionInfo?.products || []}
+              emptyMessage="No products found"
+            />
+          </InfoCard>
+        </Grid>
+
+        {/* Payment Details */}
+        <Grid item xs={12}>
+          <InfoCard
+            title="Payment Details"
+            items={[]}
+            headerColor={theme.palette.primary.light}
+          >
+            <DataTable
+              columns={paymentColumns}
+              data={subscriptionInfo?.paymentHistory || []}
+              emptyMessage="No payment details available"
+            />
+          </InfoCard>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
 
 export default SubscriptionDetails;
-
-const PaymentDetailsTable = ({ paymentDetails }: any) => {
-  return (
-    <div className="card-body table-responsive p-0">
-      <table className="table table-bordered table-hover text-center">
-        <thead className="bg-dark text-white">
-          <tr>
-            <th>Amount</th>
-            <th>Payment Date</th>
-            <th>Payment Method</th>
-            <th>Status</th>
-            <th>Stripe Subscription ID</th>
-            <th>Stripe Payment Intent ID</th>
-            <th>Stripe Customer ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paymentDetails.length > 0 ? (
-            paymentDetails.map((detail: any, index: any) => (
-              <tr key={index}>
-                <td>
-                  {detail.currency} {detail.amount}
-                </td>
-
-                <td>
-                  {new Date(detail.createdAt).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour12: true,
-                  })}
-                </td>
-                <td>{detail.paymentMethod}</td>
-                <td>
-                  <span
-                    className={`badge ${
-                      detail.status === "completed"
-                        ? "badge-success"
-                        : detail.status === "pending"
-                        ? "badge-warning"
-                        : "badge-danger"
-                    }`}
-                  >
-                    {detail.status}
-                  </span>
-                </td>
-                <td>{detail.stripeSubscriptionId || "N/A"}</td>
-                <td>{detail.stripePaymentIntentId || "N/A"}</td>
-                <td>{detail.stripeCustomerId || "N/A"}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={8}>No payment details available.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-};
