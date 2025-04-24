@@ -5,6 +5,14 @@ import { getPublicIp } from "../../utils/commonUtils";
 
 export const logUserActivity = async (userActivity: UserActivity) => {
     const ipAddress = await getPublicIp();
+    // TODO NEED TO REMOVE THIS LATER... ONLY FOR TESTING
+    function generateRandomIP() {
+      const octet = () => Math.floor(Math.random() * 256);
+      return `${octet()}.${octet()}.${octet()}.${octet()}`;
+    }
+    const randomIP = generateRandomIP();
+    console.log("ipAddress", ipAddress);
+    // ducplicate the ipaddress or send any random ipaddress
     const browserInfo = navigator.userAgent;
     return apiService.post(
       "/useractivity/",
@@ -12,7 +20,7 @@ export const logUserActivity = async (userActivity: UserActivity) => {
         userId: userActivity.userId,
         activityType: userActivity.activityType,
         description: userActivity.description,
-        ipAddress: ipAddress,
+        ipAddress: randomIP,
         browserInfo: browserInfo,
       }
     );

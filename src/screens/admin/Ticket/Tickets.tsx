@@ -1,209 +1,249 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Container,
+  Typography,
+  IconButton,
+  Chip,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import {
+  Visibility as VisibilityIcon,
+  Person as PersonIcon,
+  AccessTime as AccessTimeIcon,
+} from "@mui/icons-material";
 import { ROUTES } from "../../../shared/utils/routes";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
+import PageHeader from "../../../shared/components/PageHeader";
+import DataTable, { Column } from "../../../shared/components/DataTable";
 
-function Tickets() {
+interface Ticket {
+  _id: string;
+  title: string;
+  description: string;
+  priority: string;
+  status: string;
+  assignedTo: {
+    name: string;
+  } | null;
+  createdAt: string;
+}
+
+const Tickets = () => {
   const [auth] = useAuth();
-  const [ticketdata, setTicketData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const theme = useTheme();
 
-  const fetchTicketData = async (page = 1, limit = 32, search = "") => {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const columns: Column<Ticket>[] = [
+    {
+      id: 'title',
+      label: 'Title',
+      sortable: true,
+      minWidth: 200,
+      format: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2">{value}</Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'description',
+      label: 'Description',
+      sortable: true,
+      minWidth: 250,
+      format: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2" sx={{ 
+            maxWidth: '200px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            {value}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'priority',
+      label: 'Priority',
+      sortable: true,
+      minWidth: 120,
+      format: (value) => (
+        <Chip
+          label={value}
+          size="small"
+          sx={{
+            bgcolor:
+              value === "High"
+                ? alpha(theme.palette.error.main, 0.1)
+                : value === "Medium"
+                ? alpha(theme.palette.warning.main, 0.1)
+                : alpha(theme.palette.success.main, 0.1),
+            color:
+              value === "High"
+                ? theme.palette.error.main
+                : value === "Medium"
+                ? theme.palette.warning.main
+                : theme.palette.success.main,
+            fontWeight: 500,
+          }}
+        />
+      ),
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      sortable: true,
+      minWidth: 120,
+      format: (value) => (
+        <Chip
+          label={value}
+          size="small"
+          sx={{
+            bgcolor:
+              value === "Closed"
+                ? alpha(theme.palette.success.main, 0.1)
+                : value === "In Progress"
+                ? alpha(theme.palette.warning.main, 0.1)
+                : value === "Open"
+                ? alpha(theme.palette.error.main, 0.1)
+                : alpha(theme.palette.grey[500], 0.1),
+            color:
+              value === "Closed"
+                ? theme.palette.success.main
+                : value === "In Progress"
+                ? theme.palette.warning.main
+                : value === "Open"
+                ? theme.palette.error.main
+                : theme.palette.grey[500],
+            fontWeight: 500,
+          }}
+        />
+      ),
+    },
+    {
+      id: 'assignedTo',
+      label: 'Assigned To',
+      sortable: true,
+      minWidth: 150,
+      format: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <PersonIcon color="info" fontSize="small" />
+          <Typography variant="body2">
+            {value?.name || "Unassigned"}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'createdAt',
+      label: 'Created At',
+      sortable: true,
+      minWidth: 180,
+      format: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AccessTimeIcon color="info" fontSize="small" />
+          <Typography variant="body2">
+            {new Date(value).toLocaleString("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })}
+          </Typography>
+        </Box>
+      ),
+    },
+  ];
+
+  const getTickets = async () => {
+    setLoading(true);
     try {
       const res = await axios.get(
-        `${BASE_URL}/ticket/tickets?page=${page}&limit=${limit}&search=${search}`,
+        `${BASE_URL}/ticket/tickets?page=${currentPage + 1}&limit=${rowsPerPage}&search=${searchQuery}`,
         {
           headers: {
             Authorization: `Bearer ${auth?.token}`,
           },
-          params: {
-            page,
-            limit,
-            search,
-          },
         }
       );
-      setTicketData(res.data.tickets);
-      setCurrentPage(res.data.currentPage);
+
+      setTickets(res.data.tickets);
       setTotalPages(res.data.totalPages);
+      setLoading(false);
     } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleView = (data: any) => {
-    navigate(`${ROUTES.ADMIN.TICKETS}/${data._id}`);
-  };
-
-  const handleSearch = (e: any) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-    fetchTicketData(1, 32, e.target.value);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      fetchTicketData(currentPage - 1, 5, searchTerm);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      fetchTicketData(currentPage + 1, 5, searchTerm);
+      console.error(error);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     if (auth?.token) {
-      fetchTicketData(currentPage, 5, searchTerm);
+      getTickets();
     }
-  }, [auth, currentPage]);
+  }, [auth, currentPage, searchQuery, rowsPerPage]);
+
+  const handleViewTicket = (data: Ticket) => {
+    navigate(`${ROUTES.ADMIN.TICKETS}/${data._id}`);
+  };
+
+  const handleSort = (columnId: keyof Ticket, direction: 'asc' | 'desc') => {
+    // Implement sorting logic here if needed
+    console.log('Sorting by:', columnId, direction);
+  };
+
+  const renderActions = (row: Ticket) => (
+    <IconButton
+      size="small"
+      onClick={() => handleViewTicket(row)}
+      sx={{ color: theme.palette.primary.main }}
+    >
+      <VisibilityIcon />
+    </IconButton>
+  );
 
   return (
-    <div className="content-wrapper">
-      <section className="content-header">
-        <div className="container-fluid">
-          <div className="row align-items-center justify-content-between my-3">
-            <div className="col-12 col-md-4 mb-2 mb-md-0">
-              <h1 className="font-weight-bold">Tickets</h1>
-            </div>
-            <div className="col-12 col-md-8 d-flex flex-column flex-md-row justify-content-md-end">
-              <div className="form-group mb-2 mb-md-0 flex-grow-1 mr-md-3">
-                <div className="input-group">
-                  <input
-                    type="search"
-                    className="form-control"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                  />
-                  <div className="input-group-append">
-                    <button className="btn btn-outline-secondary" type="button">
-                      <i className="fa fa-search" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section className="content">
-        <div className="container-fluid">
-          <div className="row m-2">
-            <div className="col-12">
-              <div className="card">
-                <div className="card-body">
-                  <div className="table-responsive">
-                    <table className="table table-bordered table-hover ">
-                      <thead className="bg-dark">
-                        <tr>
-                          <th>Title</th>
-                          <th>Description</th>
-                          <th>Priority</th>
-                          <th>Status</th>
-                          <th>Assigned To</th>
-                          <th>Created At</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {ticketdata.length === 0 ? (
-                          <tr>
-                            <td colSpan={7} className="text-center">
-                              No tickets found
-                            </td>
-                          </tr>
-                        ) : (
-                          ticketdata.map((ticket: any) => (
-                            <tr key={ticket._id}>
-                              <td>{ticket.title}</td>
-                              <td>{ticket.description}</td>
-                              <td>{ticket.priority}</td>
-                              <td>
-                                <span
-                                  className={`badge ${
-                                    ticket.status === "Closed"
-                                      ? "badge-success"
-                                      : ticket.status === "In Progress"
-                                      ? "badge-warning"
-                                      : ticket.status === "Open"
-                                      ? "badge-danger"
-                                      : "badge-secondary" // Default for unrecognized statuses
-                                  } mt-2`}
-                                >
-                                  {ticket.status}
-                                </span>
-                              </td>
-                              <td>
-                                {ticket.assignedTo
-                                  ? ticket.assignedTo.name
-                                  : "N/A"}
-                              </td>
-                              <td>
-                                {new Date(ticket.createdAt).toLocaleString()}
-                              </td>
-                              <td>
-                                <button
-                                  className="btn btn-success"
-                                  onClick={() => handleView(ticket)}
-                                >
-                                  <i className="fas fa-file-alt"></i>
-                                </button>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                  {/* Pagination Controls */}
-                  {totalPages > 1 && (
-                    <div className="card-footer d-flex justify-content-center mt-4">
-                      <button
-                        className="btn btn-outline-primary mr-2"
-                        disabled={currentPage === 1}
-                        onClick={handlePrevPage}
-                      >
-                        Previous
-                      </button>
-                      {Array.from({ length: totalPages }, (_, index) => (
-                        <button
-                          key={index + 1}
-                          onClick={() =>
-                            fetchTicketData(index + 1, 15, searchTerm)
-                          }
-                          className={`btn mr-2 ${
-                            currentPage === index + 1
-                              ? "btn-success"
-                              : "btn-light"
-                          }`}
-                        >
-                          {index + 1}
-                        </button>
-                      ))}
-                      <button
-                        className="btn btn-outline-primary"
-                        disabled={currentPage === totalPages}
-                        onClick={handleNextPage}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+      <PageHeader
+        title="Tickets"
+        searchPlaceholder="Search by title, description, or status"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+
+      <Box>
+        <DataTable
+          columns={columns}
+          data={tickets}
+          loading={loading}
+          emptyMessage="No matching tickets found"
+          pagination={{
+            total: totalPages,
+            page: currentPage,
+            rowsPerPage,
+            onPageChange: setCurrentPage,
+            onRowsPerPageChange: setRowsPerPage,
+          }}
+          onSort={handleSort}
+          actions={renderActions}
+        />
+      </Box>
+    </Container>
   );
-}
+};
 
 export default Tickets;

@@ -1,30 +1,121 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Container,
+  Typography,
+  IconButton,
+  Chip,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import {
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 import { ROUTES } from "../../../shared/utils/routes";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { getProducts } from "../../../shared/api/endpoints/product";
 import { Product } from "../../../shared/api/types/product.types";
+import PageHeader from "../../../shared/components/PageHeader";
+import DataTable, { Column } from "../../../shared/components/DataTable";
 
 function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [auth] = useAuth();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [productsPerPage] = useState(32);
   const [searchQuery, setSearchQuery] = useState("");
   const [totalProducts, setTotalProducts] = useState(0);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const theme = useTheme();
   let newUrl = BASE_URL?.replace("/api", "");
 
+  const columns: Column<Product>[] = [
+    {
+      id: 'name',
+      label: 'Product Name',
+      sortable: true,
+      minWidth: 200,
+    },
+    {
+      id: 'sku',
+      label: 'SKU',
+      sortable: true,
+      minWidth: 120,
+    },
+    {
+      id: 'category',
+      label: 'Category',
+      sortable: true,
+      minWidth: 150,
+    },
+    {
+      id: 'cost',
+      label: 'Cost',
+      sortable: true,
+      minWidth: 100,
+      align: 'right',
+      format: (value) => `$${value}`,
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      sortable: true,
+      minWidth: 120,
+      format: (value) => (
+        <Chip
+          label={value}
+          size="small"
+          sx={{
+            bgcolor: value === 'Active' 
+              ? alpha(theme.palette.success.main, 0.1)
+              : value === 'Inactive'
+              ? alpha(theme.palette.error.main, 0.1)
+              : alpha(theme.palette.warning.main, 0.1),
+            color: value === 'Active'
+              ? theme.palette.success.main
+              : value === 'Inactive'
+              ? theme.palette.error.main
+              : theme.palette.warning.main,
+            fontWeight: 500,
+          }}
+        />
+      ),
+    },
+    // TODO: Add activeSubs and revenueGen columns
+    // {
+    //   id: 'activeSubs',
+    //   label: 'Active Subs',
+    //   sortable: true,
+    //   minWidth: 100,
+    //   align: 'right',
+    // },
+    // {
+    //   id: 'revenueGen',
+    //   label: 'Revenue',
+    //   sortable: true,
+    //   minWidth: 120,
+    //   align: 'right',
+    //   format: (value) => `$${value}`,
+    // },
+  ];
+
   const getProduct = async () => {
+    setLoading(true);
     try {
-      const res = await getProducts(currentPage, productsPerPage, searchQuery);
-      setProducts(res?.products);
-      setTotalPages(res?.totalPages);
-      setTotalProducts(res?.total);
+      const res = await getProducts(currentPage + 1, rowsPerPage, searchQuery);
+      setProducts(res?.products || []);
+      setTotalPages(res?.totalPages || 0);
+      setTotalProducts(res?.total || 0);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,7 +123,7 @@ function Products() {
     if (auth?.token) {
       getProduct();
     }
-  }, [auth, currentPage, searchQuery]);
+  }, [auth, currentPage, rowsPerPage, searchQuery]);
 
   const handleView = (data: Product) => {
     navigate(`${ROUTES.ADMIN.VIEW_PRODUCT(data._id)}`);
@@ -42,177 +133,69 @@ function Products() {
     navigate(ROUTES.ADMIN.NEW_PRODUCT);
   };
 
-  const handleNextPage = () => {
-    if (currentPage < Math.ceil(totalProducts / productsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
+  const handleSort = (columnId: keyof Product, direction: 'asc' | 'desc') => {
+    // Implement sorting logic here if needed
+    console.log('Sorting by:', columnId, direction);
   };
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const getStatusDotClass = (status: string) => {
-    if (status === "Active") return "bg-success";
-    if (status === "Inactive") return "bg-danger";
-    if (status === "Retired") return "bg-warning";
-    return "";
-  };
+  const renderActions = (row: Product) => (
+    <>
+      <IconButton
+        size="small"
+        onClick={() => handleView(row)}
+        sx={{ color: theme.palette.primary.main }}
+      >
+        <VisibilityIcon />
+      </IconButton>
+      <IconButton
+        size="small"
+        onClick={() => navigate(ROUTES.ADMIN.UPDATE_PRODUCT(row._id))}
+        sx={{ color: theme.palette.info.main }}
+      >
+        <EditIcon />
+      </IconButton>
+      <IconButton
+        size="small"
+        onClick={() => {
+          // Implement delete functionality
+          console.log('Delete product:', row._id);
+        }}
+        sx={{ color: theme.palette.error.main }}
+      >
+        <DeleteIcon />
+      </IconButton>
+    </>
+  );
 
   return (
-    <div className="content-wrapper">
-      <section className="content-header">
-        <div className="container-fluid">
-          <div className="row align-items-center justify-content-between my-3">
-            <div className="col-md-4">
-              <h1 className="text-left font-weight-bold">Product Catalog</h1>
-            </div>
-            <div className="col-md-8 d-flex justify-content-end">
-              <div className="form-group mb-0 flex-grow-1 mr-3">
-                <div className="input-group input-group-md">
-                  <input
-                    type="search"
-                    className="form-control form-control-md"
-                    placeholder="Search by Product Name"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    aria-label="Search Products"
-                  />
-                  <div className="input-group-append">
-                    <button
-                      className="btn btn-outline-secondary btn-md"
-                      type="button"
-                    >
-                      <i className="fa fa-search" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={handleAddProduct}
-                className="btn btn-success ml-2"
-              >
-                <i className="fas fa-plus mr-1"></i> Add Product
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+      <PageHeader
+        title="Product Catalog"
+        searchPlaceholder="Search by Product Name"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        addButtonText="Add Product"
+        onAddClick={handleAddProduct}
+      />
 
-      <div className="content container-fluid">
-        <div className="card p-2">
-          <div className="row">
-            {products.length > 0 ? (
-              products.map((prod :any) => (
-                <div className="col-md-3 mb-4" key={prod._id}>
-                  <div
-                    className="card shadow-sm h-100"
-                    onClick={() => handleView(prod)}
-                  >
-                    <img
-                      onError={(e: any) =>
-                        (e.target.src = `${newUrl}/uploads/placeholder.png`)
-                      }
-                      src={`${newUrl}${prod.imageUrl}`}
-                      className="card-img-top mt-3"
-                      alt={prod.name}
-                      style={{ height: "180px", objectFit: "contain" }}
-                    />
-
-                    <div className="card-body">
-                      <div className="card-header text-truncate ">
-                        <h6 className="mb-0">{prod.name}</h6>
-                      </div>
-                      <div className="d-flex justify-content-between mb-3 mt-3">
-                        <div>
-                          <p className="mb-0">{prod.sku}</p>
-                        </div>
-                        <div>
-                          <p className="mb-0">
-                            <span className="text-muted">{prod.currency}:</span>{" "}
-                            {prod.cost}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="d-flex justify-content-between">
-                        <div>
-                          <p className="mb-1 text-muted">Category:</p>
-                          <p className="mb-0">{prod.category}</p>
-                        </div>
-                        <div>
-                          <p className="mb-1 text-muted">Status:</p>
-                          <span
-                            className={`status-dot ${getStatusDotClass(
-                              prod.status
-                            )}`}
-                            style={{
-                              display: "inline-block",
-                              width: "10px",
-                              height: "10px",
-                              borderRadius: "50%",
-                              marginRight: "5px",
-                            }}
-                          ></span>
-                          <p className="mb-0 d-inline">{prod.status}</p>
-                        </div>
-                      </div>
-                      <hr />
-                      <div className="d-flex justify-content-between">
-                        <div>
-                          <p className="mb-1 text-muted">Active Subs:</p>
-                          <p className="mb-0">{prod.activeSubs}</p>
-                        </div>
-                        <div>
-                          <p className="mb-1 text-muted">Revenue Gen ($):</p>
-                          <p className="mb-0">{prod.revenueGen}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="col-12">
-                <p className="text-center">No products found</p>
-              </div>
-            )}
-          </div>
-          {totalPages > 1 && (
-            <div className="card-footer">
-              <div className="d-flex justify-content-center mt-4">
-                <button
-                  className="btn btn-outline-primary mr-2"
-                  disabled={currentPage === 1}
-                  onClick={handlePreviousPage}
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index + 1}
-                    onClick={() => setCurrentPage(index + 1)}
-                    className={`btn mr-2 ${
-                      currentPage === index + 1 ? "btn-success" : "btn-light"
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-                <button
-                  className="btn btn-outline-primary"
-                  disabled={currentPage === totalPages}
-                  onClick={handleNextPage}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+      <Box>
+        <DataTable
+          columns={columns}
+          data={products}
+          loading={loading}
+          emptyMessage="No products found"
+          pagination={{
+            total: totalPages,
+            page: currentPage,
+            rowsPerPage,
+            onPageChange: setCurrentPage,
+            onRowsPerPageChange: setRowsPerPage,
+          }}
+          onSort={handleSort}
+          actions={renderActions}
+        />
+      </Box>
+    </Container>
   );
 }
 

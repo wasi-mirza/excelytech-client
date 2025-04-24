@@ -2,28 +2,156 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Container,
+  Typography,
+  IconButton,
+  Chip,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import {
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
 import { ROUTES } from "../../../shared/utils/routes";
+import PageHeader from "../../../shared/components/PageHeader";
+import DataTable, { Column } from "../../../shared/components/DataTable";
+
+interface Subscription {
+  _id: string;
+  subscriptionId: string;
+  customer: {
+    businessDetails: {
+      clientName: string;
+    };
+  };
+  products: Array<{
+    productId: {
+      name: string;
+    };
+  }>;
+  subscriptionDurationInMonths: number;
+  createdAt: string;
+  subscriptionStatus: string;
+  grandTotalCurrency: string;
+  finalAmount: number;
+}
 
 const Subscriptions = () => {
-  const [loader, setLoader] = useState(true);
-  const [subscriptions, setSubscriptions] = useState([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 10;
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [auth] = useAuth();
+  const theme = useTheme();
 
-  const handleAddSubscription = () => {
-    navigate(ROUTES.ADMIN.NEW_SUBSCRIPTION);
-  };
-  // Fetch orders from the API
+  const columns: Column<Subscription>[] = [
+    {
+      id: 'subscriptionId',
+      label: 'Subscription ID',
+      sortable: true,
+      minWidth: 150,
+    },
+    {
+      id: 'customer',
+      label: 'Account',
+      sortable: true,
+      minWidth: 200,
+      format: (value) => value?.businessDetails?.clientName || 'N/A',
+    },
+    {
+      id: 'products',
+      label: 'Products',
+      sortable: true,
+      minWidth: 250,
+      format: (value) => (
+        <Box>
+          <Typography variant="body2">
+            {value && value.length > 0
+              ? value.map((product: any, index: number) => (
+                  <span key={index}>
+                    {product.productId?.name || "Unnamed Product"}
+                    {index < value.length - 1 && ", "}
+                  </span>
+                ))
+              : "No products"}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'subscriptionDurationInMonths',
+      label: 'Duration',
+      sortable: true,
+      minWidth: 100,
+      format: (value) => `${value} Months`,
+    },
+    {
+      id: 'createdAt',
+      label: 'Created On',
+      sortable: true,
+      minWidth: 150,
+      format: (value) =>
+        new Date(value).toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour12: true,
+        }),
+    },
+    {
+      id: 'subscriptionStatus',
+      label: 'Status',
+      sortable: true,
+      minWidth: 120,
+      format: (value) => (
+        <Chip
+          label={value}
+          size="small"
+          sx={{
+            bgcolor:
+              value === "Sent"
+                ? alpha(theme.palette.warning.main, 0.1)
+                : value === "active"
+                ? alpha(theme.palette.success.main, 0.1)
+                : value === "inactive"
+                ? alpha(theme.palette.grey[500], 0.1)
+                : alpha(theme.palette.error.main, 0.1),
+            color:
+              value === "Sent"
+                ? theme.palette.warning.main
+                : value === "active"
+                ? theme.palette.success.main
+                : value === "inactive"
+                ? theme.palette.grey[500]
+                : theme.palette.error.main,
+            fontWeight: 500,
+          }}
+        />
+      ),
+    },
+    {
+      id: 'finalAmount',
+      label: 'Amount',
+      sortable: true,
+      minWidth: 120,
+      align: 'right',
+      // format: (value: number, row: Subscription) => `${row.grandTotalCurrency} ${value}`,
+    },
+  ];
+
   const getSubscriptions = async () => {
-    setLoader(true);
+    setLoading(true);
     try {
       const res = await axios.get(
-        `${BASE_URL}/subscription/allSubscriptions?page=${currentPage}&limit=${itemsPerPage}&search=${searchQuery}`,
+        `${BASE_URL}/subscription/allSubscriptions?page=${currentPage + 1}&limit=${rowsPerPage}&search=${searchQuery}`,
         {
           headers: {
             Authorization: `Bearer ${auth?.token}`,
@@ -32,13 +160,11 @@ const Subscriptions = () => {
       );
 
       setSubscriptions(res.data.data);
-      console.log("res.data.data", res.data.data);
-
       setTotalPages(res.data.totalPages);
-      setLoader(false);
+      setLoading(false);
     } catch (error) {
       console.error(error);
-      setLoader(false);
+      setLoading(false);
     }
   };
 
@@ -46,217 +172,79 @@ const Subscriptions = () => {
     if (auth?.token) {
       getSubscriptions();
     }
-  }, [auth, searchQuery, currentPage]);
+  }, [auth, searchQuery, currentPage, rowsPerPage]);
 
-  // Pagination controls
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+  const handleAddSubscription = () => {
+    navigate(ROUTES.ADMIN.NEW_SUBSCRIPTION);
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handleViewSubscription = (data: any) => {
+  const handleViewSubscription = (data: Subscription) => {
     navigate(ROUTES.ADMIN.VIEW_SUBSCRIPTION(data._id));
   };
 
+  const handleSort = (columnId: keyof Subscription, direction: 'asc' | 'desc') => {
+    // Implement sorting logic here if needed
+    console.log('Sorting by:', columnId, direction);
+  };
+
+  const renderActions = (row: Subscription) => (
+    <>
+      <IconButton
+        size="small"
+        onClick={() => handleViewSubscription(row)}
+        sx={{ color: theme.palette.primary.main }}
+      >
+        <VisibilityIcon />
+      </IconButton>
+      {/* <IconButton
+        size="small"
+        onClick={() => navigate(ROUTES.ADMIN.UPDATE_SUBSCRIPTION(row._id))}
+        sx={{ color: theme.palette.info.main }}
+      >
+        <EditIcon />
+      </IconButton> */}
+      <IconButton
+        size="small"
+        onClick={() => {
+          // Implement delete functionality
+          console.log('Delete subscription:', row._id);
+        }}
+        sx={{ color: theme.palette.error.main }}
+      >
+        <DeleteIcon />
+      </IconButton>
+    </>
+  );
+
   return (
-    <div className="content-wrapper">
-      <section className="content-header">
-        <div className="container-fluid">
-          <div className="row align-items-center justify-content-between my-3">
-            <div className="col-12 col-md-4 mb-2 mb-md-0">
-              <h1 className="font-weight-bold">Subscriptions</h1>
-            </div>
-            <div className="col-12 col-md-8 d-flex flex-column flex-md-row justify-content-md-end">
-              <div className="form-group mb-2 mb-md-0 flex-grow-1 mr-md-3">
-                <div className="input-group">
-                  <input
-                    type="search"
-                    className="form-control"
-                    placeholder="Search by Id, Duration, Status"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-              <button
-                onClick={handleAddSubscription}
-                className="btn btn-success mt-2 mt-md-0"
-              >
-                <i className="fas fa-plus mr-1"></i> Add Subscription
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+      <PageHeader
+        title="Subscriptions"
+        searchPlaceholder="Search by Id, Duration, Status"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        addButtonText="Add Subscription"
+        onAddClick={handleAddSubscription}
+      />
 
-      <section className="content">
-        <div className="card ">
-          <div className="card-body">
-            {
-              // loader ? (
-              // <div>Loading...</div>
-              // ) : (
-              <>
-                <div className="table-responsive">
-                  <table className="table table-bordered table-hover">
-                    <thead className="table-dark">
-                      <tr>
-                        <th>Subcription Id</th>
-                        <th>Account </th>
-                        <th>Product </th>
-                        <th>Duration</th>
-                        <th>Created On</th>
-                        <th> Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {subscriptions.length === 0 ? (
-                        <tr>
-                          <td colSpan={11} className="text-center">
-                            No matching subscriptions found
-                          </td>
-                        </tr>
-                      ) : (
-                        subscriptions.map((subscription: any) => (
-                          <tr
-                            key={subscription._id}
-                            onClick={() => handleViewSubscription(subscription)}
-                          >
-                            <td>{subscription.subscriptionId || "N/A"}</td>
-
-                            <td>
-                              {
-                                subscription.customer?.businessDetails
-                                  .clientName
-                              }
-                            </td>
-                            <td>
-                              {subscription.products &&
-                              subscription.products.length > 0 ? (
-                                subscription.products.map((product: any, index: any) => (
-                                  <span key={index}>
-                                    {product.productId?.name ||
-                                      "Unnamed Product"}
-                                    {index < subscription.products.length - 1 &&
-                                      ", "}
-                                  </span>
-                                ))
-                              ) : (
-                                <span>No products</span>
-                              )}
-                              <div>
-                                {subscription.grandTotalCurrency}{" "}
-                                {subscription.finalAmount}
-                              </div>
-                            </td>
-                            <td>
-                              {subscription.subscriptionDurationInMonths} Months
-                            </td>
-                            <td>
-                              {new Date(subscription.createdAt).toLocaleString(
-                                "en-GB",
-                                {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                  // hour: "2-digit",
-                                  // minute: "2-digit",
-                                  hour12: true,
-                                }
-                              )}
-                            </td>
-                            <td>
-                              <span
-                                className={`badge ${
-                                  subscription.subscriptionStatus === "Sent"
-                                    ? "badge-warning"
-                                    : subscription.subscriptionStatus ===
-                                      "active"
-                                    ? "badge-success"
-                                    : subscription.subscriptionStatus ===
-                                      "inactive"
-                                    ? "badge-dark"
-                                    : "badge-danger"
-                                }`}
-                              >
-                                {subscription.subscriptionStatus}
-                              </span>
-                            </td>
-                            {/* <td>
-                              <div className="d-flex flex-column flex-md-row">
-                                <button
-                                  className="btn btn-success m-1"
-                                  onClick={() =>
-                                    handleViewSubscription(subscription)
-                                  }
-                                >
-                                  <i className="fas fa-file-alt"></i>
-                                </button>
-                                {/* <button
-                                  className="btn btn-success m-1"
-                                  onClick={() =>
-                                    handleUpdateOrder(subscription)
-                                  }
-                                >
-                                  <i className="fas fa-edit"></i>
-                                </button> 
-                              </div>
-                            </td> */}
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                  <div className="card-foote">
-                    <div className="d-flex justify-content-center mt-3">
-                      <button
-                        className="btn btn-outline-primary mr-2"
-                        disabled={currentPage === 1}
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                      >
-                        Previous
-                      </button>
-                      {Array.from({ length: totalPages }, (_, index) => (
-                        <button
-                          key={index + 1}
-                          onClick={() => setCurrentPage(index + 1)}
-                          className={`btn mr-2 ${
-                            currentPage === index + 1
-                              ? "btn-success"
-                              : "btn-light"
-                          }`}
-                        >
-                          {index + 1}
-                        </button>
-                      ))}
-                      <button
-                        className="btn btn-outline-primary"
-                        disabled={currentPage === totalPages}
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-              // )
-            }
-          </div>
-        </div>
-      </section>
-    </div>
+      <Box>
+        <DataTable
+          columns={columns}
+          data={subscriptions}
+          loading={loading}
+          emptyMessage="No matching subscriptions found"
+          pagination={{
+            total: totalPages,
+            page: currentPage,
+            rowsPerPage,
+            onPageChange: setCurrentPage,
+            onRowsPerPageChange: setRowsPerPage,
+          }}
+          onSort={handleSort}
+          actions={renderActions}
+        />
+      </Box>
+    </Container>
   );
 };
 

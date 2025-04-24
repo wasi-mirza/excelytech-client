@@ -1,5 +1,7 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './shared/theme/theme';
 
 import { ROUTES } from "./shared/utils/routes";
 
@@ -208,7 +210,11 @@ function App() {
     { path: ROUTES.NOT_FOUND, element: <Login /> }, // Fallback for unmatched routes
   ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider theme={theme}>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
 }
 
 export default App;

@@ -20,7 +20,14 @@ export const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  function generateRandomIP() {
+    const octet = () => Math.floor(Math.random() * 256);
+    return `${octet()}.${octet()}.${octet()}.${octet()}`;
+  }
+  
+  const randomIP = generateRandomIP();
   const [ip, setIp] = useState("");
+  console.log("ip", ip);
   const [browserInfo, setBrowserInfo] = useState("");
 
   useEffect(() => {
@@ -125,7 +132,7 @@ export const Login = () => {
           userInfo._id,
           "LOGIN",
           "User logged in",
-          ip,
+          randomIP,
           browserInfo,
           token
         );

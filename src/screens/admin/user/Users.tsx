@@ -1,273 +1,257 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import toast from "react-hot-toast";
+import {
+  Box,
+  Container,
+  Typography,
+  IconButton,
+  Chip,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import {
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Business as BusinessIcon,
+  LocationOn as LocationIcon,
+  AccessTime as TimeIcon,
+  Email as EmailIcon,
+} from "@mui/icons-material";
 import { ROUTES } from "../../../shared/utils/routes";
 import { BASE_URL } from "../../../shared/utils/endPointNames";
+import PageHeader from "../../../shared/components/PageHeader";
+import DataTable, { Column } from "../../../shared/components/DataTable";
+
+interface User {
+  _id: string;
+  email: string;
+  timeZone: string;
+  activeAccount: boolean;
+  businessDetails: {
+    clientName: string;
+    companyName: string;
+    companyType: string;
+  };
+  address: {
+    street1: string;
+    state: string;
+    country: string;
+  };
+}
 
 const Users = () => {
   const [auth] = useAuth();
-  const [userdata, setUserdata] = useState<any>([]);
-  const [deleteId, setDeleteId] = useState();
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 32;
-  const [searchQuery, setSearchQuery] = useState("");
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const theme = useTheme();
 
-  const getUser = async () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const columns: Column<User>[] = [
+    {
+      id: 'businessDetails',
+      label: 'Client Name',
+      sortable: true,
+      minWidth: 200,
+      format: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <BusinessIcon color="primary" fontSize="small" />
+          <Typography variant="body2">{value.clientName}</Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'businessDetails',
+      label: 'Company',
+      sortable: true,
+      minWidth: 200,
+      format: (value) => (
+        <Typography variant="body2">
+          {value.companyName} {value.companyType}
+        </Typography>
+      ),
+    },
+    {
+      id: 'address',
+      label: 'Location',
+      sortable: true,
+      minWidth: 200,
+      format: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <LocationIcon color="secondary" fontSize="small" />
+          <Typography variant="body2">
+            {value.street1}, {value.state}, {value.country}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'timeZone',
+      label: 'Time Zone',
+      sortable: true,
+      minWidth: 150,
+      format: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <TimeIcon color="info" fontSize="small" />
+          <Typography variant="body2">{value}</Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'email',
+      label: 'Email',
+      sortable: true,
+      minWidth: 200,
+      format: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <EmailIcon color="info" fontSize="small" />
+          <Typography variant="body2">{value}</Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'activeAccount',
+      label: 'Status',
+      sortable: true,
+      minWidth: 120,
+      format: (value) => (
+        <Chip
+          label={value ? "Active" : "Inactive"}
+          size="small"
+          sx={{
+            bgcolor: value
+              ? alpha(theme.palette.success.main, 0.1)
+              : alpha(theme.palette.error.main, 0.1),
+            color: value
+              ? theme.palette.success.main
+              : theme.palette.error.main,
+            fontWeight: 500,
+          }}
+        />
+      ),
+    },
+  ];
+
+  const getUsers = async () => {
     setLoading(true);
     try {
       const res = await axios.get(
-        `${BASE_URL}/user/users?page=${currentPage}&limit=${itemsPerPage}&search=${searchQuery}`,
+        `${BASE_URL}/user/users?page=${currentPage + 1}&limit=${rowsPerPage}&search=${searchQuery}`,
         {
           headers: {
             Authorization: `Bearer ${auth?.token}`,
           },
         }
       );
-      setUserdata(res.data.data); // Assuming 'data' contains the user list
-      setTotalPages(res.data.totalPages); // Assuming 'totalPages' is in the response
-      setLoading(false); // Stop loading after successful response
-      // console.log("Userdata : ", res.data.data);
-    } catch (error: any) {
+
+      setUsers(res.data.data);
+      setTotalPages(res.data.totalPages);
+      setLoading(false);
+    } catch (error) {
       console.error(error);
       setLoading(false);
     }
   };
 
-  const handleDelete = async (data: any) => {
+  useEffect(() => {
+    if (auth?.token) {
+      getUsers();
+    }
+  }, [auth, currentPage, searchQuery, rowsPerPage]);
+
+  const handleViewUser = (data: User) => {
+    navigate(ROUTES.ADMIN.VIEW_USER(data._id));
+  };
+
+  const handleUpdateUser = (data: User) => {
+    navigate(ROUTES.ADMIN.UPDATE_USER(data._id));
+  };
+
+  const handleDeleteUser = async (id: string) => {
     try {
-      if (
-        window.confirm("Are you sure you want to delete this payment method?")
-      ) {
-        await axios.delete(`${BASE_URL}/user/${data}`, {
+      if (window.confirm("Are you sure you want to delete this user?")) {
+        await axios.delete(`${BASE_URL}/user/${id}`, {
           headers: {
             Authorization: `Bearer ${auth?.token}`,
           },
         });
-        toast.success("Deleted Successfully");
-        /// add toast alert on delete
-        getUser();
+        getUsers();
+        toast.success("User deleted successfully");
       }
     } catch (error) {
-      toast.error("Unable to delete");
-      console.log(error);
+      console.error(error);
+      toast.error("Failed to delete user");
     }
   };
-  const handleUpdateForm = (id: any) => {
-    console.log("Data", id);
-    navigate(ROUTES.ADMIN.UPDATE_USER(id));
-  };
-  useEffect(() => {
-    if (auth?.token) {
-      getUser();
-    }
-  }, [auth, currentPage, searchQuery]);
 
-  const handleAddUser = () => {
-    navigate(ROUTES.ADMIN.NEW_USER);
+  const handleSort = (columnId: keyof User, direction: 'asc' | 'desc') => {
+    // Implement sorting logic here if needed
+    console.log('Sorting by:', columnId, direction);
   };
 
-  const HandleView = (data: any) => {
-    navigate(ROUTES.ADMIN.VIEW_USER(data._id));
-  };
-
-  const handleSupportChat = () => {
-    navigate(ROUTES.ADMIN.CHATS);
-  };
-  console.log("asdfsf", userdata);
+  const renderActions = (row: User) => (
+    <>
+      <IconButton
+        size="small"
+        onClick={() => handleViewUser(row)}
+        sx={{ color: theme.palette.primary.main }}
+      >
+        <VisibilityIcon />
+      </IconButton>
+      <IconButton
+        size="small"
+        onClick={() => handleUpdateUser(row)}
+        sx={{ color: theme.palette.info.main }}
+      >
+        <EditIcon />
+      </IconButton>
+      <IconButton
+        size="small"
+        onClick={() => handleDeleteUser(row._id)}
+        sx={{ color: theme.palette.error.main }}
+      >
+        <DeleteIcon />
+      </IconButton>
+    </>
+  );
 
   return (
-    <>
-      <div className="content-wrapper">
-        {/* Page Header */}
-        <section className="content-header">
-          <div className="container-fluid">
-            <div className="row align-items-center justify-content-between my-3">
-              <div className="col-12 col-md-4 mb-2 mb-md-0">
-                <h1 className="font-weight-bold">Clients</h1>
-              </div>
-              <div className="col-12 col-md-8 d-flex flex-column flex-md-row justify-content-md-end">
-                <div className="form-group mb-2 mb-md-0 flex-grow-1 mr-md-3">
-                  <div className="input-group">
-                    <input
-                      type="search"
-                      className="form-control"
-                      placeholder="Search accounts"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <div className="input-group-append">
-                      <button
-                        className="btn btn-outline-secondary"
-                        type="button"
-                      >
-                        <i className="fa fa-search" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={handleAddUser}
-                  className="btn btn-success mt-2 mt-md-0"
-                >
-                  <i className="fas fa-plus mr-1"></i> Add Client
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+      <PageHeader
+        title="Clients"
+        searchPlaceholder="Search accounts"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        addButtonText="Add Client"
+        onAddClick={() => navigate(ROUTES.ADMIN.NEW_USER)}
+      />
 
-        {/* Main Content */}
-        <section className="content">
-          <div className="container-fluid">
-            <div className="card p-2">
-              <div className="row">
-                {loading ? (
-                  <div className="col-12 text-center">
-                    <div className="spinner-border" role="status">
-                      <span className="sr-only">Loading...</span>
-                    </div>
-                  </div>
-                ) : userdata?.length === 0 ? (
-                  <div className="col-12 text-center">
-                    <p>No data found</p>
-                  </div>
-                ) : (
-                  // .filter((data) => data.businessDetails?.companyType !== "N/A")
-                  userdata?.map((data: any) => (
-                    <div
-                      className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
-                      key={data._id}
-                    >
-                      <div
-                        className="card h-100"
-                        // onClick={() => HandleView(data)}
-                      >
-                        {/* Card Header */}
-                        <div className="card-header">
-                          <div className="d-flex justify-content-between">
-                            <h5 className="card-title text-secondary mb-0">
-                              {data.businessDetails?.clientName}
-                            </h5>
-                            <span
-                              className={`badge ${
-                                data.activeAccount
-                                  ? "badge-success"
-                                  : "badge-danger"
-                              }`}
-                            >
-                              {data.activeAccount ? "Active" : "Inactive"}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Card Body */}
-                        <div className="card-body">
-                          <p className="card-text ">
-                            <strong>
-                              {data?.businessDetails?.companyName}{" "}
-                              {data?.businessDetails?.companyType}
-                            </strong>
-                          </p>
-                          <p className="card-text">
-                            <strong>
-                              <i className="fas fa-map-marker-alt"></i>
-                            </strong>
-                            <small>
-                              {" "}
-                              {data?.address?.street1}, {data?.address?.state},{" "}
-                              {data?.address?.country}
-                            </small>
-                          </p>
-                          <p className="card-text justify-content-between">
-                            <span>
-                              <strong>
-                                <i className="fas fa-clock"></i>
-                              </strong>
-                              <small> {data.timeZone}</small>
-                            </span>
-                          </p>
-                          <span>
-                            <strong>
-                              <i className="fas fa-envelope"></i>
-                            </strong>
-                            <small> {data.email}</small>
-                          </span>
-                        </div>
-
-                        {/* Card Footer */}
-                        <div className="card-footer d-flex justify-content-end align-items-center">
-                          {/* View, Edit, Delete Icons */}
-                          <div className="d-flex">
-                            <button
-                              className="btn btn-sm btn-link text-dark p-0 mx-3 "
-                              onClick={() => HandleView(data)}
-                            >
-                              <i className="fas fa-eye" />
-                            </button>
-                            <button
-                              className="btn btn-sm btn-link text-dark p-0 mx-3 "
-                              onClick={() => handleUpdateForm(data._id)}
-                            >
-                              <i className="fas fa-edit" />
-                            </button>
-                            <button
-                              className="btn btn-sm btn-link text-danger p-0 mx-3"
-                              onClick={() => handleDelete(data._id)}
-                            >
-                              <i className="fas fa-trash" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="card-foote">
-                  <div className="d-flex justify-content-center mt-3">
-                    <button
-                      className="btn btn-outline-primary mr-2"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                    >
-                      Previous
-                    </button>
-                    {Array.from({ length: totalPages }, (_, index) => (
-                      <button
-                        key={index + 1}
-                        onClick={() => setCurrentPage(index + 1)}
-                        className={`btn mr-2 ${
-                          currentPage === index + 1
-                            ? "btn-success"
-                            : "btn-light"
-                        }`}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
-                    <button
-                      className="btn btn-outline-primary"
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      </div>
-    </>
+      <Box>
+        <DataTable
+          columns={columns}
+          data={users}
+          loading={loading}
+          emptyMessage="No matching users found"
+          pagination={{
+            total: totalPages,
+            page: currentPage,
+            rowsPerPage,
+            onPageChange: setCurrentPage,
+            onRowsPerPageChange: setRowsPerPage,
+          }}
+          onSort={handleSort}
+          actions={renderActions}
+        />
+      </Box>
+    </Container>
   );
 };
 

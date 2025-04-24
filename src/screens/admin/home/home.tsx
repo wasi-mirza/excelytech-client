@@ -9,13 +9,70 @@ import {
   OpenTicketsByPriority,
   SubscriptionStats,
 } from "../../../shared/api/types/home.types";
+import {
+  Box,
+  Grid,
+  Typography,
+  Container,
+  Paper,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import StatCard from "../../../shared/components/DashboardCardComponent";
+import {
+  People as PeopleIcon,
+  TrendingUp as TrendingUpIcon,
+  Star as StarIcon,
+  ConfirmationNumber as TicketIcon,
+} from "@mui/icons-material";
+import ReactApexChart from "react-apexcharts";
+import { ApexOptions } from "apexcharts";
+import PageHeader from "../../../shared/components/PageHeader";
+
+interface SubscriptionDataItem {
+  name: string;
+  value: number;
+}
+
+interface TicketDataItem {
+  name: string;
+  value: number;
+}
+
+interface MonthlyRevenueData {
+  month: string;
+  revenue: number;
+}
+
+interface TopClientData {
+  name: string;
+  revenue: number;
+}
+
 function AdminHome() {
   const [auth] = useAuth();
+  const theme = useTheme();
   const [subscriptionStats, setSubscriptionStats] =
     useState<SubscriptionStats | null>(null);
   const [monthlyRevenue, setMonthlyRevenue] = useState<number | null>(null);
   const [ticketsByPriority, setTicketsByPriority] =
     useState<OpenTicketsByPriority | null>(null);
+
+  // Mock data for monthly revenue trend
+  const monthlyRevenueData: MonthlyRevenueData[] = [
+    { month: "Jan", revenue: 15000 },
+    { month: "Feb", revenue: 18000 },
+    { month: "Mar", revenue: 22000 },
+    { month: "Apr", revenue: 25000 },
+    { month: "May", revenue: 28000 },
+    { month: "Jun", revenue: 30000 },
+    { month: "Jul", revenue: 32000 },
+    { month: "Aug", revenue: 34000 },
+    { month: "Sep", revenue: 36000 },
+    { month: "Oct", revenue: 38000 },
+    { month: "Nov", revenue: 40000 },
+    { month: "Dec", revenue: 42000 },
+  ];
 
   const fetchOpenTicketsByPriority = async () => {
     try {
@@ -30,25 +87,25 @@ function AdminHome() {
 
   const fetchMonthlyRevenue = async () => {
     try {
-      const today = new Date(); // Get the current date
-      const year = today.getFullYear(); // Get the current year
-      const month = today.getMonth() + 1; // Get the current month (0-based, so add 1 to match 1-12 range)
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth() + 1;
 
       const response = await getMonthlyRevenue({
-        year, // Pass the dynamically calculated year
-        month, // Pass the dynamically calculated month
+        year,
+        month,
       });
 
+      console.log(response);
       if (response.status === 200 || response.status === 201) {
         setMonthlyRevenue(response?.data?.monthlyRevenue);
-        // Check if the expected structure exists
       } else {
         console.warn("Unexpected status for monthly revenue:", response.status);
-        setMonthlyRevenue(null); // Default to 0 if the status is unexpected
+        setMonthlyRevenue(null);
       }
     } catch (activeError) {
       console.error("Error fetching monthly revenue:", activeError);
-      setMonthlyRevenue(null); // Fallback to 0 if an error occurs
+      setMonthlyRevenue(null);
     }
   };
 
@@ -57,20 +114,17 @@ function AdminHome() {
       const response = await getSubscriptionStats();
 
       if (response.status === 200 || response.status === 201) {
-        //console.log("Active Subscriptions Response:", response.data);
-
         setSubscriptionStats(response.data);
-        // Check if the expected structure exists
       } else {
         console.warn(
           "Unexpected status for active subscriptions:",
           response.status
         );
-        setSubscriptionStats(null); // Default to 0 if the status is unexpected
+        setSubscriptionStats(null);
       }
     } catch (activeError) {
       console.error("Error fetching active subscriptions:", activeError);
-      setSubscriptionStats(null); // Fallback to 0 if an error occurs
+      setSubscriptionStats(null);
     }
   };
 
@@ -80,199 +134,438 @@ function AdminHome() {
     fetchOpenTicketsByPriority();
   }, [auth]);
 
+  const subscriptionData: SubscriptionDataItem[] = subscriptionStats
+    ? [
+        { name: "Active", value: subscriptionStats.active },
+        { name: "Expired", value: subscriptionStats.expired },
+        { name: "Processing", value: subscriptionStats.processing },
+        { name: "Inactive", value: subscriptionStats.inactive },
+        { name: "Cancelled", value: subscriptionStats.cancelled },
+      ]
+    : [];
+  
+  console.log("subscriptionData",subscriptionData);
+
+  const ticketData: TicketDataItem[] = ticketsByPriority?.openTicketsByPriority.map((ticket) => ({
+    name: ticket._id,
+    value: ticket.count,
+  })) || [];
+
+  const pieChartOptions: ApexOptions = {
+    chart: {
+      type: "donut",
+      animations: {
+        enabled: true,
+        speed: 800,
+      },
+    },
+    labels: subscriptionData.map((item) => item.name),
+    colors: ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#FF0000"],
+    legend: {
+      position: "bottom",
+      fontSize: "14px",
+      markers: {
+        size: 12,
+      },
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: "65%",
+          labels: {
+            show: true,
+            name: {
+              show: true,
+              fontSize: "22px",
+              fontWeight: 600,
+            },
+            value: {
+              show: true,
+              fontSize: "16px",
+              fontWeight: 400,
+            },
+            total: {
+              show: true,
+              label: "Total",
+              fontSize: "16px",
+              fontWeight: 600,
+            },
+          },
+        },
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    stroke: {
+      width: 0,
+    },
+  };
+
+  const barChartOptions: ApexOptions = {
+    chart: {
+      type: "bar",
+      animations: {
+        enabled: true,
+        speed: 800,
+      },
+      toolbar: {
+        show: false,
+      },
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        horizontal: false,
+        columnWidth: "55%",
+        borderRadiusApplication: "end",
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    stroke: {
+      show: true,
+      width: 2,
+      colors: ["transparent"],
+    },
+    xaxis: {
+      categories: ticketData.map((item) => item.name),
+      labels: {
+        style: {
+          fontSize: "12px",
+        },
+      },
+    },
+    yaxis: {
+      title: {
+        text: "Number of Tickets",
+      },
+    },
+    fill: {
+      opacity: 1,
+      type: "gradient",
+      gradient: {
+        shade: "light",
+        type: "vertical",
+        shadeIntensity: 0.25,
+        gradientToColors: undefined,
+        inverseColors: false,
+        opacityFrom: 0.85,
+        opacityTo: 0.85,
+        stops: [0, 100],
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: function (val) {
+          return val + " tickets";
+        },
+      },
+    },
+  };
+
+  const monthlyRevenueChartOptions: ApexOptions = {
+    chart: {
+      type: "area",
+      animations: {
+        enabled: true,
+        speed: 800,
+      },
+      toolbar: {
+        show: false,
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    stroke: {
+      curve: "smooth",
+      width: 2,
+    },
+    xaxis: {
+      categories: monthlyRevenueData.map((item) => item.month),
+      labels: {
+        style: {
+          fontSize: "12px",
+        },
+      },
+    },
+    yaxis: {
+      title: {
+        text: "Revenue ($)",
+      },
+      labels: {
+        formatter: (value) => `$${value.toLocaleString()}`,
+      },
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.7,
+        opacityTo: 0.9,
+        stops: [0, 90, 100],
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: (value) => `$${value.toLocaleString()}`,
+      },
+    },
+  };
+
   return (
-    <div className="content-wrapper">
-      {/* Content Header (Page header) */}
-      <div className="content-header">
-        <div className="container-fluid">
-          <div className="row mb-2">
-            <div className="col-sm-6">
-              <h1 className="m-0">Dashboard</h1>
-            </div>
-            {/* /.col */}
-            {/* <div className="col-sm-6">
-              <form className="form-inline float-right">
-                <div className="input-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search for accounts"
-                  />
-                  <div className="input-group-append">
-                    <button type="submit" className="btn btn-success">
-                      <i className="fas fa-search"></i>
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div> */}
-            {/* /.col */}
-          </div>
-          {/* /.row */}
-        </div>
-        {/* /.container-fluid */}
-      </div>
-      {/* /.content-header */}
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+      <PageHeader 
+      title="Dashboard" />
 
-      {/* Main Content */}
-      <section className="content">
-        <div className="container-fluid">
-          {/* Overview Section */}
-          <div className="row">
-            <div className="col-lg-3 col-6">
-              <div className="small-box bg-success">
-                <div className="inner">
-                  <h3>{subscriptionStats?.active}</h3>
-                  <p>Active Subscriptions</p>
-                </div>
-                <div className="icon">
-                  <i className="fas fa-users"></i>
-                </div>
-              </div>
-            </div>
+      {/* Overview Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            title="Active Subscriptions"
+            value={subscriptionStats?.active || 0}
+            icon={<PeopleIcon />}
+            bgColor={alpha(theme.palette.success.main, 0.1)}
+            iconColor={theme.palette.success.main}
+            sx={{
+              height: 180,
+              width: '100%',
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+              },
+            }}
+          />
+        </Grid>
 
-            <div className="col-lg-3 col-6">
-              <div className="small-box bg-info">
-                <div className="inner">
-                  <h3>${monthlyRevenue}</h3>
-                  <p>Monthly Revenue</p>
-                </div>
-                <div className="icon">
-                  <i className="fas fa-chart-line"></i>
-                </div>
-              </div>
-            </div>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            title="Monthly Revenue"
+            value={`$${monthlyRevenue?.toLocaleString() || 0}`}
+            icon={<TrendingUpIcon />}
+            bgColor={alpha(theme.palette.info.main, 0.1)}
+            iconColor={theme.palette.info.main}
+            sx={{
+              height: 180,
+              width: '100%',
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+              },
+            }}
+          />
+        </Grid>
 
-            <div className="col-lg-3 col-6">
-              <div className="small-box bg-warning">
-                <div className="inner">
-                  <h3>5</h3>
-                  <p>Top Clients</p>
-                </div>
-                <div className="icon">
-                  <i className="fas fa-user-tie"></i>
-                </div>
-              </div>
-            </div>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            title="Top Clients"
+            value="5"
+            icon={<StarIcon />}
+            bgColor={alpha(theme.palette.warning.main, 0.1)}
+            iconColor={theme.palette.warning.main}
+            sx={{
+              height: 180,
+              width: '100%',
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+              },
+            }}
+          />
+        </Grid>
 
-            <div className="col-lg-3 col-6">
-              <div className="small-box bg-danger">
-                <div className="inner">
-                  <h3>
-                    {ticketsByPriority === null
-                      ? 0
-                      : ticketsByPriority?.totalOpenTickets}
-                  </h3>
-                  <p>Open Tickets</p>
-                </div>
-                <div className="icon">
-                  <i className="fas fa-ticket-alt"></i>
-                </div>
-              </div>
-            </div>
-          </div>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            title="Open Tickets"
+            value={ticketsByPriority?.totalOpenTickets || 0}
+            icon={<TicketIcon />}
+            bgColor={alpha(theme.palette.error.main, 0.1)}
+            iconColor={theme.palette.error.main}
+            sx={{
+              height: 180,
+              width: '100%',
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+              },
+            }}
+          />
+        </Grid>
+      </Grid>
 
-          {/* Subscription Management Section */}
-          <div className="card">
-            <div className="card-header bg-primary text-white">
-              <h3 className="card-title">Subscription Management</h3>
-            </div>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-md-4">
-                  <p>
-                    <strong>Active vs. Expired Subscriptions:</strong>
-                    <br /> Active : {subscriptionStats?.active}, Expired :{" "}
-                    {subscriptionStats?.expired}
-                  </p>
-                </div>
-                <div className="col-md-4">
-                  <p>
-                    <strong>Processing vs. Inactive Subscriptions:</strong>
-                    <br /> Processing : {subscriptionStats?.processing},
-                    Inactive : {subscriptionStats?.inactive}
-                  </p>
-                </div>
-                <div className="col-md-4">
-                  <p>
-                    <strong>Cancelled :</strong> {subscriptionStats?.cancelled}
-                  </p>
-                </div>
+      {/* Charts Section */}
+      <Grid container spacing={3}>
+        {/* Monthly Revenue Trend */}
+        <Grid item xs={12} md={6}>
+          <Paper
+            sx={{
+              p: 3,
+              height: "100%",
+              borderRadius: 2,
+              boxShadow: theme.shadows[2],
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+                boxShadow: theme.shadows[4],
+              },
+            }}
+          >
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Monthly Revenue Trend
+            </Typography>
+            <Box sx={{ height: 400 }}>
+              <ReactApexChart
+                options={monthlyRevenueChartOptions}
+                series={[
+                  {
+                    name: "Revenue",
+                    data: monthlyRevenueData.map((item) => item.revenue),
+                  },
+                ]}
+                type="area"
+                height="100%"
+              />
+            </Box>
+          </Paper>
+        </Grid>
 
-                {/* <div className="col-md-4">
-                  <p>
-                    <strong>Churn Rate:</strong> 5% this month.
-                  </p>
-                </div> */}
-              </div>
-            </div>
-          </div>
 
-          {/* Support & Incidents Section */}
-          <div className="card">
-            <div className="card-header bg-warning text-white">
-              <h3 className="card-title">Support & Incidents</h3>
-            </div>
-            <div className="card-body">
-              {ticketsByPriority === null ? (
-                <div>No Tickets or Incidents</div>
-              ) : (
-                <div className="row">
-                  <div className="col-md-4">
-                    <p>
-                      <strong>Open Tickets by Priority:</strong>{" "}
-                      {ticketsByPriority?.openTicketsByPriority.map(
-                        (tickets) => (
-                          <p>
-                            {tickets?._id}:{tickets?.count}
-                          </p>
-                        )
-                      )}
-                    </p>
-                  </div>
-                  {/* <div className="col-md-4">
-                    <p>
-                      <strong>Avg. Response Time:</strong> 2 hours
-                    </p>
-                  </div>
-                  <div className="col-md-4">
-                    <p>
-                      <strong>SLA Compliance:</strong> 90%
-                    </p>
-                  </div> */}
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Subscription Distribution */}
+        <Grid item xs={12} md={6}>
+          <Paper
+            sx={{
+              p: 3,
+              height: "100%",
+              borderRadius: 2,
+              boxShadow: theme.shadows[2],
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+                boxShadow: theme.shadows[4],
+              },
+            }}
+          >
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Subscription Distribution
+            </Typography>
+            <Box sx={{ height: 400 }}>
+              <ReactApexChart
+                options={pieChartOptions}
+                series={subscriptionData.map((item) => item.value)}
+                type="donut"
+                height="100%"
+              />
+            </Box>
+          </Paper>
+        </Grid>
 
-          {/* Service Utilization Section */}
-          {/* <div className="card">
-            <div className="card-header bg-info text-white">
-              <h3 className="card-title">Service Utilization</h3>
-            </div>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-md-4">
-                  <p>
-                    <strong>Service Usage Metrics:</strong> Data usage: 80%
-                  </p>
-                </div>
-                <div className="col-md-4">
-                  <p>
-                    <strong>Top-Used Services:</strong> Backup and Analytics
-                  </p>
-                </div>
-                <div className="col-md-4">
-                  <p>
-                    <strong>Alerts:</strong> 2 clients exceeding limits.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div> */}
-        </div>
-      </section>
-    </div>
+        {/* Tickets by Priority */}
+        <Grid item xs={12} md={6}>
+          <Paper
+            sx={{
+              p: 3,
+              height: "100%",
+              borderRadius: 2,
+              boxShadow: theme.shadows[2],
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+                boxShadow: theme.shadows[4],
+              },
+            }}
+          >
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Tickets by Priority
+            </Typography>
+            <Box sx={{ height: 400 }}>
+              <ReactApexChart
+                options={barChartOptions}
+                series={[
+                  {
+                    name: "Tickets",
+                    data: ticketData.map((item) => item.value),
+                  },
+                ]}
+                type="bar"
+                height="100%"
+              />
+            </Box>
+          </Paper>
+        </Grid>
+
+        {/* Subscription Details */}
+        <Grid item xs={12}>
+          <Paper
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              boxShadow: theme.shadows[2],
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+                boxShadow: theme.shadows[4],
+              },
+            }}
+          >
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Subscription Management
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 1,
+                    bgcolor: alpha(theme.palette.primary.main, 0.05),
+                  }}
+                >
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                    Active vs. Expired Subscriptions
+                  </Typography>
+                  <Typography>
+                    Active: {subscriptionStats?.active || 0}, Expired:{" "}
+                    {subscriptionStats?.expired || 0}
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 1,
+                    bgcolor: alpha(theme.palette.info.main, 0.05),
+                  }}
+                >
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                    Processing vs. Inactive Subscriptions
+                  </Typography>
+                  <Typography>
+                    Processing: {subscriptionStats?.processing || 0}, Inactive:{" "}
+                    {subscriptionStats?.inactive || 0}
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 1,
+                    bgcolor: alpha(theme.palette.error.main, 0.05),
+                  }}
+                >
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                    Cancelled Subscriptions
+                  </Typography>
+                  <Typography>{subscriptionStats?.cancelled || 0}</Typography>
+                </Box>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 

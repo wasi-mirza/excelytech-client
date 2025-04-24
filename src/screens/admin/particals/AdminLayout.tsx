@@ -1,82 +1,79 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import AdminNavbar from "./AdminNavBar";
-import AdminSidebar from "./AdminSidebar";
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Box, CssBaseline, useTheme, useMediaQuery } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { useAuth } from '../../../context/AuthContext';
+import { ROUTES } from '../../../shared/utils/routes';
+import AdminNavigationBar from './AdminNavigationBar';
+import Sidebar from './Sidebar';
+
+const drawerWidth = 280;
+
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
+  open?: boolean;
+}>(({ theme, open }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(3),
+  transition: theme.transitions.create('margin', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  marginLeft: `-${drawerWidth}px`,
+  ...(open && {
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginLeft: 0,
+  }),
+}));
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  ...theme.mixins.toolbar,
+  justifyContent: 'flex-end',
+}));
 
 const AdminLayout = () => {
-  const [auth, setAuth] = useState({ user: null, token: "" });
-  const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 992);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  const [auth, setAuth] = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [open, setOpen] = useState(!isMobile);
 
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          logout();
+          setAuth({ user: null, token: '' });
+          localStorage.removeItem('auth');
+          localStorage.removeItem('token');
+          window.location.href = ROUTES.AUTH.LOGIN;
         }
         return Promise.reject(error);
       }
     );
 
     return () => axios.interceptors.response.eject(interceptor);
-  }, [navigate]);
+  }, [setAuth]);
 
-  const logout = () => {
-    setAuth({ user: null, token: "" });
-    localStorage.removeItem("auth");
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
-  };
-
-  const handleContentClick = () => {
-    if (isMobile) {
-      setIsSidebarOpen(!isSidebarOpen);
-    }
+  const handleDrawerToggle = () => {
+    setOpen(!open);
   };
 
   return (
-    <div className="wrapper">
-      {/* Preloader
-      <div className="preloader flex-column justify-content-center align-items-center">
-        <img
-          className="animation__shake"
-          src="/img/excelytech-favicon.png"
-          alt="excelytech-logo"
-          height={60}
-          width={60}
-        />
-      </div> */}
-      {/* <AdminNavbar /> */}
-      <AdminSidebar />
-      <div className="content">
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AdminNavigationBar open={open} onDrawerToggle={handleDrawerToggle} />
+      <Sidebar open={open} onDrawerToggle={handleDrawerToggle} isMobile={isMobile} />
+      <Main open={open}>
+        <DrawerHeader />
         <Outlet />
-      </div>
-      {/* Control Sidebar */}
-      <aside className="control-sidebar control-sidebar-dark">
-        {/* Control sidebar content goes here */}
-      </aside>
-      {/* /.control-sidebar */}
-    </div>
+      </Main>
+    </Box>
   );
 };
 
