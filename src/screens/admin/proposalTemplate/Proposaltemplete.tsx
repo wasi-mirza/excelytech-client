@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -9,7 +9,6 @@ import {
   Typography,
   IconButton,
   useTheme,
-  alpha,
 } from "@mui/material";
 import {
   Visibility as VisibilityIcon,
@@ -120,11 +119,11 @@ const ProposalTemplate = () => {
   }, [auth, currentPage, searchQuery, rowsPerPage]);
 
   const handleViewTemplate = (data: ProposalTemplate) => {
-    navigate(`/admin-dashboard/viewproposaltemplete/${data._id}`);
+    navigate(ROUTES.ADMIN.VIEW_PROPOSAL_TEMPLATE(data._id));
   };
 
   const handleUpdateTemplate = (data: ProposalTemplate) => {
-    navigate(`/admin-dashboard/updateproposaltemplete/${data._id}`);
+    navigate(ROUTES.ADMIN.UPDATE_PROPOSAL_TEMPLATE(data._id));
   };
 
   const handleDeleteTemplate = async (id: string) => {

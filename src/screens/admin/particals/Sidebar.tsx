@@ -242,7 +242,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
         {navigation.map((item) => renderNavigationItem(item))}
       </List>
       <Divider />
-      <List>
+      {/* <List>
         <ListItem disablePadding>
           <StyledListItemButton onClick={handleLogout}>
             <StyledListItemIcon>
@@ -251,7 +251,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
             <StyledListItemText primary="Logout" />
           </StyledListItemButton>
         </ListItem>
-      </List>
+      </List> */}
     </Drawer>
   );
 };

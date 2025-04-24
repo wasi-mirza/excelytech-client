@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { jwtDecode } from "jwt-decode"; // Add this package to decode JWT tokens
 import toast from "react-hot-toast";
 import { ROUTES } from "../../shared/utils/routes";
-import { BASE_URL } from "../../shared/utils/endPointNames";
 import ForgotPassword from "./ForgotPassword";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { getPublicIp, getBrowserInfo } from "../../shared/utils/commonUtils";
@@ -26,8 +25,8 @@ export const Login = () => {
   }
   
   const randomIP = generateRandomIP();
+  console.log("randomIP", randomIP);
   const [ip, setIp] = useState("");
-  console.log("ip", ip);
   const [browserInfo, setBrowserInfo] = useState("");
 
   useEffect(() => {
@@ -132,7 +131,7 @@ export const Login = () => {
           userInfo._id,
           "LOGIN",
           "User logged in",
-          randomIP,
+          ip,
           browserInfo,
           token
         );
