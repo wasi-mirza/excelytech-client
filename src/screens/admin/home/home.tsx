@@ -404,11 +404,11 @@ function AdminHome() {
               p: 3,
               height: "100%",
               borderRadius: 2,
-              boxShadow: theme.shadows[2],
+              // boxShadow: theme.shadows[2],
               transition: "transform 0.2s",
               "&:hover": {
                 transform: "translateY(-5px)",
-                boxShadow: theme.shadows[4],
+                // boxShadow: theme.shadows[4],
               },
             }}
           >
@@ -439,11 +439,11 @@ function AdminHome() {
               p: 3,
               height: "100%",
               borderRadius: 2,
-              boxShadow: theme.shadows[2],
+              // boxShadow: theme.shadows[2],
               transition: "transform 0.2s",
               "&:hover": {
                 transform: "translateY(-5px)",
-                boxShadow: theme.shadows[4],
+                // boxShadow: theme.shadows[4],
               },
             }}
           >
@@ -468,11 +468,11 @@ function AdminHome() {
               p: 3,
               height: "100%",
               borderRadius: 2,
-              boxShadow: theme.shadows[2],
+              // boxShadow: theme.shadows[2],
               transition: "transform 0.2s",
               "&:hover": {
                 transform: "translateY(-5px)",
-                boxShadow: theme.shadows[4],
+                // boxShadow: theme.shadows[4],
               },
             }}
           >
@@ -501,11 +501,11 @@ function AdminHome() {
             sx={{
               p: 3,
               borderRadius: 2,
-              boxShadow: theme.shadows[2],
+              // boxShadow: theme.shadows[2],
               transition: "transform 0.2s",
               "&:hover": {
                 transform: "translateY(-5px)",
-                boxShadow: theme.shadows[4],
+                // boxShadow: theme.shadows[4],
               },
             }}
           >

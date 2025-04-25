@@ -73,7 +73,7 @@ function DataTable<T extends { [key: string]: any }>({
         mt: 2,
         borderRadius: 2,
         border: `1px solid ${alpha(borderColor, 0.2)}`,
-        boxShadow: theme.shadows[2],
+        boxShadow: theme.shadows[0],
         '& .MuiTableHead-root': {
           bgcolor: alpha(bgColor, 0.1),
           '& .MuiTableCell-root': {
@@ -81,7 +81,6 @@ function DataTable<T extends { [key: string]: any }>({
             color: theme.palette.text.primary,
             fontWeight: 600,
             fontSize: '0.875rem',
-            textTransform: 'uppercase',
             letterSpacing: '0.5px',
           },
           '& .MuiTableSortLabel-root': {
@@ -200,4 +199,4 @@ function DataTable<T extends { [key: string]: any }>({
   );
 }
 
-export default DataTable; 
+export default DataTable;

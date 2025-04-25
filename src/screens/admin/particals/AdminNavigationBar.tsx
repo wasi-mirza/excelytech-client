@@ -77,7 +77,7 @@ const AdminNavigationBar: React.FC<AdminNavigationBarProps> = ({ open, onDrawerT
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-          ExcellyTech Service Portal
+          Excellytech Service Portal
         </Typography>
         <IconButton
           onClick={handleProfileMenuOpen}

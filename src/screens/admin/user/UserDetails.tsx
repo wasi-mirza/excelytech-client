@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
@@ -6,11 +5,33 @@ import { BASE_URL } from "../../../shared/utils/endPointNames";
 import moment from "moment";
 import toast from "react-hot-toast";
 import ReusableDialog from "../../../shared/components/DialogComponent";
+import PageHeader from "../../../shared/components/PageHeader";
+import InfoCard from "../../../shared/components/InfoCard";
+import {
+  Box,
+  Grid,
+  Button,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
+  Upload as UploadIcon,
+  VisibilityOff as VisibilityOffIcon,
+} from "@mui/icons-material";
 import axios from "axios";
 
-import { Modal, ModalHeader, ModalBody } from "reactstrap";
 function View() {
   const navigate = useNavigate();
+  const theme = useTheme();
   const [viewInfo, setViewInfo] = useState<any>(null);
   const [auth] = useAuth();
   const { id } = useParams();
@@ -21,8 +42,10 @@ function View() {
   const [isAgreementOpen, setIsAgreementOpen] = useState(false);
   const [userAgreementUrl, setUserAgreementUrl] = useState<any>(null);
   const [resetEmail] = useState("");
+  const [isDeleteUserDialog, setDeleteUserDialog] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-  const notesPerPage = 4; // Set number of notes per page
+  const notesPerPage = 4;
 
   // Function to fetch user details
   const viewpage = async () => {
@@ -168,15 +191,6 @@ function View() {
 
     navigate(`/admin-dashboard/update/${id}`);
   };
-  const [isDeleteUserDialog, setDeleteUserDialog] = useState(false);
-
-  const toggleDeleteUserDialog = () => {
-    setDeleteUserDialog(!isDeleteUserDialog);
-  };
-
-  // const handleConfirm = async (data) => {
-  //   handleDelete(data);
-  // };
 
   const handleFileChange = (e: any) => {
     const file = e.target.files[0];
@@ -185,432 +199,271 @@ function View() {
     }
   };
 
-  const handleCancelDeleteUserDialog = () => {
-    // console.log("Cancelled!");
-    toggleDeleteUserDialog();
-  };
-
-  const [message, setMessage] = useState("");
-  const [isDialogOpen, setDialogOpen] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [confirmHandler, setConfirmHandler] = useState<any>(null);
-
-  const toggleDialog = (msg: string, handler: () => void) => {
-    setMessage(msg);
-    setConfirmHandler(() => handler);
-    setDialogOpen(!isDialogOpen);
-  };
-
-  const handleCancel = () => {
-    console.log("Cancelled!");
-    toggleDialog("", () => {});
-  };
-  const toggleModal = () => {
-    setShowModal(!showModal);
-  };
-
   return (
-    <>
-      <div className="content-wrapper">
-        <ReusableDialog
-          isOpen={isDialogOpen}
-          toggle={() => toggleDialog("", () => {})}
-          message={message}
-          onConfirm={confirmHandler}
-          onCancel={handleCancel}
-        />
-        <ReusableDialog
-          isOpen={isDeleteUserDialog}
-          toggle={toggleDeleteUserDialog}
-          message="Are you sure you want to perform this action?"
-          onConfirm={() => handleDelete(viewInfo)}
-          onCancel={handleCancelDeleteUserDialog}
-        />
-        {isModalOpen && (
-          <PasswordResetModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            // onReset={handleResetPassword}
-            resetEmail={viewInfo.email}
-            auth={auth}
-            // setResetEmail={setResetEmail}
-            // newPassword={newPassword}
-            // setNewPassword={setNewPassword}
-          />
-        )}
-        {showModal && (
-          <AgreementModal
-            isOpen={showModal}
-            onClose={() => setShowModal(false)}
-            userAgreementUrl={viewInfo?.userAgreementUrl}
-          />
-        )}
-        <section className="content-header">
-          <div className="container-fluid">
-            <div className="row mb-2">
-              <div className="col-sm-6 d-flex ">
-                <h1 className="text-dark">User Details</h1>
-                <div>
-                  {" "}
-                  <button
-                    className="btn btn-sm btn-link text-dark p-0 mx-3 "
-                    onClick={() => handleUpdateForm(viewInfo._id)}
-                  >
-                    <i className="fas fa-edit" />
-                  </button>
-                  <button
-                    className="btn btn-sm btn-link text-danger p-0 mx-3"
-                    onClick={() => toggleDeleteUserDialog()}
-                  >
-                    <i className="fas fa-trash" />
-                  </button>
-                </div>
-              </div>
-              <div className="col-sm-6">
-                <ol className="breadcrumb float-sm-right">
-                  <li className="breadcrumb-item">
-                    <a href="#">Home</a>
-                  </li>
-                  <li className="breadcrumb-item active">User Details</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </section>
+    <Box sx={{ p: 3 }}>
+      <PageHeader
+        title="User Details"
+        showBackButton
+        backUrl="/admin-dashboard/allusers"
+        rightContent={
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <IconButton
+              onClick={() => handleUpdateForm(viewInfo?._id)}
+              sx={{ color: theme.palette.primary.main }}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              onClick={() => setDeleteUserDialog(true)}
+              sx={{ color: theme.palette.error.main }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        }
+      />
 
-        <section className="content container-fluid">
-          <div className="row">
-            {/* User Info Card */}
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-header ">
-                  <h3 className="card-title">Account Owner</h3>
-                </div>
-                <div className="card-body">
-                  <dl className="row">
-                    <dt className="col-sm-4">Name:</dt>
-                    <dd className="col-sm-8">{viewInfo?.name}</dd>
-
-                    <dt className="col-sm-4">Email:</dt>
-                    <dd className="col-sm-8">{viewInfo?.email}</dd>
-
-                    <dt className="col-sm-4">Phone:</dt>
-                    <dd className="col-sm-8">{viewInfo?.phone}</dd>
-
-                    <dt className="col-sm-4">User Type:</dt>
-                    <dd className="col-sm-8">{viewInfo?.userType}</dd>
-
-                    <dt className="col-sm-4">Account Manager:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.accountManagers?.name || "Not Assigned"}
-                    </dd>
-
-                    <dt className="col-sm-4">User Agreement:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.userAgreementUrl ? (
-                        <div className="d-flex justify-content-between align-items-center">
-                          <button
-                            className="btn btn-link "
-                            onClick={() => setShowModal(true)} // Trigger modal to view the agreement
-                          >
-                            View Agreement
-                          </button>
-                          <button
-                            className="btn btn-secondary"
-                            onClick={() => setIsAgreementOpen(true)} // Trigger modal to view the agreement
-                          >
-                            Upload New Agreement
-                          </button>
-                        </div>
-                      ) : (
-                        "Not available"
-                      )}
-                    </dd>
-                    <Modal
-                      isOpen={isAgreementOpen}
-                      toggle={() => setIsAgreementOpen(false)}
-                      size="lg"
-                      centered
+      <Grid container spacing={3}>
+        {/* Account Owner Card */}
+        <Grid item xs={12} md={6}>
+          <InfoCard
+            title="Account Owner"
+            items={[
+              { label: "Name", value: viewInfo?.name },
+              { label: "Email", value: viewInfo?.email },
+              { label: "Phone", value: viewInfo?.phone },
+              { label: "User Type", value: viewInfo?.userType },
+              { label: "Account Manager", value: viewInfo?.accountManagers?.name || "Not Assigned" },
+              {
+                label: "User Agreement",
+                value: viewInfo?.userAgreementUrl ? (
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => setShowModal(true)}
+                      size="small"
                     >
-                      <ModalHeader>
-                        Upload New User Agreement Document
-                      </ModalHeader>
-                      <ModalBody>
-                        <div className="form-group">
-                          {/* File Input */}
+                      View
+                    </Button>
+                    <Button
+                      startIcon={<UploadIcon />}
+                      onClick={() => setIsAgreementOpen(true)}
+                      size="small"
+                      variant="outlined"
+                    >
+                      Upload New
+                    </Button>
+                  </Box>
+                ) : (
+                  "Not available"
+                ),
+              },
+            ]}
+          />
+        </Grid>
 
-                          <div className="form-group">
-                            <label htmlFor="userAgreement">
-                              Upload User Agreement
-                            </label>
-                            <div className="input-group">
-                              <div className="custom-file">
-                                <input
-                                  type="file"
-                                  id="userAgreement"
-                                  className="custom-file-input"
-                                  onChange={handleFileChange}
-                                />
-                                <label
-                                  className="custom-file-label"
-                                  htmlFor="userAgreement"
-                                >
-                                  Choose file
-                                </label>
-                              </div>
-                            </div>
+        {/* Address Card */}
+        <Grid item xs={12} md={6}>
+          <InfoCard
+            title="Address"
+            items={[
+              { label: "Time Zone", value: viewInfo?.timeZone },
+              { label: "Street 1", value: viewInfo?.address?.street1 },
+              { label: "Street 2", value: viewInfo?.address?.street2 },
+              { label: "City", value: viewInfo?.address?.city },
+              { label: "State", value: viewInfo?.address?.state },
+              { label: "Zip Code", value: viewInfo?.address?.zipCode },
+            ]}
+          />
+        </Grid>
 
-                            {/* Display Selected File Name */}
-                            {userAgreementUrl && (
-                              <div className="mt-3">
-                                <p className="text-muted">Selected File:</p>
-                                <div className="d-flex align-items-center justify-content-between p-2 border rounded">
-                                  <span
-                                    className="text-truncate"
-                                    title={userAgreementUrl.name}
-                                  >
-                                    {userAgreementUrl.name}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
+        {/* Business Information Card */}
+        <Grid item xs={12} md={6}>
+          <InfoCard
+            title="Business Information"
+            items={[
+              { label: "Client Name", value: viewInfo?.businessDetails?.clientName },
+              { label: "Company Name", value: viewInfo?.businessDetails?.companyName },
+              { label: "Company Type", value: viewInfo?.businessDetails?.companyType },
+              { label: "Tax ID", value: viewInfo?.businessDetails?.taxId },
+              { label: "Employee Size", value: viewInfo?.businessDetails?.employeeSize },
+              { label: "Owner Phone", value: viewInfo?.businessDetails?.ownerPhone },
+              { label: "Owner Email", value: viewInfo?.businessDetails?.ownerEmail },
+            ]}
+          />
+        </Grid>
 
-                          {/* Action Buttons */}
-                          <div className="mt-4 text-right">
-                            <button
-                              className="btn btn-warning mr-2"
-                              onClick={handleUserAgreement}
-                              disabled={!userAgreementUrl} // Disable if no file selected
-                            >
-                              Add New Agreement
-                            </button>
-                          </div>
-                        </div>
-                      </ModalBody>
-                    </Modal>
-                  </dl>
-                </div>
-              </div>
-            </div>
+        {/* Account Status Card */}
+        <Grid item xs={12} md={6}>
+          <InfoCard
+            title="Account Status"
+            items={[
+              { label: "Account Manager", value: viewInfo?.accountManagers?.name || "Not Assigned" },
+              { label: "Allow Login", value: viewInfo?.allowLogin },
+              { label: "Account Active", value: viewInfo?.activeAccount },
+              { label: "First-Time Login", value: viewInfo?.isFirstTimeLogin },
+              { label: "Password Reset Completed", value: viewInfo?.isFirstPasswordResetDone },
+              { label: "Agreement Accepted", value: viewInfo?.agreementAccepted },
+            ]}
+            rightContent={
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={() => setIsModalOpen(true)}
+                sx={{ mt: 2 }}
+              >
+                Reset Password
+              </Button>
+            }
+          />
+        </Grid>
 
-            {/* Address Card */}
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-header ">
-                  <h3 className="card-title">Address </h3>
-                </div>
-                <div className="card-body">
-                  <dl className="row">
-                    <dt className="col-sm-4">Time Zone:</dt>
-                    <dd className="col-sm-8">{viewInfo?.timeZone}</dd>
-
-                    <dt className="col-sm-4">Street 1:</dt>
-                    <dd className="col-sm-8">{viewInfo?.address?.street1}</dd>
-
-                    <dt className="col-sm-4">Street 2:</dt>
-                    <dd className="col-sm-8">{viewInfo?.address?.street2}</dd>
-
-                    <dt className="col-sm-4">City:</dt>
-                    <dd className="col-sm-8">{viewInfo?.address?.city}</dd>
-
-                    <dt className="col-sm-4">State:</dt>
-                    <dd className="col-sm-8">{viewInfo?.address?.state}</dd>
-
-                    <dt className="col-sm-4">Zip Code:</dt>
-                    <dd className="col-sm-8">{viewInfo?.address?.zipCode}</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Business Details Card */}
-          <div className="row">
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-header ">
-                  <h3 className="card-title">Business Information</h3>
-                </div>
-                <div className="card-body">
-                  <dl className="row">
-                    <dt className="col-sm-4">Client Name:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.businessDetails?.clientName}
-                    </dd>
-
-                    <dt className="col-sm-4">Company Name:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.businessDetails?.companyName}
-                    </dd>
-
-                    <dt className="col-sm-4">Company Type:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.businessDetails?.companyType}
-                    </dd>
-
-                    <dt className="col-sm-4">Tax ID:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.businessDetails?.taxId}
-                    </dd>
-
-                    <dt className="col-sm-4">Employee Size:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.businessDetails?.employeeSize}
-                    </dd>
-
-                    <dt className="col-sm-4">Owner Phone:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.businessDetails?.ownerPhone}
-                    </dd>
-
-                    <dt className="col-sm-4">Owner Email:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.businessDetails?.ownerEmail}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-
-            {/* Miscellaneous Info Card */}
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-header ">
-                  <h3 className="card-title">Account Status</h3>
-                </div>
-                <div className="card-body">
-                  <dl className="row">
-                    <dt className="col-sm-4">Account Manager:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.accountManagers?.name || "Not Assigned"}
-                    </dd>
-                    <dt className="col-sm-4">Allow Login:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.allowLogin ? "Yes" : "No"}
-                    </dd>
-
-                    <dt className="col-sm-4">Account Active:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.activeAccount ? "Yes" : "No"}
-                    </dd>
-
-                    <dt className="col-sm-4">First-Time Login:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.isFirstTimeLogin ? "Yes" : "No"}
-                    </dd>
-
-                    <dt className="col-sm-4">Password Reset Completed:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.isFirstPasswordResetDone ? "Yes" : "No"}
-                    </dd>
-
-                    <dt className="col-sm-4">Agreement Accepted:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.agreementAccepted ? "Yes" : "No"}
-                    </dd>
-
-                    <div className="mt-3">
-                      <button
-                        className="btn btn-warning mr-2"
-                        onClick={() => setIsModalOpen(true)}
+        {/* Notes Section */}
+        <Grid item xs={12}>
+          <InfoCard
+            title="Notes"
+            items={[]}
+            headerColor={theme.palette.primary.light}
+          >
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                  {currentNotes.map((note: any, index: number) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        p: 2,
+                        mb: 2,
+                        bgcolor: 'background.default',
+                        borderRadius: 1,
+                        boxShadow: theme.shadows[1],
+                      }}
+                    >
+                      <Typography variant="body2">{note.content}</Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: 'text.secondary', display: 'block', textAlign: 'right' }}
                       >
-                        Reset Password
-                      </button>
-                    </div>
-
-                    {/* <dt className="col-sm-4">Account Banned:</dt>
-                    <dd className="col-sm-8">
-                      {viewInfo?.bannedAccount ? "Yes" : "No"}
-                    </dd> */}
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-md-12">
-            <div className="card">
-              <div className="card-header bg-olive">
-                <h3 className="card-title">Notes</h3>
-              </div>
-              <div className="row">
-                {/* Left Section: Display Notes */}
-                <div className="col-md-6">
-                  <div
-                    className="card-body h-100 overflow-auto"
-                    style={{ maxHeight: "400px" }}
-                  >
-                    {currentNotes.length > 0 ? (
-                      currentNotes.map((note: any, index: number) => (
-                        <div className="card mb-3" key={index}>
-                          <div className="card-body">
-                            <p className="card-text">{note.content}</p>
-                            <small className="text-muted d-block text-end">
-                              {moment(note.createdAt).format(
-                                "HH:mm - DD, MMMM YYYY"
-                              )}
-                            </small>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p>No notes available</p>
-                    )}
-
-                    {/* Pagination Controls */}
-                    <div className="d-flex justify-content-between mt-3">
-                      <button
-                        className="btn btn-outline-primary"
+                        {moment(note.createdAt).format("HH:mm - DD, MMMM YYYY")}
+                      </Typography>
+                    </Box>
+                  ))}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                    <Button
+                      variant="outlined"
                         onClick={handlePreviousPage}
                         disabled={currentPage === 1}
                       >
                         Previous
-                      </button>
-                      <span>
-                        Page {currentPage} of {totalPages}
-                      </span>
-                      <button
-                        className="btn btn-outline-primary"
+                    </Button>
+                    <Typography variant="body2">
+                      Page {currentPage} of {Math.ceil(notes.length / notesPerPage)}
+                    </Typography>
+                    <Button
+                      variant="outlined"
                         onClick={handleNextPage}
-                        disabled={currentPage === totalPages}
+                      disabled={currentPage === Math.ceil(notes.length / notesPerPage)}
                       >
                         Next
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Section: Add New Note */}
-                <div className="col-md-6">
-                  <div className="card">
-                    <div className="card-body">
+                    </Button>
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
                       <form onSubmit={handleAddNote}>
-                        <div className="form-group">
-                          <label htmlFor="noteContent">Add New Note</label>
-                          <textarea
-                            id="noteContent"
-                            className="form-control"
-                            placeholder="Enter note content"
+                    <TextField
+                      fullWidth
+                      multiline
                             rows={5}
+                      label="Add New Note"
                             value={noteContent}
                             onChange={(e) => setNoteContent(e.target.value)}
                             required
-                          ></textarea>
-                        </div>
-                        <button type="submit" className="btn btn-success">
+                      sx={{ mb: 2 }}
+                    />
+                    <Button type="submit" variant="contained" color="success">
                           Add Note
-                        </button>
+                    </Button>
                       </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </>
+                </Box>
+              </Grid>
+            </Grid>
+          </InfoCard>
+        </Grid>
+      </Grid>
+
+      {/* Keep the existing modals but update their styling to use MUI */}
+      <ReusableDialog
+        isOpen={isDeleteUserDialog}
+        toggle={() => setDeleteUserDialog(false)}
+        message="Are you sure you want to delete this user?"
+        onConfirm={() => handleDelete(viewInfo)}
+        onCancel={() => setDeleteUserDialog(false)}
+      />
+
+      <Dialog
+        open={isAgreementOpen}
+        onClose={() => setIsAgreementOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Upload New User Agreement Document</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <input
+              type="file"
+              id="userAgreement"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+            <label htmlFor="userAgreement">
+              <Button
+                variant="outlined"
+                component="span"
+                startIcon={<UploadIcon />}
+                sx={{ mb: 2 }}
+              >
+                Choose File
+              </Button>
+            </label>
+            {userAgreementUrl && (
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                Selected File: {userAgreementUrl.name}
+              </Typography>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsAgreementOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleUserAgreement}
+            disabled={!userAgreementUrl}
+            variant="contained"
+            color="primary"
+          >
+            Upload
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {showModal && (
+        <AgreementModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          userAgreementUrl={viewInfo?.userAgreementUrl}
+        />
+      )}
+
+      {isModalOpen && (
+        <PasswordResetModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          resetEmail={viewInfo?.email}
+          auth={auth}
+        />
+      )}
+    </Box>
   );
 }
 
@@ -624,22 +477,30 @@ function AgreementModal({ isOpen, onClose, userAgreementUrl }: {
   if (!isOpen) return null;
   const newUrl = BASE_URL?.replace("/api", "");
   return (
-    <Modal isOpen={isOpen} toggle={onClose} size="lg" centered>
-      <ModalHeader toggle={onClose}>Agreement </ModalHeader>
-      <ModalBody style={{ padding: "0", height: "90vh" }}>
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{
+        sx: { height: '90vh' }
+      }}
+    >
+      <DialogTitle>Agreement</DialogTitle>
+      <DialogContent sx={{ p: 0 }}>
         {userAgreementUrl ? (
           <iframe
             src={`${newUrl}${userAgreementUrl}`}
             width="100%"
             height="100%"
             title="Agreement Document"
-            style={{ border: "none", display: "block" }}
-          ></iframe>
+            style={{ border: 'none', display: 'block' }}
+          />
         ) : (
-          <p>No agreement available.</p>
+          <Typography sx={{ p: 2 }}>No agreement available.</Typography>
         )}
-      </ModalBody>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -657,9 +518,10 @@ function PasswordResetModal({ isOpen, onClose, auth, resetEmail }: {
   if (!isOpen) return null;
 
   const validatePassword = () => {
-    const isValid = newPassword === confirmPassword; //&& passwordRegex.test(password);
+    const isValid = newPassword === confirmPassword;
     setIsPasswordValid(isValid);
   };
+
   const handleResetPassword = async () => {
     try {
       if (!resetEmail || !newPassword) {
@@ -675,99 +537,70 @@ function PasswordResetModal({ isOpen, onClose, auth, resetEmail }: {
           },
         }
       );
-      // console.log("response", response);
-      if (response.status == 200 || response.status == 201) {
+      if (response.status === 200 || response.status === 201) {
         toast.success(response.data.message || "Password reset successful.");
         onClose();
       }
     } catch (error: any) {
-      // console.error("Error resetting password:", error);
       toast.error(error.response?.data?.message || "Failed to reset password.");
     }
   };
+
   return (
-    <div
-      className="modal fade show d-block"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-    >
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Reset Password</h5>
-            <button type="button" className="close" onClick={onClose}>
-              &times;
-            </button>
-          </div>
-          <div className="modal-body">
-            <form>
-              <div className="form-group">
-                <label>Email: {resetEmail || "Enter your email"}</label>
-                {/* <input
-                  type="email"
-                  className="form-control"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  required
-                /> */}
-              </div>
-              <div className="form-group">
-                <label>New Password</label>
-                <div className="input-group">
-                  <input
+    <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>Reset Password</DialogTitle>
+      <DialogContent>
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Email: {resetEmail}
+          </Typography>
+          <TextField
+            fullWidth
+            label="New Password"
                     type={showPassword ? "text" : "password"}
-                    className="form-control"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
-                  />
-                  <div className="input-group-append">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
+            sx={{ mb: 2 }}
+            InputProps={{
+              endAdornment: (
+                <IconButton
                       onClick={() => setShowPassword(!showPassword)}
-                      onBlur={validatePassword}
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Confirm Password</label>
-                <input
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                </IconButton>
+              ),
+            }}
+          />
+          <TextField
+            fullWidth
+            label="Confirm Password"
                   type="password"
-                  className="form-control"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onBlur={validatePassword}
                   required
-                />
-              </div>
-              {!isPasswordValid && confirmPassword.length > 0 && (
-                <small className="text-danger">
-                  Passwords do not match or are invalid!
-                </small>
-              )}
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onClose}
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              className="btn btn-success"
+            error={!isPasswordValid && confirmPassword.length > 0}
+            helperText={
+              !isPasswordValid && confirmPassword.length > 0
+                ? "Passwords do not match"
+                : ""
+            }
+          />
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button
               onClick={handleResetPassword}
+          variant="contained"
+          color="primary"
+          disabled={!isPasswordValid}
             >
               Reset Password
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

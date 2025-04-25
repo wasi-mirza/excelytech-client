@@ -8,12 +8,38 @@ import toast from "react-hot-toast";
 import { logUserActivity } from "../../../shared/api/endpoints/user";
 import { getProductById } from "../../../shared/api/endpoints/product";
 import { Product } from "../../../shared/api/types/product.types";
+import PageHeader from "../../../shared/components/PageHeader";
+import InfoCard from "../../../shared/components/InfoCard";
+import {
+  Box,
+  Grid,
+  Button,
+  Typography,
+  Chip,
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ShoppingCart as ShoppingCartIcon,
+  Category as CategoryIcon,
+  CalendarToday as CalendarIcon,
+  AttachMoney as AttachMoneyIcon,
+  LocalOffer as LocalOfferIcon,
+  Tag as TagIcon,
+} from "@mui/icons-material";
 
 function ViewProduct() {
   const [product, setProduct] = useState<Product>();
   const [auth] = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
+  const theme = useTheme();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   let newUrl = BASE_URL?.replace("/api", "");
 
   const handleEdit = () => {
@@ -21,23 +47,17 @@ function ViewProduct() {
   };
 
   const handleDelete = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-    if (!confirmDelete) return;
-
     try {
       await axios.delete(`${BASE_URL}/product/${id}`, {
         headers: {
           Authorization: `Bearer ${auth?.token}`,
         },
       });
-      // alert("Product deleted successfully");
       toast.success("Product Deleted Successfully");
-      navigate("/admin-dashboard/products"); // Redirect to product list after deletion
+      navigate("/admin-dashboard/products");
     } catch (error) {
       console.error("Failed to delete product:", error);
-      alert("Failed to delete the product. Please try again.");
+      toast.error("Failed to delete the product. Please try again.");
     }
   };
 
@@ -45,7 +65,7 @@ function ViewProduct() {
     try {
       const res = await getProductById(id);
       setProduct(res.data);
-      if (res.status == 200 || res.status == 201) {
+      if (res.status === 200 || res.status === 201) {
         await logUserActivity({
           userId: auth?.user?._id,
           activityType: "VIEW_PAGE",
@@ -65,150 +85,201 @@ function ViewProduct() {
 
   if (!product) {
     return (
-      <div className="col-md-12 mt-1">
-        <div className="card card-olive shadow-sm">
-          <div className="card-header">
-            <h3 className="card-title">Loading...</h3>
-          </div>
-        </div>
-      </div>
+      <Box sx={{ p: 3 }}>
+        <InfoCard
+          title="Loading..."
+          items={[]}
+          headerColor={theme.palette.primary.light}
+        />
+      </Box>
     );
   }
 
   return (
-    <div className="content-wrapper">
-      <section className="content-header d-flex justify-content-between align-items-center">
-        <h1>Product Details</h1>
-        <div>
-          <button className="btn btn-success mr-2" onClick={handleEdit}>
-            Edit Product
-          </button>
-          <button className="btn btn-danger" onClick={handleDelete}>
-            Delete Product
-          </button>
-        </div>
-      </section>
-      <section className="content">
-        <div className="row">
-          {/* Product Image and Overview */}
-          <div className="col-lg-7 col-md-12 mt-1">
-            <div className="card card-olive card-outline shadow-sm">
-              <div className="card-header d-flex justify-content-between align-items-center">
-                <h3 className="card-title">{product.name}</h3>
-                <span
-                  className={`badge ${
-                    product.status === "Active"
-                      ? "badge-success"
-                      : "badge-secondary"
-                  }`}
-                >
-                  {product.status}
-                </span>
-              </div>
-              <div className="card-body">
-                <div className="text-center mb-3">
-                  <img
-                    onError={(e: any) =>
-                      (e.target.src = `${newUrl}/uploads/placeholder.png`)
-                    }
-                    className="img-fluid img-cover rounded"
-                    src={`${newUrl}${product.imageUrl}`}
-                    alt="product"
-                    height={200}
-                    width={200}
-                  />
-                </div>
-                <div className="mb-3">
-                  <strong>Description:</strong>
-                  <p>{product.description}</p>
-                </div>
-                <div className="mb-3">
-                  <strong>Tags:</strong>
-                  <p>{product.tags?.join(", ")}</p>
-                </div>
-                <div className="mb-3">
-                  <strong>Keywords:</strong>
-                  <p>{product.keywords?.join(", ")}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+    <Box sx={{ p: 3 }}>
+      <PageHeader
+        title="Product Details"
+        showBackButton
+        backUrl="/admin-dashboard/products"
+        rightContent={
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<EditIcon />}
+              onClick={handleEdit}
+            >
+              Edit Product
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              Delete Product
+            </Button>
+          </Box>
+        }
+      />
 
-          {/* Product Pricing and Additional Information */}
-          <div className="col-lg-5 col-md-12 mt-1">
+      <Grid container spacing={3}>
+        {/* Product Image and Overview */}
+        <Grid item xs={12} lg={7}>
+          <InfoCard
+            title={product.name}
+            items={[]}
+            headerColor={theme.palette.primary.light}
+            rightContent={
+              <Chip
+                label={product.status}
+                color={product.status === "Active" ? "success" : "default"}
+                sx={{ ml: 2 }}
+              />
+            }
+          >
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <img
+                onError={(e: any) =>
+                  (e.target.src = `${newUrl}/uploads/placeholder.png`)
+                }
+                src={`${newUrl}${product.imageUrl}`}
+                alt="product"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  maxHeight: 300,
+                  borderRadius: theme.shape.borderRadius,
+                }}
+              />
+            </Box>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                Description
+              </Typography>
+              <Typography variant="body2">{product.description}</Typography>
+            </Box>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                Tags
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {product.tags?.map((tag, index) => (
+                  <Chip
+                    key={index}
+                    label={tag}
+                    size="small"
+                    icon={<TagIcon />}
+                  />
+                ))}
+              </Box>
+            </Box>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                Keywords
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {product.keywords?.map((keyword, index) => (
+                  <Chip
+                    key={index}
+                    label={keyword}
+                    size="small"
+                    variant="outlined"
+                  />
+                ))}
+              </Box>
+            </Box>
+          </InfoCard>
+        </Grid>
+
+        {/* Product Pricing and Additional Information */}
+        <Grid item xs={12} lg={5}>
+          <Grid container spacing={3}>
             {/* Pricing Information */}
-            <div className="card card-olive card-outline shadow-sm mb-3">
-              <div className="card-header">
-                <h3 className="card-title">Pricing Information</h3>
-              </div>
-              <div className="card-body">
-                <div className="mb-3">
-                  <i className="fas fa-barcode mr-2"></i>
-                  <strong className="mb-1 text-muted">SKU:</strong>{" "}
-                  <span>{product.sku}</span>
-                </div>
-                <div className="mb-3">
-                  <i className="fas fa-dollar-sign mr-2"></i>
-                  <strong className="mb-1 text-muted">Cost:</strong>{" "}
-                  <span>
-                    {product.currency} {product.cost}
-                  </span>
-                </div>
-                <div className="mb-3">
-                  <i className="fas fa-percentage mr-2"></i>
-                  <strong className="mb-1 text-muted">Tax:</strong>{" "}
-                  <span>
-                    {product.currency} {product.tax}
-                  </span>
-                </div>
-                <div className="mb-3">
-                  <i className="fas fa-money-bill-alt mr-2"></i>
-                  <strong className="mb-1 text-muted">Total Cost:</strong>{" "}
-                  <span>
-                    {product.currency} {product.totalCost}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <Grid item xs={12}>
+              <InfoCard
+                title="Pricing Information"
+                items={[
+                  {
+                    label: "SKU",
+                    value: product.sku,
+                  },
+                  {
+                    label: "Cost",
+                    value: `${product.currency} ${product.cost}`,
+                  },
+                  {
+                    label: "Tax",
+                    value: `${product.currency} ${product.tax}`,
+                  },
+                  {
+                    label: "Total Cost",
+                    value: `${product.currency} ${product.totalCost}`,
+                  },
+                ]}
+                headerColor={theme.palette.primary.light}
+              />
+            </Grid>
 
             {/* Additional Information */}
-            <div className="card card-olive card-outline shadow-sm">
-              <div className="card-header">
-                <h3 className="card-title">Additional Information</h3>
-              </div>
-              <div className="card-body">
-                <div className="mb-3">
-                  <i className="fas fa-tags mr-2"></i>
-                  <strong className="mb-1 text-muted">Category:</strong>{" "}
-                  <span>{product.category}</span>
-                </div>
-                <div className="mb-3">
-                  <i className="fas fa-shopping-cart mr-2"></i>
-                  <strong className="mb-1 text-muted">
-                    Purchase Type:
-                  </strong>{" "}
-                  <span>{product.purchaseType}</span>
-                </div>
-                {product.purchaseType === "subscription" && (
-                  <div className="mb-3">
-                    <i className="fas fa-calendar-alt mr-2"></i>
-                    <strong className="mb-1 text-muted">Duration:</strong>{" "}
-                    <span>{product.duration} months</span>
-                  </div>
-                )}
-                <div className="mb-3">
-                  <i className="fas fa-clock mr-2"></i>
-                  <strong className="mb-1 text-muted">Created On:</strong>{" "}
-                  <span>
-                    {moment(product.createdAt).format("MMMM DD, YYYY")}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+            <Grid item xs={12}>
+              <InfoCard
+                title="Additional Information"
+                items={[
+                  {
+                    label: "Category",
+                    value: product.category,
+                  },
+                  {
+                    label: "Purchase Type",
+                    value: product.purchaseType,
+                  },
+                  ...(product.purchaseType === "subscription"
+                    ? [
+                        {
+                          label: "Duration",
+                          value: `${product.duration} months`,
+                        },
+                      ]
+                    : []),
+                  {
+                    label: "Created On",
+                    value: moment(product.createdAt).format("MMMM DD, YYYY"),
+                  },
+                ]}
+                headerColor={theme.palette.primary.light}
+              />
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this product? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              setIsDeleteDialogOpen(false);
+              handleDelete();
+            }}
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }
 

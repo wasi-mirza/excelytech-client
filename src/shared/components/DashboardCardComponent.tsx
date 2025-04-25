@@ -54,11 +54,14 @@ const StatCard: React.FC<StatCardProps> = ({
         position: 'relative',
         overflow: 'hidden',
         borderRadius: 2,
-        boxShadow: theme.shadows[4],
-        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+        elevation:0,
+        boxShadow: 'none',
+        border: `1px solid ${bgColor}`,
+        // boxShadow: theme.shadows[4],
+        // transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[8],
+          // boxShadow: theme.shadows[8],
         },
         '&:after': {
           content: '""',

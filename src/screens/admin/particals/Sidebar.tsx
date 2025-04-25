@@ -30,6 +30,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import theme from '../../../shared/theme/theme';
 
 const drawerWidth = 280;
 
@@ -39,6 +40,10 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 1),
   ...theme.mixins.toolbar,
   justifyContent: 'flex-end',
+  backgroundColor: theme.palette.secondary.dark,
+  '& .MuiIconButton-root': {
+    color: theme.palette.common.white,
+  }
 }));
 
 const navigation = [
@@ -114,6 +119,29 @@ interface SidebarProps {
   isMobile: boolean;
 }
 
+const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
+  '&:hover': {
+    backgroundColor: "#327184",
+  },
+  '&.Mui-selected': {
+    backgroundColor: "#013140",
+    '&:hover': {
+      backgroundColor: "#327184",
+    }
+  }
+}));
+
+const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
+  color: theme.palette.common.white,
+  minWidth: 40,
+}));
+
+const StyledListItemText = styled(ListItemText)(({ theme }) => ({
+  '& .MuiTypography-root': {
+    color: theme.palette.common.white,
+  }
+}));
+
 const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => {
   const [auth] = useAuth();
   const navigate = useNavigate();
@@ -138,14 +166,14 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
       return (
         <React.Fragment key={item.segment}>
           <ListItem disablePadding>
-            <ListItemButton
+            <StyledListItemButton
               onClick={() => handleExpandClick(item.segment)}
               sx={{ pl: level * 2 + 2 }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.title} />
-              {isExpanded ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
+              <StyledListItemIcon>{item.icon}</StyledListItemIcon>
+              <StyledListItemText primary={item.title} />
+              {isExpanded ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
+            </StyledListItemButton>
           </ListItem>
           <Collapse in={isExpanded} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
@@ -160,14 +188,14 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
 
     return (
       <ListItem key={item.segment} disablePadding>
-        <ListItemButton
+        <StyledListItemButton
           onClick={() => navigate(item.segment)}
           sx={{ pl: level * 2 + 2 }}
           selected={location.pathname.includes(item.segment)}
         >
-          <ListItemIcon>{item.icon}</ListItemIcon>
-          <ListItemText primary={item.title} />
-        </ListItemButton>
+          <StyledListItemIcon>{item.icon}</StyledListItemIcon>
+          <StyledListItemText primary={item.title} />
+        </StyledListItemButton>
       </ListItem>
     );
   };
@@ -180,6 +208,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
+          backgroundColor: theme.palette.secondary.dark,
+          '& .MuiDivider-root': {
+            borderColor: 'rgba(255, 255, 255, 0.12)',
+          },
         },
       }}
       variant={isMobile ? 'temporary' : 'persistent'}
@@ -201,8 +233,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
       </DrawerHeader>
       <Divider />
       <Box sx={{ p: 2 }}>
-        <Typography variant="subtitle1">
-          {auth?.user?.name ?? 'Admin'}
+        <Typography variant="subtitle1" sx={{ color: 'common.white' }}>
+          Welcome, {auth?.user?.name ?? 'Admin'}
         </Typography>
       </Box>
       <Divider />
@@ -212,12 +244,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
       <Divider />
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={handleLogout}>
-            <ListItemIcon>
+          <StyledListItemButton onClick={handleLogout}>
+            <StyledListItemIcon>
               <LogoutIcon />
-            </ListItemIcon>
-            <ListItemText primary="Logout" />
-          </ListItemButton>
+            </StyledListItemIcon>
+            <StyledListItemText primary="Logout" />
+          </StyledListItemButton>
         </ListItem>
       </List>
     </Drawer>
