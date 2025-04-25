@@ -398,18 +398,12 @@ function AdminHome() {
       {/* Charts Section */}
       <Grid container spacing={3}>
         {/* Monthly Revenue Trend */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6} md={4}>
           <Paper
             sx={{
               p: 3,
               height: "100%",
               borderRadius: 2,
-              // boxShadow: theme.shadows[2],
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "translateY(-5px)",
-                // boxShadow: theme.shadows[4],
-              },
             }}
           >
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
@@ -433,18 +427,12 @@ function AdminHome() {
 
 
         {/* Subscription Distribution */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6} md={4}>
           <Paper
             sx={{
               p: 3,
               height: "100%",
               borderRadius: 2,
-              // boxShadow: theme.shadows[2],
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "translateY(-5px)",
-                // boxShadow: theme.shadows[4],
-              },
             }}
           >
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
@@ -462,18 +450,12 @@ function AdminHome() {
         </Grid>
 
         {/* Tickets by Priority */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6} md={4}>
           <Paper
             sx={{
               p: 3,
               height: "100%",
               borderRadius: 2,
-              // boxShadow: theme.shadows[2],
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "translateY(-5px)",
-                // boxShadow: theme.shadows[4],
-              },
             }}
           >
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
@@ -501,12 +483,6 @@ function AdminHome() {
             sx={{
               p: 3,
               borderRadius: 2,
-              // boxShadow: theme.shadows[2],
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "translateY(-5px)",
-                // boxShadow: theme.shadows[4],
-              },
             }}
           >
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>

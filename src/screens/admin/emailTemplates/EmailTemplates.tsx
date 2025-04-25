@@ -108,7 +108,7 @@ const EmailTemplates = () => {
         }
       );
 
-      setTemplates(res.data.templates);
+      setTemplates(res.data.templates || []);
       setTotalPages(res.data.totalPages);
       setLoading(false);
     } catch (error) {

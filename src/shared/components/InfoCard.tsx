@@ -6,6 +6,7 @@ import {
   Typography,
   Box,
   useTheme,
+  alpha,
 } from '@mui/material';
 
 interface InfoItem {
@@ -31,11 +32,11 @@ const InfoCard: React.FC<InfoCardProps> = ({
   const theme = useTheme();
 
   return (
-    <Card sx={{ height: '100%', boxShadow: theme.shadows[2] }}>
+    <Card sx={{ height: '100%' }}>
       <CardHeader
         title={title}
         sx={{
-          bgcolor: headerColor || theme.palette.primary.light,
+          bgcolor: alpha(headerColor || theme.palette.primary.main, 0.1),
           color: 'white',
           '& .MuiCardHeader-title': {
             fontSize: '1.1rem',
