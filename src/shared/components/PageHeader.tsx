@@ -127,9 +127,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 '&:hover': {
                   bgcolor: theme.palette.primary.dark,
                 },
-                boxShadow: theme.shadows[2],
+                boxShadow: theme.shadows[0],
                 px: 3,
                 whiteSpace: 'nowrap',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 600,
               }}
             >
               {addButtonText}

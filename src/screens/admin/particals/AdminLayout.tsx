@@ -14,7 +14,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
 }>(({ theme, open }) => ({
   flexGrow: 1,
-  padding: theme.spacing(3),
+  padding: theme.spacing(0),
   transition: theme.transitions.create('margin', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -67,10 +67,10 @@ const AdminLayout = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AdminNavigationBar open={open} onDrawerToggle={handleDrawerToggle} />
+      {/* <AdminNavigationBar open={open} onDrawerToggle={handleDrawerToggle} /> */}
       <Sidebar open={open} onDrawerToggle={handleDrawerToggle} isMobile={isMobile} />
       <Main open={open}>
-        <DrawerHeader />
+        {/* <DrawerHeader /> */}
         <Outlet />
       </Main>
     </Box>

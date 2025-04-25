@@ -121,12 +121,12 @@ interface SidebarProps {
 
 const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   '&:hover': {
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: "#327184",
   },
   '&.Mui-selected': {
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: "#013140",
     '&:hover': {
-      backgroundColor: theme.palette.secondary.main,
+      backgroundColor: "#327184",
     }
   }
 }));
@@ -242,7 +242,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
         {navigation.map((item) => renderNavigationItem(item))}
       </List>
       <Divider />
-      {/* <List>
+      <List>
         <ListItem disablePadding>
           <StyledListItemButton onClick={handleLogout}>
             <StyledListItemIcon>
@@ -251,7 +251,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onDrawerToggle, isMobile }) => 
             <StyledListItemText primary="Logout" />
           </StyledListItemButton>
         </ListItem>
-      </List> */}
+      </List>
     </Drawer>
   );
 };
