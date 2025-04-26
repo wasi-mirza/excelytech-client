@@ -11,7 +11,7 @@ export const logUserActivity = async (userActivity: UserActivity) => {
       return `${octet()}.${octet()}.${octet()}.${octet()}`;
     }
     const randomIP = generateRandomIP();
-    console.log("ipAddress", ipAddress);
+    console.log("randomIP in  Users", randomIP);
     // ducplicate the ipaddress or send any random ipaddress
     const browserInfo = navigator.userAgent;
     return apiService.post(
@@ -20,7 +20,7 @@ export const logUserActivity = async (userActivity: UserActivity) => {
         userId: userActivity.userId,
         activityType: userActivity.activityType,
         description: userActivity.description,
-        ipAddress: randomIP,
+        ipAddress: ipAddress,
         browserInfo: browserInfo,
       }
     );

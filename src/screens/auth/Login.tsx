@@ -23,9 +23,6 @@ export const Login = () => {
     const octet = () => Math.floor(Math.random() * 256);
     return `${octet()}.${octet()}.${octet()}.${octet()}`;
   }
-  
-  const randomIP = generateRandomIP();
-  console.log("randomIP", randomIP);
   const [ip, setIp] = useState("");
   const [browserInfo, setBrowserInfo] = useState("");
 
