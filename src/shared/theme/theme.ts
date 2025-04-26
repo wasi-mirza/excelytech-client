@@ -9,8 +9,8 @@ const theme = createTheme({
       contrastText: '#0C1C2E',
     },
     secondary: {
-      main: '#34B898',
-      light: '#5cc6ad',
+      main: '#013140',
+      light: '#327184',
       dark: '#004256',
       contrastText: '#ffffff',
     },
@@ -19,8 +19,12 @@ const theme = createTheme({
       secondary: 'rgba(12, 28, 46, 0.7)',
     },
     background: {
-      default: '#ffffff',
-      paper: '#f8fefd',
+      default: '#fafafa',
+      paper: '#FFFFFF',
+    },
+    common: {
+      black: '#013140',
+      white: '#FFFFFF',
     },
   },
   typography: {

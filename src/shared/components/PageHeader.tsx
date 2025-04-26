@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Add as AddIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import theme from '../theme/theme';
 
 interface PageHeaderProps {
   title: string;
@@ -34,8 +35,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   addButtonText,
   onAddClick,
   rightContent,
-  bgColor = '#65d9c8',
-  borderColor = '#65d9c8',
+  bgColor = theme.palette.primary.main,
+  borderColor = theme.palette.primary.main,
   showBackButton = false,
   backUrl,
 }) => {
