@@ -190,6 +190,10 @@ export const Login = () => {
             — John Doe, Company Inc.
           </Typography> */}
         </Box>
+
+        <Typography variant="body2" color="primary.dark" align="center" sx={{ position: 'absolute', bottom: 16, transform: 'translateX(-50%)', left: '25%' }}>
+          Your Data, Always Safe. Always Recoverable
+        </Typography>
       </Grid>
       {/* Right Section */}
       <Grid
@@ -288,10 +292,10 @@ export const Login = () => {
             variant="outlined"
             color="secondary"
             sx={{ mb: 1, py: 1.2, fontWeight: 600 }}
-            startIcon={<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" style={{ width: 24, height: 24 }} />}
+            startIcon={<img src="/img/Google-Icon.png" alt="Google" style={{ width: 30, height: 30 }} />}
           // onClick={handleGithubLogin} // Add your GitHub login logic here
           >
-            Sign in with GitHub
+            Sign in with Google
           </Button>
           <Typography variant="caption" color="text.secondary" align="center" display="block" sx={{ mt: 2 }}>
             By signing in, you agree to our Terms of Service and Privacy Policy.
